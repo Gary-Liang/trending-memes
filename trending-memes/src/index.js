@@ -2,15 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Title from './Components/Title'
 import reportWebVitals from './reportWebVitals';
 
 
-function Application() {
-  return <div>Hello, world</div>
-}
-ReactDOM.render(Application,
-  document.getElementById('root')
-);
+
+
+
+
+ReactDOM.render(<Title/>, document.getElementById('root'));
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
