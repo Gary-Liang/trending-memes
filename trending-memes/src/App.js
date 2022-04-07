@@ -1,4 +1,4 @@
-import MenuBar from './Components/MenuBar';
+import SearchBar from './Components/SearchBar';
 import './Components/Title'
 import Title from './Components/Title';
 
@@ -7,7 +7,7 @@ export default function App() {
     <div className="App">
       <Title /*name='The Trending Memes'*//>
 
-      <MenuBar/>
+      <SearchBar/>
     </div>
   );
 }
