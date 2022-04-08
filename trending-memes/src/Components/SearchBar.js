@@ -1,36 +1,32 @@
-import React from 'react'
-import Data from '../Data/MOCK_DATA.json'
-import PropTypes from 'prop-types'
+import React, {useState} from 'react'
 
 
 
 
-function SearchBar() {
+export default function SearchBar() {
   // use State
+  const [query, setQuery] = useState("");
 
+  const searchValue = (e) => {
+    setQuery(e.target.value);
+  }
 
   return (
-    <div>
-      <form>
-        <label>Search Bar</label>
-        <input 
-          type='text'
-          style={divStyle}
-        />
-      </form>
+    <div query={query}>
+          <input placeholder="Search Here!" style={styleSearch} onChange={searchValue}/>
     </div>
-  )
+  );
 }
 
 
-const divStyle = {
-        color: 'blue',
-        padding: '6px',
-        align: 'center',
-        position: 'center',
-        border: '1px solid blue',
+
+const styleSearch = {
+  margin: 'auto',
+  padding: '5px',
+  alignItems: 'center',
 }
 
 
-export default SearchBar
+
+
 
