@@ -1,24 +1,30 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Data from '../Data/MOCK_DATA.json'
+import SearchBar from './SearchBar';
 
-export default function SearchResults(props) {
+export default function SearchResults() {
+  const [query, setQuery] = useState("");
+
   return (
-    <div className='box' style={divStyle}>
-      {
-        Data.filter(post => {
-            if (props.query == "") {
-                // if query is empty
-                return post;
-            } else if (post.first_name.toLowerCase().includes(props.query.toLowerCase()) || post.last_name.toLowerCase().includes(props.query.toLowerCase())) {
-                return post;
-            }
-        }).map((post, id) => (
-            <div key={post.id} style={searchResults}>
-              <p>{post.first_name + " " + post.last_name}</p>
-            </div>
-        ))
+    <>
+      <SearchBar query={query} onChange={setQuery}/>
+      <div className='box' style={divStyle}>
+        {
+          Data.filter(post => {
+              if (query == "") {
+                  // if query is empty
+                  return post;
+              } else if (post.first_name.toLowerCase().includes(query.toLowerCase()) || post.last_name.toLowerCase().includes(query.toLowerCase())) {
+                  return post;
+              }
+          }).map((post, id) => (
+              <div key={post.id} style={searchResults}>
+                <p>{post.first_name + " " + post.last_name}</p>
+              </div>
+          ))
         }
-    </div>
+      </div>
+    </>
   )
 }
 
