@@ -1,17 +1,14 @@
 import React, { useState } from 'react'
 import Data from '../Data/MOCK_DATA.json'
-import SearchBar from './SearchBar';
 
-export default function SearchResults() {
-  const [query, setQuery] = useState("");
+export default function SearchResults({query}) {
 
   return (
     <>
-      <SearchBar query={query} onChange={setQuery}/>
       <div className='box' style={divStyle}>
         {
           Data.filter(post => {
-              if (query == "") {
+              if (query == "" || query == null) {
                   // if query is empty
                   return post;
               } else if (post.first_name.toLowerCase().includes(query.toLowerCase()) || post.last_name.toLowerCase().includes(query.toLowerCase())) {
