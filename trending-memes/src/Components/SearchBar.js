@@ -1,19 +1,18 @@
 import React, {useState} from 'react'
+import SearchResults from './SearchResults';
 
 
 
 
-export default function SearchBar() {
-  // use State
-  const [query, setQuery] = useState("");
+export default function SearchBar({query, setQuery}) {
 
   const searchValue = (e) => {
     setQuery(e.target.value);
   }
 
   return (
-    <div query={query}>
-          <input placeholder="Search Here!" style={styleSearch} onChange={searchValue}/>
+    <div>
+          <input placeholder="Search Here!" style={styleSearch} onChange={query}/>
     </div>
   );
 }
