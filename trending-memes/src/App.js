@@ -12,8 +12,8 @@ export default function App() {
     <div className="App">
       <Title /*name='The Trending Memes'*//>
 
-      <SearchBar query={query} setQuery />
-      <SearchResults query/>
+      <SearchBar setQuery={setQuery} />
+      <SearchResults query={query} />
     </div>
   );
 }

@@ -7,16 +7,16 @@ export default function SearchResults({query}) {
     <>
       <div className='box' style={divStyle}>
         {
-          Data.filter(post => {
+          Data.filter(data => {
               if (query == "" || query == null) {
                   // if query is empty
-                  return post;
-              } else if (post.first_name.toLowerCase().includes(query.toLowerCase()) || post.last_name.toLowerCase().includes(query.toLowerCase())) {
-                  return post;
+                  return data;
+              } else if (data.first_name.toLowerCase().includes(query.toLowerCase()) || data.last_name.toLowerCase().includes(query.toLowerCase())) {
+                  return data;
               }
-          }).map((post, id) => (
-              <div key={post.id} style={searchResults}>
-                <p>{post.first_name + " " + post.last_name}</p>
+          }).map((data, id) => (
+              <div key={data.id} style={searchResults}>
+                <p>{data.first_name + " " + data.last_name}</p>
               </div>
           ))
         }
