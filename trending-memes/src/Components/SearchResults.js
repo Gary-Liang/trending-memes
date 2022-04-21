@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Data from '../Data/MOCK_DATA.json'
+import Data from '../Data/MOCK_DATA (4).json'
 
 export default function SearchResults({query}) {
 
@@ -17,6 +17,7 @@ export default function SearchResults({query}) {
           }).map((data, id) => (
               <div key={data.id} style={searchResults}>
                 <p>{data.first_name + " " + data.last_name}</p>
+                <img src={data.img}/>
               </div>
           ))
         }
