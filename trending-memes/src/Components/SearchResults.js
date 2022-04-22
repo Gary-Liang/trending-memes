@@ -16,8 +16,8 @@ export default function SearchResults({query}) {
               }
           }).map((data, id) => (
               <div key={data.id} style={searchResults}>
-                <p>{data.first_name + " " + data.last_name}</p>
-                <img src={data.img}/>
+                  <p>{data.first_name + " " + data.last_name}</p>
+                  <img src={data.img}/>
               </div>
           ))
         }
@@ -29,18 +29,24 @@ export default function SearchResults({query}) {
 
 const divStyle = {
     color: 'blue',
-    padding: '6px',
-    align: 'center',
+    padding: '1%',
     border: '1px solid blue',
     textAlign: 'center',
-    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'space-around',
+    justifyContent: 'space-around',
+    //alignContent: 'space-between',
+    gap: '7.5px',
 
 }
 
 const searchResults = {
     border: 'black ridge 1px',
-    borderRadius: '15px',
-    margin: 'auto',
-    width: '30rem',
-    alignItems: 'center',
+    borderRadius: '10px',
+    // margin: 'auto',
+    flex: '3 4 2',
+    // width: '30%',
+    padding: '25px',
 }
