@@ -15,7 +15,7 @@ export default function SearchResults({query}) {
                   return data;
               }
           }).map((data, id) => (
-              <div key={data.id} style={searchResults}>
+              <div key={id} style={searchResults}>
                   <p>{data.first_name + " " + data.last_name}</p>
                   <img src={data.img}/>
               </div>
@@ -32,21 +32,30 @@ const divStyle = {
     padding: '1%',
     border: '1px solid blue',
     textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'space-around',
-    justifyContent: 'space-around',
-    //alignContent: 'space-between',
+    // display: 'flex',
+    display: 'grid',
+    // flexDirection: 'row',
+    // flexWrap: 'wrap',
+    // Condenses flex direction and flex wrap
+    // flexFlow: 'row wrap',
+    // alignItems: 'space-around',
+    // justifyContent: 'space-around',
+    // alignContent: 'space-between',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gridAutoFlow: 'row',
+    minWidth: '100px',
     gap: '7.5px',
+    //gridRowStart: 'span 2',
 
 }
 
 const searchResults = {
     border: 'black ridge 1px',
     borderRadius: '10px',
+    alignSelf: 'flex-start',
+    position: 'relative',
     // margin: 'auto',
-    flex: '3 4 2',
     // width: '30%',
     padding: '25px',
+    
 }
