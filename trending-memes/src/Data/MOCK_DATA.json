@@ -2,12 +2,14 @@
     {
         "id": 1,
         "first_name": "Jeremiah",
-        "last_name": "Duke"
+        "last_name": "Duke",
+        "image": "https://placekitten.com/g/200/302"
     },
     {
         "id": 2,
         "first_name": "Farleigh",
-        "last_name": "Maguire"
+        "last_name": "Maguire",
+        "image": "https://placekitten.com/g/201/302"
     },
     {
         "id": 3,
