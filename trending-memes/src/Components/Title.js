@@ -10,7 +10,7 @@ export default function Title(props) {
 }
 
 Title.defaultProps = {
-        name: 'Trending Memes',
+        name: 'The Trending Memes',
 }
 
 Title.propTypes = {
