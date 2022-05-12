@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\khang\OneDrive\Documents\My Projects\trending-memes\trending-memes\src\Backend"
+VIRTUAL_ENV="..\Scripts\..\src\..\Backend"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

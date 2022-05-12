@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\khang\OneDrive\Documents\My Projects\trending-memes\trending-memes\src\Backend
+set VIRTUAL_ENV=..\Scripts\..\src\..\Backend
 
 if not defined PROMPT set PROMPT=$P$G
 
