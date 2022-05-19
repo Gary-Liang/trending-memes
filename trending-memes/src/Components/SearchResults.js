@@ -3,6 +3,9 @@ import Data from '../Data/MOCK_DATA (4).json'
 
 export default function SearchResults({query}) {
 
+  // create state variable to get backend API 
+ // const [data, setData] = useState([{}]);
+
   return (
     <>
       <div className='box' style={divStyle}>
