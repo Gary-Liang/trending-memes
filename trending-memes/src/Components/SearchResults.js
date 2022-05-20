@@ -1,16 +1,29 @@
-import React, { useState } from 'react'
-import Data from '../Data/MOCK_DATA (4).json'
+import React, { useEffect, useState } from 'react'
+//import Data from '../Data/MOCK_DATA (4).json'
 
 export default function SearchResults({query}) {
 
   // create state variable to get backend API 
- // const [data, setData] = useState([{}]);
+ const [data, setData] = useState([{}]);
+
+ // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
+ useEffect(() => {
+    fetch("/members").then(
+      // Promise
+      res => res.json()
+    ).then(
+      data => {
+        setData(data)
+        console.log(data)
+      }
+    )
+  }, [])  
 
   return (
     <>
-      <div className='box' style={divStyle}>
+      { <div className='box' style={divStyle}>
         {
-          Data.filter(data => {
+          data.filter(data => {
               if (query == "" || query == null) {
                   // if query is empty
                   return data;
@@ -24,7 +37,7 @@ export default function SearchResults({query}) {
               </div>
           ))
         }
-      </div>
+      </div>}
     </>
   )
 }
