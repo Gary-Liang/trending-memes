@@ -24,7 +24,7 @@ export default function SearchResults({query}) {
       { <div className='box' style={divStyle}>
         {
           data.filter(data => {
-              if (query == "" || query == null) {
+              if (query == "") {
                   // if query is empty
                   return data;
               } else if (data.first_name.toLowerCase().includes(query.toLowerCase()) || data.last_name.toLowerCase().includes(query.toLowerCase())) {
