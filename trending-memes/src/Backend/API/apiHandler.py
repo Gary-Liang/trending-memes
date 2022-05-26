@@ -22,7 +22,7 @@ dictConfig({
 app = Flask(__name__)
 
 # Members API Route
-@app.route('/members')
+@app.route('/json')
 def members():
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
     app.logger.info(SITE_ROOT)
