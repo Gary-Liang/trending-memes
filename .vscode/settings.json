@@ -1,3 +1,4 @@
 {
+    "python.terminal.activateEnvInCurrentTerminal": true,
     "python.defaultInterpreterPath": "./trending-memes/src/Backend/Scripts/python.exe"
 }
