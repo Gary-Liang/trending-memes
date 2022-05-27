@@ -1,6 +1,12 @@
-from flask import Flask, json
+import imp
+from flask import Flask, json, request, make_response
+from requests import requests
 from logging.config import dictConfig
 import os
+
+# client id and client secret
+client_id = ''
+
 
 # Basic configuration for app for logging
 dictConfig({
@@ -31,8 +37,13 @@ def members():
     json_data = json.load(open(json_url))
     # returns the json data, serialized 
     return json.dumps(json_data)
-  
 
+# Make api calls to imgur gallery tag name calls.   
+# https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
+@app.route('/hello')
+def hello():
+    r = requests.get('https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}')
+    return r.text
 
 if __name__ == '__main__':
     app.run(debug=True)
