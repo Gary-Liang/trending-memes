@@ -2,10 +2,12 @@ from flask import Flask, json, request, make_response
 import requests
 from logging.config import dictConfig
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # client id and client secret
-client_id = ''
-client_secret = ''
+client_id = 'af53be228b9a39e'
+client_secret = os.getenv('CLIENT_SECRET')
 
 # variables to use for API call
 tag_name = ''
@@ -39,6 +41,7 @@ def members():
     # Get current directory and output path into terminal console 
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
     app.logger.info(SITE_ROOT)
+    app.logger.info(client_secret)
     json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA.json")
     # Load json from a file 
     json_data = json.load(open(json_url))
