@@ -1,4 +1,4 @@
-from flask import Flask, json, make_response
+from flask import Flask, json, make_response, request
 import requests
 from requests_oauthlib import OAuth2Session
 from logging.config import dictConfig
@@ -20,6 +20,13 @@ sort_filter = 'top'
 window_filter = 'week'
 page_filter = '0'
 
+# urls 
+authorization_base_url = 'https://api.imgur.com/3/gallery/t/'
+token_url = 'https://api.imgur.com/oauth2/token'
+redirect_uri = 'http://127.0.0.1:5000/callback'
+
+# Configuration to allow HTTP connection in the environment
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Basic configuration for app for logging
 # Referenced from https://flask.palletsprojects.com/en/2.1.x/logging/
@@ -63,6 +70,12 @@ def members_two():
     json_data = json.load(open(json_url))
     # returns the json data, serialized 
     return json.dumps(json_data)
+
+@app.route('/callback')
+def callback():
+    imgur = OAuth2Session(CLIENT_ID)
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
+    return token
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
