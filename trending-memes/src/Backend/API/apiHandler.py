@@ -20,13 +20,24 @@ sort_filter = 'top'
 window_filter = 'week'
 page_filter = '0'
 
-# urls 
-authorization_base_url = 'https://api.imgur.com/3/gallery/t/'
-token_url = 'https://api.imgur.com/oauth2/token'
-redirect_uri = 'http://127.0.0.1:5000/callback'
+# urls
+authorization_base_url = 'https://api.imgur.com/oauth2/token'
+get_request_url = 'https://api.imgur.com/3/gallery/t/'
+# redirect_uri for callback may need to be in https.
+redirect_uri = 'https://127.0.0.1:5000/callback'
+# Imgur URI (Uniform Resource Identifier)
+uri = 'http://api.imgur.com'
+
+
+"""
+    You need a client id and a client secret to get an access token from the API.
+    This is the client's way of asking for permission to use the API service.
+    The Authentication token gives the client authorization to use the API service. 
+
+"""
 
 # Configuration to allow HTTP connection in the environment
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+#os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Basic configuration for app for logging
 # Referenced from https://flask.palletsprojects.com/en/2.1.x/logging/
@@ -74,7 +85,7 @@ def members_two():
 @app.route('/callback')
 def callback():
     imgur = OAuth2Session(CLIENT_ID)
-    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
+    token = imgur.fetch_token(authorization_base_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
     return token
 
 # Make API calls to imgur gallery tag name calls.   
@@ -86,6 +97,8 @@ def response():
     r = requests.get(get_request, headers=headers, auth=(CLIENT_ID, CLIENT_SECRET))
     return r.text
 
+# We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
+# HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
     #app.run(port=5000)

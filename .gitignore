@@ -135,4 +135,5 @@ __pycache__/
 *.cfg
 *.bat
 *.ps1
+*.pem
 activate
