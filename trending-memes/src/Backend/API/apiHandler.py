@@ -23,7 +23,8 @@ page_filter = '0'
 # urls
 authorization_base_url = 'https://api.imgur.com/oauth2/token'
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
-redirect_uri = 'http://127.0.0.1:5000/callback'
+# redirect_uri for callback may need to be in https.
+redirect_uri = 'https://127.0.0.1:5000/callback'
 # Imgur URI (Uniform Resource Identifier)
 uri = 'http://api.imgur.com'
 
@@ -96,8 +97,8 @@ def response():
     r = requests.get(get_request, headers=headers, auth=(CLIENT_ID, CLIENT_SECRET))
     return r.text
 
-
+# We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
     #app.run(port=5000)
