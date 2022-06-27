@@ -84,8 +84,8 @@ def members_two():
 
 @app.route('/callback')
 def callback():
-    imgur = OAuth2Session(CLIENT_ID)
-    token = imgur.fetch_token(authorization_base_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
+    imgur = OAuth2Session(client_id=CLIENT_ID)
+    token = imgur.fetch_token(token_url=authorization_base_url, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
     return token
 
 # Make API calls to imgur gallery tag name calls.   
@@ -100,5 +100,5 @@ def response():
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
-    app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
-    #app.run(port=5000)
+    #app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
+    app.run(port=5000)
