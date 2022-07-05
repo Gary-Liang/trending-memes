@@ -11,6 +11,9 @@ load_dotenv()
 # client id and client secret
 CLIENT_ID = 'af53be228b9a39e'
 CLIENT_SECRET = os.getenv('SECRET_KEY')
+RESPONSE_TYPE = 'token'
+# optional parameter for authorization field
+STATE = ''
 headers = {'Accept':'*/*',
            'Authorization' : 'Client-ID ' + CLIENT_ID }
 
@@ -21,7 +24,7 @@ window_filter = 'week'
 page_filter = '0'
 
 # urls
-authorization_base_url = 'https://api.imgur.com/oauth2/token'
+authorization_base_url = 'https://api.imgur.com/oauth2/authorize'
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 # redirect_uri for callback may need to be in https.
 redirect_uri = 'https://127.0.0.1:5000/callback'
@@ -84,8 +87,8 @@ def members_two():
 
 @app.route('/callback')
 def callback():
-    imgur = OAuth2Session(client_id=CLIENT_ID)
-    token = imgur.fetch_token(token_url=authorization_base_url, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
+    #imgur = OAuth2Session(client_id=CLIENT_ID)
+    #token = imgur.fetch_token(token_url=authorization_base_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
     return token
 
 # Make API calls to imgur gallery tag name calls.   
