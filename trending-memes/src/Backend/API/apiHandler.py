@@ -13,7 +13,8 @@ CLIENT_ID = 'af53be228b9a39e'
 CLIENT_SECRET = os.getenv('SECRET_KEY')
 RESPONSE_TYPE = 'token'
 # optional parameter for authorization field
-STATE = ''
+APPLICATION_STATE = 'TEST'
+
 headers = {'Accept':'*/*',
            'Authorization' : 'Client-ID ' + CLIENT_ID }
 
@@ -85,11 +86,16 @@ def members_two():
     # returns the json data, serialized 
     return json.dumps(json_data)
 
-@app.route('/callback')
+@app.route('/callback', methods=['GET', 'POST'])
 def callback():
     #imgur = OAuth2Session(client_id=CLIENT_ID)
     #token = imgur.fetch_token(token_url=authorization_base_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
-    return token
+    # access token
+    get_request = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
+    r = requests.get(get_request)
+    app.logger.info(get_request)
+    #return token
+    return r.text
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
