@@ -1,4 +1,4 @@
-from flask import Flask, json, make_response, request
+from flask import Flask, json, make_response, request, redirect
 import requests
 from requests_oauthlib import OAuth2Session
 from logging.config import dictConfig
@@ -88,14 +88,14 @@ def members_two():
 
 @app.route('/callback', methods=['GET', 'POST'])
 def callback():
-    #imgur = OAuth2Session(client_id=CLIENT_ID)
-    #token = imgur.fetch_token(token_url=authorization_base_url, client_secret=CLIENT_SECRET, authorization_response=redirect_uri)
-    # access token
-    get_request = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
-    r = requests.get(get_request)
-    app.logger.info(get_request)
-    #return token
-    return r.text
+    # Create an authorization URL by setting parameters in the authorization URL
+    authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
+    app.logger.info(authorization_url)
+
+    # Redirect the user (us) to the authorization URL. From there, the server would authenticate us and a response is sent back. Returns a response to redirect the user to the URI defined 
+    # in the application. 
+    query_string = redirect(authorization_url)
+    
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
