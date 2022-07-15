@@ -86,16 +86,22 @@ def members_two():
     # returns the json data, serialized 
     return json.dumps(json_data)
 
-@app.route('/callback', methods=['GET', 'POST'])
-def callback():
+@app.route('/auth', methods=['GET', 'POST'])
+def auth():
     # Create an authorization URL by setting parameters in the authorization URL
     authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
     app.logger.info(authorization_url)
 
     # Redirect the user (us) to the authorization URL. From there, the server would authenticate us and a response is sent back. Returns a response to redirect the user to the URI defined 
     # in the application. 
-    query_string = redirect(authorization_url)
-    
+    return redirect(authorization_url)
+
+    # return requests.get(authorization_url).content
+
+
+@app.route('/auth/callback<urlstring>')
+def callback(urlstring):
+    return urlstring
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
