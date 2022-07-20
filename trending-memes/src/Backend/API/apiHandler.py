@@ -1,8 +1,11 @@
-from flask import Flask, json, make_response, request, redirect
+from flask import Flask, json, make_response, request, redirect, session, url_for
 import requests
 from requests_oauthlib import OAuth2Session
 from logging.config import dictConfig
 import os
+import base64
+import re
+import hashlib
 from dotenv import load_dotenv
 
 # Load variables from .env file (not in version control)
@@ -11,6 +14,7 @@ load_dotenv()
 # client id and client secret
 CLIENT_ID = 'af53be228b9a39e'
 CLIENT_SECRET = os.getenv('SECRET_KEY')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 RESPONSE_TYPE = 'token'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
@@ -26,12 +30,21 @@ page_filter = '0'
 
 # urls
 authorization_base_url = 'https://api.imgur.com/oauth2/authorize'
+token_url = 'https://api.imgur.com/oauth2/token'
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 # redirect_uri for callback may need to be in https.
 redirect_uri = 'https://127.0.0.1:5000/callback'
 # Imgur URI (Uniform Resource Identifier)
 uri = 'http://api.imgur.com'
 
+# code verifiers: Secure random strings. Used to create a code challenge.
+code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8")
+code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
+
+# code challenge - base64 encoded string, SHA256
+code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
+code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8")
+code_challenge = code_challenge.replace("=", "")
 
 """
     You need a client id and a client secret to get an access token from the API.
@@ -63,6 +76,15 @@ dictConfig({
 
 app = Flask(__name__)
 
+# First landing page
+@app.route('/')
+def authsamplecall():
+    global imgur
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI, scope=authorization_base_url)
+    return redirect(authorization_base_url)
+
+
+
 # Members API Route
 @app.route('/json')
 def members():
@@ -86,7 +108,7 @@ def members_two():
     # returns the json data, serialized 
     return json.dumps(json_data)
 
-@app.route('/auth', methods=['GET', 'POST'])
+@app.route('/oauth', methods=['GET', 'POST'])
 def auth():
     # Create an authorization URL by setting parameters in the authorization URL
     authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
@@ -99,9 +121,19 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/auth/callback<urlstring>')
-def callback(urlstring):
-    return urlstring
+@app.route('/oauth/callback', methods=['GET'])
+def callback():
+    # state_string = request.args['state']
+    # query_string = request.args
+    # return query_string
+    code = request.args.get("code")
+    # token = imgur.fetch_token(
+    #     token_url=token_url, 
+    #     client_secret=CLIENT_SECRET, 
+    #     code_verifier=code_verifier, 
+    #     code = code,
+    # )
+    return code
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
