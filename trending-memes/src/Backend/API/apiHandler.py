@@ -79,9 +79,15 @@ app = Flask(__name__)
 # First landing page
 @app.route('/')
 def authsamplecall():
-    global imgur
-    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI, scope=authorization_base_url)
-    return redirect(authorization_base_url)
+    # global imgur
+    # imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI, 
+    #                       scope=authorization_base_url, state=imgur.authorization_url(
+    #                         authorization_base_url, code_challenge=code_challenge, code_challenge_method="S256"
+    #                       ))
+
+    # session['oauth_state'] = state
+    # return redirect(authorization_base_url)
+    return "First Landing Page"
 
 
 
@@ -111,7 +117,7 @@ def members_two():
 @app.route('/oauth', methods=['GET', 'POST'])
 def auth():
     # Create an authorization URL by setting parameters in the authorization URL
-    authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE +  '&state=' + APPLICATION_STATE
+    authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE
     app.logger.info(authorization_url)
 
     # Redirect the user (us) to the authorization URL. From there, the server would authenticate us and a response is sent back. Returns a response to redirect the user to the URI defined 
@@ -121,19 +127,19 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/oauth/callback', methods=['GET'])
+@app.route('/oauth/callback/', methods=['GET'])
 def callback():
     # state_string = request.args['state']
     # query_string = request.args
     # return query_string
-    code = request.args.get("code")
     # token = imgur.fetch_token(
     #     token_url=token_url, 
     #     client_secret=CLIENT_SECRET, 
     #     code_verifier=code_verifier, 
     #     code = code,
     # )
-    return code
+    return request.path
+    
 
 # Make API calls to imgur gallery tag name calls.   
 # https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
