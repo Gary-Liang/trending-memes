@@ -12,10 +12,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # client id and client secret
-CLIENT_ID = 'af53be228b9a39e'
+CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('SECRET_KEY')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
-RESPONSE_TYPE = 'token'
+RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
 
@@ -32,10 +32,6 @@ page_filter = '0'
 authorization_base_url = 'https://api.imgur.com/oauth2/authorize'
 token_url = 'https://api.imgur.com/oauth2/token'
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
-# redirect_uri for callback may need to be in https.
-redirect_uri = 'https://127.0.0.1:5000/callback'
-# Imgur URI (Uniform Resource Identifier)
-uri = 'http://api.imgur.com'
 
 # code verifiers: Secure random strings. Used to create a code challenge.
 code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8")
@@ -79,15 +75,14 @@ app = Flask(__name__)
 # First landing page
 @app.route('/')
 def authsamplecall():
-    # global imgur
-    # imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI, 
-    #                       scope=authorization_base_url, state=imgur.authorization_url(
-    #                         authorization_base_url, code_challenge=code_challenge, code_challenge_method="S256"
-    #                       ))
+    global imgur
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+    authorization_url, state= imgur.authorization_url(authorization_base_url)
 
-    # session['oauth_state'] = state
-    # return redirect(authorization_base_url)
-    return "First Landing Page"
+    # State is used to prevent CSRF
+    session['oauth_state'] = state
+                         
+    return redirect(authorization_url)
 
 
 
@@ -114,10 +109,11 @@ def members_two():
     # returns the json data, serialized 
     return json.dumps(json_data)
 
-@app.route('/oauth', methods=['GET', 'POST'])
+@app.route('/oauth', methods=['GET'])
 def auth():
     # Create an authorization URL by setting parameters in the authorization URL
-    authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE
+    #authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE  
+    authorization_url = authorization_base_url + '?response_type=' + RESPONSE_TYPE +  '&client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT_URI + '&code_challenge=' + code_challenge + '&code_challenge_method=S256' 
     app.logger.info(authorization_url)
 
     # Redirect the user (us) to the authorization URL. From there, the server would authenticate us and a response is sent back. Returns a response to redirect the user to the URI defined 
@@ -127,7 +123,7 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/oauth/callback/', methods=['GET'])
+@app.route('/oauth/callback/', methods=['POST'])
 def callback():
     # state_string = request.args['state']
     # query_string = request.args
@@ -138,7 +134,7 @@ def callback():
     #     code_verifier=code_verifier, 
     #     code = code,
     # )
-    return request.path
+    return request.get_json
     
 
 # Make API calls to imgur gallery tag name calls.   
