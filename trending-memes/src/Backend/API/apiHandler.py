@@ -14,6 +14,7 @@ load_dotenv()
 # client id and client secret
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('SECRET_KEY')
+SESSION_SECRET_KEY= os.getenv('SESSION_SECRET_KEY')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
