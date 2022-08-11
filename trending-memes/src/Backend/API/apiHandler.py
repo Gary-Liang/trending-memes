@@ -1,6 +1,7 @@
 from flask import Flask, json, make_response, request, redirect, session, url_for
 import requests
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
 from logging.config import dictConfig
 import os
 import base64
@@ -74,16 +75,18 @@ dictConfig({
 app = Flask(__name__)
 
 # First landing page
-@app.route('/')
+@app.route('/', methods=['GET'])
 def authsamplecall():
     global imgur
     imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
-    authorization_url, state= imgur.authorization_url(authorization_base_url)
+    # authorization_url, state= imgur.authorization_url(authorization_base_url)
 
-    # State is used to prevent CSRF
-    session['oauth_state'] = state
+    # # State is used to prevent CSRF
+    # session['oauth_state'] = state
                          
-    return redirect(authorization_url)
+    # return redirect(authorization_url)
+
+    token = imgur.fetch_token(token_url='https://api.imgur.com/oauth2/token', client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
 
 
@@ -124,7 +127,7 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/oauth/callback/', methods=['POST'])
+@app.route('/oauth/callback/', methods=['GET', 'POST'])
 def callback():
     # state_string = request.args['state']
     # query_string = request.args
@@ -151,4 +154,5 @@ def response():
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
     #app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
+    app.config['SECRET_KEY'] = SESSION_SECRET_KEY
     app.run(port=5000)
