@@ -1,5 +1,6 @@
 from flask import Flask, json, make_response, request, redirect, session, url_for
 import requests
+from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from logging.config import dictConfig
@@ -78,15 +79,17 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def authsamplecall():
     global imgur
+
     imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
-    # authorization_url, state= imgur.authorization_url(authorization_base_url)
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+        url=authorization_base_url)
+        # consider specific parameters from imgur
+        #response_type=RESPONSE_TYPE)
 
-    # # State is used to prevent CSRF
-    # session['oauth_state'] = state
-                         
-    # return redirect(authorization_url)
-
-    token = imgur.fetch_token(token_url='https://api.imgur.com/oauth2/token', client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+    app.logger.info('authorization url:  ' + authorization_url)
+    session['oauth_state'] = state
+    return redirect(authorization_url)
 
 
 
@@ -127,7 +130,7 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/oauth/callback/', methods=['GET', 'POST'])
+@app.route('/oauth/callback/', methods=['GET'])
 def callback():
     # state_string = request.args['state']
     # query_string = request.args
@@ -138,7 +141,12 @@ def callback():
     #     code_verifier=code_verifier, 
     #     code = code,
     # )
-    return request.get_json
+
+    imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
+
+    session['oauth_token'] = token
+    return redirect(url_for('.profile'))
     
 
 # Make API calls to imgur gallery tag name calls.   
