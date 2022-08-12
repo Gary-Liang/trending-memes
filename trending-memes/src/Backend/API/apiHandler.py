@@ -1,6 +1,8 @@
 from flask import Flask, json, make_response, request, redirect, session, url_for
 import requests
+from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
 from logging.config import dictConfig
 import os
 import base64
@@ -74,15 +76,19 @@ dictConfig({
 app = Flask(__name__)
 
 # First landing page
-@app.route('/')
+@app.route('/', methods=['GET'])
 def authsamplecall():
     global imgur
-    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
-    authorization_url, state= imgur.authorization_url(authorization_base_url)
 
-    # State is used to prevent CSRF
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+        url=authorization_base_url)
+        # consider specific parameters from imgur
+        #response_type=RESPONSE_TYPE)
+
+    app.logger.info('authorization url:  ' + authorization_url)
     session['oauth_state'] = state
-                         
     return redirect(authorization_url)
 
 
@@ -124,7 +130,7 @@ def auth():
     # return requests.get(authorization_url).content
 
 
-@app.route('/oauth/callback/', methods=['POST'])
+@app.route('/oauth/callback/', methods=['GET'])
 def callback():
     # state_string = request.args['state']
     # query_string = request.args
@@ -135,7 +141,12 @@ def callback():
     #     code_verifier=code_verifier, 
     #     code = code,
     # )
-    return request.get_json
+
+    imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
+
+    session['oauth_token'] = token
+    return redirect(url_for('.profile'))
     
 
 # Make API calls to imgur gallery tag name calls.   
@@ -151,4 +162,5 @@ def response():
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
     #app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
+    app.config['SECRET_KEY'] = SESSION_SECRET_KEY
     app.run(port=5000)
