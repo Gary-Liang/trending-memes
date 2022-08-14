@@ -1,4 +1,4 @@
-from flask import Flask, json, make_response, request, redirect, session, url_for
+from flask import Flask, json, make_response, request, redirect, session, url_for, jsonify
 import requests
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
@@ -78,7 +78,7 @@ app = Flask(__name__)
 # First landing page
 @app.route('/', methods=['GET'])
 def authsamplecall():
-    global imgur
+    
 
     imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
     # Construct authorization url from the base auth url:
@@ -88,6 +88,7 @@ def authsamplecall():
         #response_type=RESPONSE_TYPE)
 
     app.logger.info('authorization url:  ' + authorization_url)
+    app.logger.info('state: ' + state)
     session['oauth_state'] = state
     return redirect(authorization_url)
 
@@ -146,7 +147,15 @@ def callback():
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
 
     session['oauth_token'] = token
-    return redirect(url_for('.profile'))
+    return redirect(url_for('.search'))
+
+
+@app.route('/search', methods=['GET'])
+def search():
+    imgur = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
+    return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_filter + '/' + page_filter).json())
+
+
     
 
 # Make API calls to imgur gallery tag name calls.   
@@ -161,6 +170,9 @@ def response():
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
-    #app.run(ssl_context=('cert.pem', 'key.pem'), debug=True)
+    
+    # Plain HTTP callback
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
+
     app.config['SECRET_KEY'] = SESSION_SECRET_KEY
     app.run(port=5000)
