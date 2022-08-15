@@ -9,6 +9,7 @@ import base64
 import re
 import hashlib
 from dotenv import load_dotenv
+from time import time 
 
 # Load variables from .env file (not in version control)
 load_dotenv()
@@ -34,6 +35,7 @@ page_filter = '0'
 # urls
 authorization_base_url = 'https://api.imgur.com/oauth2/authorize'
 token_url = 'https://api.imgur.com/oauth2/token'
+refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 
 # code verifiers: Secure random strings. Used to create a code challenge.
@@ -93,20 +95,6 @@ def authsamplecall():
     return redirect(authorization_url)
 
 
-
-# Members API Route
-@app.route('/json')
-def members():
-    # Get current directory and output path into terminal console 
-    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-    app.logger.info(SITE_ROOT)
-    app.logger.info(CLIENT_SECRET)
-    json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA.json")
-    # Load json from a file 
-    json_data = json.load(open(json_url))
-    # returns the json data, serialized 
-    return json.dumps(json_data)
-
 @app.route('/json2')
 def members_two():
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -117,20 +105,7 @@ def members_two():
     # returns the json data, serialized 
     return json.dumps(json_data)
 
-@app.route('/oauth', methods=['GET'])
-def auth():
-    # Create an authorization URL by setting parameters in the authorization URL
-    #authorization_url = authorization_base_url + '?client_id=' + CLIENT_ID + '&response_type=' + RESPONSE_TYPE  
-    authorization_url = authorization_base_url + '?response_type=' + RESPONSE_TYPE +  '&client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT_URI + '&code_challenge=' + code_challenge + '&code_challenge_method=S256' 
-    app.logger.info(authorization_url)
-
-    # Redirect the user (us) to the authorization URL. From there, the server would authenticate us and a response is sent back. Returns a response to redirect the user to the URI defined 
-    # in the application. 
-    return redirect(authorization_url)
-
-    # return requests.get(authorization_url).content
-
-
+# Callback
 @app.route('/oauth/callback/', methods=['GET'])
 def callback():
     # state_string = request.args['state']
@@ -157,15 +132,30 @@ def search():
 
 
     
+@app.route('/automatic_refresh', methods=['GET'])
+def automatic_refresh():
+    token = session['oauth_token']
 
-# Make API calls to imgur gallery tag name calls.   
-# https://api.imgur.com/3/gallery/t/{{tagName}}/{{sort}}/{{window}}/{{page}}
-# Imgur API uses OAuth 2.0.  get request is different from the norm due to different authentication
-@app.route('/response')
-def response():
-    get_request = 'https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_filter + '/' + page_filter
-    r = requests.get(get_request, headers=headers, auth=(CLIENT_ID, CLIENT_SECRET))
-    return r.text
+    token['expires_at'] = time() - 10
+
+    extra = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET
+    }
+    
+    def token_updater(token):
+        session['oauth_token'] = token
+
+    imgur = OAuth2Session(client_id=CLIENT_ID, token=token, auto_refresh_kwargs=extra, auto_refresh_url=refresh_url, token_updater=token_updater)
+    return jsonify(session['oauth_token'])
+
+@app.route('/validate', methods=['GET'])
+def validate():
+    token = session['oauth_token']
+
+    validate_url = 'https://api.imgur.com/oauth2/secret?' 'access_token=%s' % token['access_token']
+    return jsonify(requests.get(validate_url).json())
+
 
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
