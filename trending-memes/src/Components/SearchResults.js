@@ -8,7 +8,7 @@ export default function SearchResults({query}) {
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
-    fetch("/json").then(
+    fetch("/search").then(
       // Promise
       res => res.json()
     ).then(
