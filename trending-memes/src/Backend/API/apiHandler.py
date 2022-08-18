@@ -163,6 +163,6 @@ if __name__ == '__main__':
     
     # Plain HTTP callback
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
-
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
     app.config['SECRET_KEY'] = SESSION_SECRET_KEY
     app.run(port=5000)
