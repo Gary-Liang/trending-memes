@@ -27,13 +27,13 @@ export default function SearchResults({query}) {
               if (query == "") {
                   // if query is empty
                   return data;
-              } else if (data.first_name.toLowerCase().includes(query.toLowerCase()) || data.last_name.toLowerCase().includes(query.toLowerCase())) {
+              } else if (data.data.items.title.toLowerCase().includes(query.toLowerCase())) { //|| data.last_name.toLowerCase().includes(query.toLowerCase())) {
                   return data;
               }
-          }).map((data, id) => (
-              <div key={id} style={searchResults}>
-                  <p>{data.first_name + " " + data.last_name}</p>
-                  <img src={data.img}/>
+          }).map((data, account_id) => (
+              <div key={data.data.items.account_id} style={searchResults}>
+                  <p>{data.data.items.title}</p>
+                  <img src={data.data.items.link}/>
               </div>
           ))
         }
