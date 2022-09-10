@@ -8,15 +8,15 @@ export default function SearchResults({query}) {
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
-    fetch("/search").then(
+    fetch('/search').then(
       // Promise
       res => res.json()
     ).then(
       data => {
-        setData(data)
-        console.log(data)
+        setData(JSON.parse(JSON.stringify(data)).data.items)
+        console.log(JSON.parse(JSON.stringify(data)).data.items)
       }
-    )
+    ) 
   }, [])  // render once
 
   return (
@@ -24,16 +24,16 @@ export default function SearchResults({query}) {
       { <div className='box' style={divStyle}>
         {
           data.filter(data => {
-              if (query == "") {
+              if (query === "") {
                   // if query is empty
                   return data;
-              } else if (data.data.items.title.toLowerCase().includes(query.toLowerCase())) { //|| data.last_name.toLowerCase().includes(query.toLowerCase())) {
+              } else if (data.title.toLowerCase().includes(query.toLowerCase())) { 
                   return data;
               }
-          }).map((data, account_id) => (
-              <div key={data.data.items.account_id} style={searchResults}>
-                  <p>{data.data.items.title}</p>
-                  <img src={data.data.items.link}/>
+          }).map((data) => (
+              <div key={data.id} style={searchResults}>
+                  <p>{data.title}</p>
+                  <img src={data.link}/>
               </div>
           ))
         }

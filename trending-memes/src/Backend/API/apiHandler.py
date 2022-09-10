@@ -131,6 +131,11 @@ def search():
     return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_filter + '/' + page_filter).json())
 
 
+@app.route('/all_album_image_links/<string:album_hash_info>', methods=['GET'])
+def all_album_image_links(album_hash_info):
+    imgur = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
+    return jsonify(imgur.get('https://api.imgur.com/3/album/' + album_hash_info + '/images').json())
+
     
 @app.route('/automatic_refresh', methods=['GET'])
 def automatic_refresh():
