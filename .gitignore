@@ -130,6 +130,7 @@ yarn-error.log*
 # Python Virtual Environment
 Lib/
 Include/
+bin/
 __pycache__/
 *.exe
 *.cfg
