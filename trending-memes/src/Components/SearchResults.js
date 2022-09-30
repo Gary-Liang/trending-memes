@@ -32,7 +32,7 @@ export default function SearchResults({query}) {
                   return data;
               }
           }).map((data) => (
-              <div key={data.id} className={data.id} style={searchResults} onClick={e => promptViewMedia(data)}>
+              <div key={data.id} className={data.id} style={searchResults} onClick={() => promptViewMedia(data)}>
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
@@ -131,7 +131,8 @@ function renderMediaPreview(data) {
 function promptViewMedia(data) {
   return (
     <div className="popUpViewMedia">
-      <ViewMedia passData={data}></ViewMedia>
+      {console.log('test')}
+      <ViewMedia data></ViewMedia>
     </div>
   )
 }
