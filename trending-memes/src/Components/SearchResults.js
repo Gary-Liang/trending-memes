@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 //import Data from '../Data/MOCK_DATA (4).json'
+import ViewMedia from './ViewMedia';
 
 export default function SearchResults({query}) {
 
@@ -31,9 +32,9 @@ export default function SearchResults({query}) {
                   return data;
               }
           }).map((data) => (
-              <div key={data.id} style={searchResults}>
+              <div key={data.id} className={data.id} style={searchResults} onClick={e => promptViewMedia(data)}>
                   <p>{data.title}</p>
-                  <img src={data.link}/>
+                  {renderMediaPreview(data)}
               </div>
           ))
         }
@@ -44,9 +45,9 @@ export default function SearchResults({query}) {
 
 
 const divStyle = {
-    color: 'blue',
+    color: 'black',
     padding: '1%',
-    border: '1px solid blue',
+    border: '3px solid grey',
     textAlign: 'center',
     // display: 'flex',
     display: 'grid',
@@ -57,10 +58,10 @@ const divStyle = {
     // alignItems: 'space-around',
     // justifyContent: 'space-around',
     // alignContent: 'space-between',
-    gridTemplateColumns: 'repeat(5, 1fr)',
+    gridTemplateColumns: 'repeat(4, 0.25fr)',
     gridAutoFlow: 'row',
-    minWidth: '100px',
-    gap: '7.5px',
+    //minWidth: '100px',
+    gap: '6.5px',
     //gridRowStart: 'span 2',
 
 }
@@ -74,4 +75,63 @@ const searchResults = {
     // width: '30%',
     padding: '25px',
     
+}
+
+const mediaMaxSize = {
+  maxheight: '250px',
+  maxWidth: '250px',
+  height: 'auto',
+  width: 'auto',
+}
+
+// functions should be declared outside of the functional components or else we re-render the function every time 
+// it is called for imgur
+function renderMediaPreview(data) {
+  console.log('Rendering.');
+  if (data.link) {
+    if (data.link.includes(".mp4")) {
+      return (
+        <video style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
+          <source src={data.link} type="video/mp4"/>
+        </video>
+      )
+    } else if (data.link.includes("/a/")) {
+      var mediaURL = "http://i.imgur.com/" + data.cover + ".";
+      var previewHeaderText = "";
+      if (data.images_count > 1)
+        previewHeaderText = "(Meme Album)";
+      if (data.images[0].type.includes("mp4")) {
+        mediaURL += "mp4";
+        return (
+          <>
+          <p>{previewHeaderText}</p>
+          <video style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
+            <source src={mediaURL} type="video/mp4"/>
+          </video>
+          </>
+        )
+      } else {
+        mediaURL += data.images[0].type.split("/")[1];
+        return (
+          <>
+          <p>{previewHeaderText}</p>
+          <img src={mediaURL} style={mediaMaxSize} alt=""/>
+          </>
+        )
+      }
+    } else {
+      // if link is just a normal image or a gifv, render it normally. 
+      return (
+        <img src={data.link} style={mediaMaxSize} alt=""/>
+      )
+    }
+  }
+}
+
+function promptViewMedia(data) {
+  return (
+    <div className="popUpViewMedia">
+      <ViewMedia passData={data}></ViewMedia>
+    </div>
+  )
 }
