@@ -14,11 +14,12 @@ export default function ViewMedia(data) {
 
 
 const overlayDiv = {
-    width: "100%",
-    height: "100%",
     opacity: "0.6",
     background: 'black',
-
+    width: "100vw",
+    position: "relative",
+    marginLeft: "-50vw",
+    left: "50%",
 }
 
 const mediaPopupDisplay = {

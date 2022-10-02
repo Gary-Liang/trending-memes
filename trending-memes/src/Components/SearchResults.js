@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
-//import Data from '../Data/MOCK_DATA (4).json'
 import ViewMedia from './ViewMedia';
 
 export default function SearchResults({query}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
+ // show media state variable to display media previews
+ const [showMedia, setShowMedia] = useState([]);
+
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
@@ -22,20 +24,26 @@ export default function SearchResults({query}) {
 
   return (
     <>
-      { <div className='box' style={divStyle}>
+      { <div className='mediaBox' style={divStyle}>
         {
           data.filter(data => {
               if (query === "") {
                   // if query is empty
                   return data;
               } else if (data.title.toLowerCase().includes(query.toLowerCase())) { 
+                  // if condition is true, then return data that matches query to be mapped
                   return data;
               }
-          }).map((data) => (
-              <div key={data.id} className={data.id} style={searchResults} onClick={() => promptViewMedia(data)}>
+          }).map((data, index, dataAsArray) => (
+            <>
+              <div key={data.id} className={data.id} style={searchResults} onClick={() => promptViewMedia(setShowMedia, index, dataAsArray)}>
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
+              <div>
+                {showMedia[index] ? <ViewMedia data={data}></ViewMedia> : null}
+              </div>
+            </>
           ))
         }
       </div>}
@@ -128,11 +136,12 @@ function renderMediaPreview(data) {
   }
 }
 
-function promptViewMedia(data) {
-  return (
-    <div className="popUpViewMedia">
-      {console.log('test')}
-      <ViewMedia data></ViewMedia>
-    </div>
-  )
+
+// push to add to array
+function promptViewMedia(setShowMedia, index, dataAsArray) {
+  console.log(index);
+
+  let copiedShowMediaList = Array.apply(false, Array(dataAsArray.length));
+  copiedShowMediaList[index] = true;
+  setShowMedia(copiedShowMediaList);
 }
