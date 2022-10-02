@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import ViewMedia from './ViewMedia';
 
-export default function SearchResults({query}) {
+export default function SearchResults({query, setMediaInfo}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
  // show media state variable to display media previews
- const [showMedia, setShowMedia] = useState([]);
+ //const [showMedia, setShowMedia] = useState([]);
 
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
@@ -24,7 +24,7 @@ export default function SearchResults({query}) {
 
   return (
     <>
-      { <div className='mediaBox' style={divStyle}>
+      { <div class='mediaBox' style={divStyle}>
         {
           data.filter(data => {
               if (query === "") {
@@ -35,15 +35,12 @@ export default function SearchResults({query}) {
                   return data;
               }
           }).map((data, index, dataAsArray) => (
-            <>
-              <div key={data.id} className={data.id} style={searchResults} onClick={() => promptViewMedia(setShowMedia, index, dataAsArray)}>
+              <div key={data.id} class={data.id} style={searchResults} onClick={() => setMediaInfo({dataInfo: data, isClicked: true})}>
+                  {/**showMedia[index] ? <ViewMedia data={data}></ViewMedia> : null */}
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
-              <div>
-                {showMedia[index] ? <ViewMedia data={data}></ViewMedia> : null}
-              </div>
-            </>
+
           ))
         }
       </div>}
@@ -54,7 +51,7 @@ export default function SearchResults({query}) {
 
 const divStyle = {
     color: 'black',
-    padding: '1%',
+    padding: '0.25%',
     border: '3px solid grey',
     textAlign: 'center',
     // display: 'flex',
@@ -139,9 +136,9 @@ function renderMediaPreview(data) {
 
 // push to add to array
 function promptViewMedia(setShowMedia, index, dataAsArray) {
-  console.log(index);
+  // console.log(index);
 
-  let copiedShowMediaList = Array.apply(false, Array(dataAsArray.length));
-  copiedShowMediaList[index] = true;
-  setShowMedia(copiedShowMediaList);
+  // let copiedShowMediaList = Array.apply(false, Array(dataAsArray.length));
+  // copiedShowMediaList[index] = true;
+  //setShowMedia(copiedShowMediaList);
 }
