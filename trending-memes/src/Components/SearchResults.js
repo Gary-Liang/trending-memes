@@ -24,7 +24,7 @@ export default function SearchResults({query, setMediaInfo}) {
 
   return (
     <>
-      { <div class='mediaBox' style={divStyle}>
+      { <div className='mediaBox' style={divStyle}>
         {
           data.filter(data => {
               if (query === "") {
@@ -34,9 +34,8 @@ export default function SearchResults({query, setMediaInfo}) {
                   // if condition is true, then return data that matches query to be mapped
                   return data;
               }
-          }).map((data, index, dataAsArray) => (
-              <div key={data.id} class={data.id} style={searchResults} onClick={() => setMediaInfo({dataInfo: data, isClicked: true})}>
-                  {/**showMedia[index] ? <ViewMedia data={data}></ViewMedia> : null */}
+          }).map((data) => (
+              <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo)}>
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
@@ -101,8 +100,8 @@ function renderMediaPreview(data) {
         </video>
       )
     } else if (data.link.includes("/a/")) {
-      var mediaURL = "http://i.imgur.com/" + data.cover + ".";
-      var previewHeaderText = "";
+      let mediaURL = "http://i.imgur.com/" + data.cover + ".";
+      let previewHeaderText = "";
       if (data.images_count > 1)
         previewHeaderText = "(Meme Album)";
       if (data.images[0].type.includes("mp4")) {
@@ -133,12 +132,11 @@ function renderMediaPreview(data) {
   }
 }
 
-
-// push to add to array
-function promptViewMedia(setShowMedia, index, dataAsArray) {
-  // console.log(index);
-
-  // let copiedShowMediaList = Array.apply(false, Array(dataAsArray.length));
-  // copiedShowMediaList[index] = true;
-  //setShowMedia(copiedShowMediaList);
+// data.id is album hash link
+function writeMetadataToMediaInfo(data, setMediaInfo) {
+  if (data.images_count > 1) {
+    setMediaInfo({dataInfo: data, album: data.id, albumLength: data.images_count, isClicked: true});
+  } else {
+    setMediaInfo({dataInfo: data, album: "", albumLength: 1, isClicked: true});
+  }
 }

@@ -1,14 +1,25 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 export default function ViewMedia({mediaInfo, setMediaInfo}) {
+
+  const [imageAlbumCount, setImageAlbumCount] = useState(0);
+
+
     return (
         <>
-            {mediaInfo.isClicked === true ? 
-            <div class="popup" style={overlayDiv}>
-                <div class="popupMedia" style={mediaPopupDisplay}>
-                    {(mediaInfo.dataInfo !== null) ? renderMediaPreview(mediaInfo.dataInfo): null}
+            {(mediaInfo.isClicked) ? 
+            <div className="popup" style={overlayDiv}>
+                <div className="popupMedia" style={mediaPopupDisplay}>
+                    {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
-                <button className="closeButton" style={closeButton}>X</button>
+                <button className="closeButton" style={closeButton} onClick={() => closeViewMediaAndReset(setMediaInfo, setImageAlbumCount)}>X</button>
+                { (mediaInfo.dataInfo && mediaInfo.albumLength > 1) ? 
+                  <div>
+                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount}</div>
+                    <button className="viewNextInAlbum" style={arrowRightButton} onClick={() => setMediaInfo({dataInfo: loadNextMediaInAlbum(mediaInfo, imageAlbumCount, setImageAlbumCount), isClicked: true})}>R</button>
+                    <button className="viewPrevInAlbum" style={arrowLeftButton} onClick={() => setMediaInfo({dataInfo: loadNextMediaInAlbum(mediaInfo, imageAlbumCount, setImageAlbumCount), isClicked: true})}>L</button>
+                  </div> : null
+                }
             </div> : null}
         </>
     )
@@ -20,12 +31,9 @@ const overlayDiv = {
     width: "100%",
     height: "100%",
     position: "fixed",
-    // padding: "10px",
-    //marginLeft: "-50vw",
     top: "0",
     zIndex: "5",
-    overflow: "hidden"
-    // display: "none"
+    // overflow: "hidden"
 }
 
 const closeButton = {
@@ -36,40 +44,70 @@ const closeButton = {
     zIndex: "5",
     top: "0",
     border: "none",
-    webkitTextStroke: "0.15px white",
+    WebkitTextStroke: "0.10px white",
+}
+
+const arrowLeftButton = {
+  color: "white",
+  position: "fixed",
+  background: "none",
+  fontSize: "24px",
+  zIndex: "5",
+  top: "50%",
+  left: "0",
+  border: "none",
+  WebkitTextStroke: "0.10px black",
+}
+
+const arrowRightButton = {
+  color: "white",
+  position: "fixed",
+  background: "none",
+  fontSize: "24px",
+  zIndex: "5",
+  top: "50%",
+  right: "0",
+  border: "none",
+  WebkitTextStroke: "0.10px black",
+}
+
+const imageNumber = {
+  color: "white",
+  position: "fixed",
+  background: "none",
+  fontSize: "24px",
+  zIndex: "5",
+  top: "15%",
+  left: "0",
+  border: "none",
+  WebkitTextStroke: "0.10px black",
 }
 
 const mediaPopupDisplay = {
     zIndex: "5",
-    background: "rgba(0,0,0, 1);",
-    // width: "100%",
-    // height: "100%",
-    // marginLeft: "200px",
-    // marginRight: "200px",
-    // marginTop: "200px",
-    // marginBottom: "200px"
+    background: "rgba(0,0,0, 1)",
 }
 
 
-function renderMediaPreview(data) {
+function renderFullMedia(data) {
     console.log('Rendering.');
     if (data.link) {
       if (data.link.includes(".mp4")) {
         return (
-          <video style={videoResize} preload="auto" controls autoPlay muted loop>
+          <video style={videoResize} preload="auto" controls autoPlay loop>
             <source src={data.link} type="video/mp4"/>
           </video>
         )
       } else if (data.link.includes("/a/")) {
-        var mediaURL = "http://i.imgur.com/" + data.cover + ".";
-        var previewHeaderText = "";
+        let mediaURL = "http://i.imgur.com/" + data.cover + ".";
+        let previewHeaderText = "";
         if (data.images_count > 1)
           previewHeaderText = "(Meme Album)";
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
           return (
             <>
-            <video style={videoResize} preload="auto" controls autoPlay muted loop>
+            <video style={videoResize} preload="auto" controls autoPlay loop>
               <source src={mediaURL} type="video/mp4"/>
             </video>
             </>
@@ -78,25 +116,54 @@ function renderMediaPreview(data) {
           mediaURL += data.images[0].type.split("/")[1];
           return (
             <>
-            <img style={imageReSize} src={mediaURL}  alt=""/>
+            <img style={imageResize} src={mediaURL}  alt=""/>
             </>
           )
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
         return (
-          <img style={imageReSize} src={data.link}  alt=""/>
+          <img style={imageResize} src={data.link}  alt=""/>
         )
       }
     }
   }
 
-  const imageReSize = {
+  function loadNextMediaInAlbum(mediaInfo, imageAlbumCount, setImageAlbumCount) {
+    let updatedImageAlbumCount = imageAlbumCount + 1;
+    setImageAlbumCount(updatedImageAlbumCount);
+    
+    let mediaLinkFromAlbum;
+
+    // make a promise and pull imgur album based on album hash 
+    fetch('/all_album_image_links/' + mediaInfo.album).then(
+        // Promise
+        res => res.json()
+    ).then(
+        albumInfo => {
+          mediaLinkFromAlbum = JSON.parse(JSON.stringify(albumInfo)).data[updatedImageAlbumCount].link;
+          console.log("Media Link from Album" + mediaLinkFromAlbum);
+        }
+    )
+
+    console.log("Media Link from Album 2" + mediaLinkFromAlbum);
+    return mediaLinkFromAlbum;
+  }
+
+  function closeViewMediaAndReset(setMediaInfo, setImageAlbumCount) {
+    setMediaInfo({dataInfo: "", album: "", albumLength: 0, isClicked: false});
+    setImageAlbumCount(0);
+  }
+
+  const imageResize = {
     height: "100%",
-    width: "50%",
-    left: "0",
+    width: "auto",
     top: "0",
-    position: "fixed"
+    left: "0",
+    right: "0",
+    bottom: "0",
+    margin: "auto",
+    position: "absolute",
   }
 
   const videoResize = {
@@ -104,6 +171,5 @@ function renderMediaPreview(data) {
     width: "100%",
     left: "0",
     top: "0",
-    position: "fixed",
-    zIndex: "-1"
+    position: "absolute",
   }
