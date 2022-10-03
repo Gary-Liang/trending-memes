@@ -16,7 +16,7 @@ export default function App() {
   //const [showMedia] = useState(false); 
 
   return (
-    <div class="App">
+    <div className="App">
       <Title /*name='The Trending Memes'*//>
 
       <SearchBar setQuery={setQuery} />
