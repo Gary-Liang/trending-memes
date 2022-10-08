@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import ViewMedia from './ViewMedia';
 
-export default function SearchResults({query}) {
+export default function SearchResults({query, setMediaInfo}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
  // show media state variable to display media previews
- const [showMedia, setShowMedia] = useState([]);
+ //const [showMedia, setShowMedia] = useState([]);
 
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
@@ -34,16 +34,12 @@ export default function SearchResults({query}) {
                   // if condition is true, then return data that matches query to be mapped
                   return data;
               }
-          }).map((data, index, dataAsArray) => (
-            <>
-              <div key={data.id} className={data.id} style={searchResults} onClick={() => promptViewMedia(setShowMedia, index, dataAsArray)}>
+          }).map((data) => (
+              <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo)}>
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
-              <div>
-                {showMedia[index] ? <ViewMedia data={data}></ViewMedia> : null}
-              </div>
-            </>
+
           ))
         }
       </div>}
@@ -54,7 +50,7 @@ export default function SearchResults({query}) {
 
 const divStyle = {
     color: 'black',
-    padding: '1%',
+    padding: '0.25%',
     border: '3px solid grey',
     textAlign: 'center',
     // display: 'flex',
@@ -104,8 +100,8 @@ function renderMediaPreview(data) {
         </video>
       )
     } else if (data.link.includes("/a/")) {
-      var mediaURL = "http://i.imgur.com/" + data.cover + ".";
-      var previewHeaderText = "";
+      let mediaURL = "http://i.imgur.com/" + data.cover + ".";
+      let previewHeaderText = "";
       if (data.images_count > 1)
         previewHeaderText = "(Meme Album)";
       if (data.images[0].type.includes("mp4")) {
@@ -136,12 +132,11 @@ function renderMediaPreview(data) {
   }
 }
 
-
-// push to add to array
-function promptViewMedia(setShowMedia, index, dataAsArray) {
-  console.log(index);
-
-  let copiedShowMediaList = Array.apply(false, Array(dataAsArray.length));
-  copiedShowMediaList[index] = true;
-  setShowMedia(copiedShowMediaList);
+// data.id is album hash link
+function writeMetadataToMediaInfo(data, setMediaInfo) {
+  if (data.images_count > 1) {
+    setMediaInfo({dataInfo: data, album: data.id, albumLength: data.images_count, isClicked: true});
+  } else {
+    setMediaInfo({dataInfo: data, album: "", albumLength: 1, isClicked: true});
+  }
 }
