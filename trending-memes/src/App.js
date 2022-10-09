@@ -13,6 +13,10 @@ export default function App() {
     dataInfo: null,
     isClicked: false
   }]);
+  const [albumInfo, setAlbumInfo] = useState([{
+    album: null,
+    albumLength: null
+  }]);
   //const [showMedia] = useState(false); 
 
   return (
@@ -20,8 +24,8 @@ export default function App() {
       <Title /*name='The Trending Memes'*//>
 
       <SearchBar setQuery={setQuery} />
-      <SearchResults query={query} setMediaInfo={setMediaInfo}/>
-      <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo}/>
+      <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} />
+      <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
 
     </div>
   );
