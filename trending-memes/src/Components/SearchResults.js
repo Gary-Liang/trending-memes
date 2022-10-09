@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ViewMedia from './ViewMedia';
 
-export default function SearchResults({query, setMediaInfo}) {
+export default function SearchResults({query, setMediaInfo, setAlbumInfo}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
@@ -35,7 +35,7 @@ export default function SearchResults({query, setMediaInfo}) {
                   return data;
               }
           }).map((data) => (
-              <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo)}>
+              <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo)}>
                   <p>{data.title}</p>
                   {renderMediaPreview(data)}
               </div>
@@ -133,10 +133,12 @@ function renderMediaPreview(data) {
 }
 
 // data.id is album hash link
-function writeMetadataToMediaInfo(data, setMediaInfo) {
+function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
   if (data.images_count > 1) {
-    setMediaInfo({dataInfo: data, album: data.id, albumLength: data.images_count, isClicked: true});
+    setMediaInfo({dataInfo: data, isClicked: true});
+    setAlbumInfo({album: data.id, albumLength: data.images_count});
   } else {
-    setMediaInfo({dataInfo: data, album: "", albumLength: 1, isClicked: true});
+    setMediaInfo({dataInfo: data, isClicked: true});
+    setAlbumInfo({album: null, albumLength: 1});
   }
 }
