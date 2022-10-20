@@ -108,15 +108,6 @@ def members_two():
 # Callback
 @app.route('/oauth/callback/', methods=['GET'])
 def callback():
-    # state_string = request.args['state']
-    # query_string = request.args
-    # return query_string
-    # token = imgur.fetch_token(
-    #     token_url=token_url, 
-    #     client_secret=CLIENT_SECRET, 
-    #     code_verifier=code_verifier, 
-    #     code = code,
-    # )
 
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
