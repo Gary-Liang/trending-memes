@@ -7,6 +7,29 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   const [imageAlbumData, setImageAlbumData] = useState(null);
 
 
+  // Escape key to close view media component
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        closeViewMediaAndReset();
+      }  
+      // // Left arrow key
+      // } else if (e.key === 37) {
+      //   loadPrevMediaInAlbum();
+      // // Right arrow key
+      // } else if (e.key === 39) {
+      //   loadNextMediaInAlbum();
+      // }
+    }  
+      document.addEventListener('keydown', handleKeyDown);
+
+      // Don't forget to clean up
+      return function cleanup() {
+        document.removeEventListener('keydown', handleKeyDown);
+      } 
+  }, []);
+
+
   async function loadNextMediaInAlbum() {
     let updateImageIncrement = imageAlbumCount + 1;
     setImageAlbumCount(imageAlbumCount + 1);
@@ -25,9 +48,14 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
           }
       )
     } else {
-      setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                   isClicked: true});
-      console.log("rendered here second:" + updateImageIncrement);
+      await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
+        setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+                      isClicked: true})
+        console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
+      })  
+      // setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+      //              isClicked: true});
+      // console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
     }
   
   }
@@ -156,11 +184,11 @@ const mediaPopupDisplay = {
 
 
 function renderFullMedia(data) {
-    console.log('Rendering.');
     if (data.link) {
       if (data.link.includes(".mp4")) {
         return (
           <video style={videoResize} preload="auto" controls autoPlay loop>
+            {console.log(data.link)}
             <source src={data.link} type="video/mp4"/>
           </video>
         )
@@ -189,7 +217,7 @@ function renderFullMedia(data) {
       } else {
         // if link is just a normal image or a gifv, render it normally. 
         return (
-          <img style={imageResize} src={data.link}  alt=""/>
+          <img style={imageResize} src={data.link} alt=""/>
         )
       }
     }
