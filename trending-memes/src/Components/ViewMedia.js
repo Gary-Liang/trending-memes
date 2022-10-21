@@ -11,23 +11,37 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') {
-        closeViewMediaAndReset();
-      }  
-      // // Left arrow key
-      // } else if (e.key === 37) {
-      //   loadPrevMediaInAlbum();
-      // // Right arrow key
-      // } else if (e.key === 39) {
-      //   loadNextMediaInAlbum();
-      // }
-    }  
+        console.log("Pressed escape key");
+        console.log('image count' + imageAlbumCount);
+        closeViewMediaAndReset(); 
+      }// }else 
+      
+      if (albumInfo.albumLength > 1) {
+        // Left arrow key
+        if (imageAlbumCount > 0) {
+          if (e.key === 'ArrowLeft') {
+            console.log("pressed left arrowkey");
+            console.log('image count' + imageAlbumCount);
+            loadPrevMediaInAlbum();
+          } 
+        }
+
+        // Right arrow key
+        if (imageAlbumCount + 1 < albumInfo.albumLength) {
+          if (e.key === 'ArrowRight') {
+            console.log("pressed right arrowkey");
+            loadNextMediaInAlbum();
+          }  
+        }
+      }
+    }
       document.addEventListener('keydown', handleKeyDown);
 
       // Don't forget to clean up
       return function cleanup() {
         document.removeEventListener('keydown', handleKeyDown);
       } 
-  }, []);
+  }, [albumInfo, imageAlbumCount, closeViewMediaAndReset, loadNextMediaInAlbum, loadPrevMediaInAlbum]);
 
 
   async function loadNextMediaInAlbum() {
@@ -82,7 +96,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                    isClicked: true});
       console.log("rendered here second");
     }
-  
   }
 
   function closeViewMediaAndReset() {
@@ -187,7 +200,7 @@ function renderFullMedia(data) {
     if (data.link) {
       if (data.link.includes(".mp4")) {
         return (
-          <video style={videoResize} preload="auto" controls autoPlay loop>
+          <video key={data.link} style={videoResize} preload="auto" controls autoPlay loop>
             {console.log(data.link)}
             <source src={data.link} type="video/mp4"/>
           </video>
@@ -200,74 +213,24 @@ function renderFullMedia(data) {
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
           return (
-            <>
-            <video style={videoResize} preload="auto" controls autoPlay loop>
+            <video key={mediaURL} style={videoResize} preload="auto" controls autoPlay loop>
               <source src={mediaURL} type="video/mp4"/>
             </video>
-            </>
           )
         } else {
           mediaURL += data.images[0].type.split("/")[1];
           return (
-            <>
-            <img style={imageResize} src={mediaURL}  alt=""/>
-            </>
+            <img key={mediaURL} style={imageResize} src={mediaURL}  alt=""/>
           )
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
         return (
-          <img style={imageResize} src={data.link} alt=""/>
+          <img key={data.link} style={imageResize} src={data.link} alt=""/>
         )
       }
     }
   }
-
-  // function loadNextMediaInAlbum(mediaInfo, setMediaInfo, albumInfo, imageAlbumCount, setImageAlbumCount) {
-  //   let updatedImageAlbumCount = imageAlbumCount + 1;
-  //   setImageAlbumCount(updatedImageAlbumCount);
-
-
-  //   // make a promise and pull imgur album based on album hash 
-  //   if (!imageAlbumData) { 
-  //     fetch('/all_album_image_links/' + albumInfo.album).then(
-  //         // Promise
-  //         res => res.json()
-  //       ).then(
-  //         albumInfo => {
-  //           setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfo)).data[updatedImageAlbumCount], 
-  //                         isClicked: true});
-  //         }
-  //     )
-  //   } else {
-  //     setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfo)).data[updatedImageAlbumCount], 
-  //       isClicked: true});
-  //   }
-  
-  // }
-
-  // function loadPrevMediaInAlbum(mediaInfo, setMediaInfo, albumInfo, imageAlbumCount, setImageAlbumCount) {
-  //   let updatedImageAlbumCount = imageAlbumCount - 1;
-  //   setImageAlbumCount(updatedImageAlbumCount);
-
-
-  //   // make a promise and pull imgur album based on album hash 
-  //   fetch('/all_album_image_links/' + albumInfo.album).then(
-  //       // Promise
-  //       res => res.json()
-  //     ).then(
-  //       albumInfo => {
-  //         setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfo)).data[updatedImageAlbumCount], 
-  //                       isClicked: true});
-  //       }
-  //   )
-  
-  // }
-
-  // function closeViewMediaAndReset(setMediaInfo, setImageAlbumCount) {
-  //   setMediaInfo({dataInfo: "", isClicked: false});
-  //   setImageAlbumCount(0);
-  // }
 
   const imageResize = {
     height: "100%",
@@ -287,3 +250,22 @@ function renderFullMedia(data) {
     top: "0",
     position: "absolute",
   }
+
+  // const spinnerStyle = {
+  //   zIndex: "5"
+  // }
+
+
+function checkMediaSize() {
+
+  }
+
+// function loadingSpinner() {
+//   return (
+//     <>
+//       <div style={spinnerStyle}>
+//         <p>Please wait while media is loading...</p>
+//       </div>
+//     </>
+//   )
+// }

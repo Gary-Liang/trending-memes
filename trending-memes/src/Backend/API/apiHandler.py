@@ -23,8 +23,7 @@ RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
 
-headers = {'Accept':'*/*',
-           'Authorization' : 'Client-ID ' + CLIENT_ID }
+headers = {'Connnection' : 'keep-alive'}
 
 # variables to use for API call
 tag_name = 'funny'
@@ -108,10 +107,8 @@ def members_two():
 # Callback
 @app.route('/oauth/callback/', methods=['GET'])
 def callback():
-
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
-
     session['oauth_token'] = token
     return redirect(url_for('.search'))
 
@@ -119,6 +116,7 @@ def callback():
 @app.route('/search', methods=['GET'])
 def search():
     imgur = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
+    
     return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_filter + '/' + page_filter).json())
 
 
