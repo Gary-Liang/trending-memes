@@ -95,7 +95,7 @@ function renderMediaPreview(data) {
   if (data.link) {
     if (data.link.includes(".mp4")) {
       return (
-        <video style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
+        <video key={data.link} style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
           <source src={data.link} type="video/mp4"/>
         </video>
       )
@@ -109,7 +109,7 @@ function renderMediaPreview(data) {
         return (
           <>
           <p>{previewHeaderText}</p>
-          <video style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
+          <video key={mediaURL} style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
             <source src={mediaURL} type="video/mp4"/>
           </video>
           </>
@@ -119,14 +119,14 @@ function renderMediaPreview(data) {
         return (
           <>
           <p>{previewHeaderText}</p>
-          <img src={mediaURL} style={mediaMaxSize} alt=""/>
+          <img key={mediaURL} src={mediaURL} style={mediaMaxSize} alt=""/>
           </>
         )
       }
     } else {
       // if link is just a normal image or a gifv, render it normally. 
       return (
-        <img src={data.link} style={mediaMaxSize} alt=""/>
+        <img key={data.link} src={data.link} style={mediaMaxSize} alt=""/>
       )
     }
   }
