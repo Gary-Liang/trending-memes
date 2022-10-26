@@ -104,6 +104,11 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     setImageAlbumData(null);
   }
 
+  function copyMediaToClipboard() {
+    navigator.clipboard.writeText(mediaInfo.dataInfo)
+
+  }
+
     return (
         <>
             {(mediaInfo.isClicked) ? 
@@ -112,6 +117,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
+                <button className="copyToClipBoard" onClick={copyMediaToClipboard}></button>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
