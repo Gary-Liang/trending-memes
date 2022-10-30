@@ -6,6 +6,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
 
+  let currentMediaLink = "";
 
   // Escape key to close view media component
   useEffect(() => {
@@ -104,6 +105,11 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     setImageAlbumData(null);
   }
 
+  function copyMediaToClipboard() {
+    navigator.clipboard.writeText(mediaInfo.dataInfo.data[imageAlbumCount])
+
+  }
+
     return (
         <>
             {(mediaInfo.isClicked) ? 
@@ -112,6 +118,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
+                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}>O</button>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
@@ -150,6 +157,19 @@ const closeButton = {
     border: "none",
     fontWeight: "bold",
     WebkitTextStroke: "0.10px white",
+}
+
+const copyToClipboardButton = {
+  color: "black",
+  position: "fixed",
+  background: "none",
+  fontSize: "24px",
+  zIndex: "5",
+  top: "60px",
+  left: "30px",
+  border: "none",
+  fontWeight: "bold",
+  WebkitTextStroke: "0.10px white",
 }
 
 const arrowLeftButton = {
