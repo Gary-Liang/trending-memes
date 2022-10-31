@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react'
 
+let currentMediaLink = "";
+
 export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
   const [imageAlbumCount, setImageAlbumCount] = useState(0);
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
-
-  let currentMediaLink = "";
 
   // Escape key to close view media component
   useEffect(() => {
@@ -58,14 +58,18 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
           albumInfoData => {
             setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
             setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true});
+                          isClicked: true,
+                          height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
+                          width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
             console.log("I was here first");
           }
       )
     } else {
       await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
         setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                      isClicked: true})
+                      isClicked: true,
+                      height: imageAlbumData.data[updateImageIncrement].height,
+                      width: imageAlbumData.data[updateImageIncrement].width})
         console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
       })  
       // setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
@@ -88,13 +92,17 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
           albumInfoData => {
             setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
             setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true});
+                          isClicked: true,
+                          height: imageAlbumData.data[updateImageIncrement].height,
+                          width: imageAlbumData.data[updateImageIncrement].width});
             console.log("I was here first");
           }
       )
     } else {
       setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                   isClicked: true});
+                   isClicked: true,
+                   height: imageAlbumData.data[updateImageIncrement].height,
+                   width: imageAlbumData.data[updateImageIncrement].width});
       console.log("rendered here second");
     }
   }
@@ -106,8 +114,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   }
 
   function copyMediaToClipboard() {
-    navigator.clipboard.writeText(mediaInfo.dataInfo.data[imageAlbumCount])
-
+    navigator.clipboard.writeText(currentMediaLink)
   }
 
     return (
@@ -118,7 +125,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
-                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}>O</button>
+                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}>Δ</button>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
@@ -213,12 +220,14 @@ const imageNumber = {
 const mediaPopupDisplay = {
     zIndex: "5",
     background: "rgba(0,0,0, 1)",
+    height: "0"
 }
 
 
 function renderFullMedia(data) {
     if (data.link) {
       if (data.link.includes(".mp4")) {
+        currentMediaLink = data.link
         return (
           <video key={data.link} style={videoResize} preload="auto" controls autoPlay loop>
             {console.log(data.link)}
@@ -232,6 +241,7 @@ function renderFullMedia(data) {
           previewHeaderText = "(Meme Album)";
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
+          currentMediaLink = mediaURL
           return (
             <video key={mediaURL} style={videoResize} preload="auto" controls autoPlay loop>
               <source src={mediaURL} type="video/mp4"/>
@@ -239,14 +249,20 @@ function renderFullMedia(data) {
           )
         } else {
           mediaURL += data.images[0].type.split("/")[1];
+          currentMediaLink = mediaURL
           return (
-            <img key={mediaURL} style={imageResize} src={mediaURL}  alt=""/>
+            <>
+              <img key={mediaURL} style={imageResize} src={mediaURL}  alt=""/>
+            </>
           )
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
+        currentMediaLink = data.link
         return (
-          <img key={data.link} style={imageResize} src={data.link} alt=""/>
+          <>
+            <img key={data.link} style={imageResize} src={data.link} alt=""/>
+          </>
         )
       }
     }
@@ -259,7 +275,7 @@ function renderFullMedia(data) {
     left: "0",
     right: "0",
     bottom: "0",
-    margin: "auto",
+    margin: "0 auto",
     position: "absolute",
   }
 

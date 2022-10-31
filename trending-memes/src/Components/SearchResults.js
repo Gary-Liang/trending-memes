@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import ViewMedia from './ViewMedia';
 
+let breakpoint = 400;
+
 export default function SearchResults({query, setMediaInfo, setAlbumInfo}) {
 
   // create state variable to get backend API 
@@ -82,7 +84,7 @@ const searchResults = {
 }
 
 const mediaMaxSize = {
-  maxheight: '250px',
+  maxHeight: '450px',
   maxWidth: '250px',
   height: 'auto',
   width: 'auto',
@@ -135,10 +137,10 @@ function renderMediaPreview(data) {
 // data.id is album hash link
 function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
   if (data.images_count > 1) {
-    setMediaInfo({dataInfo: data, isClicked: true});
+    setMediaInfo({dataInfo: data, isClicked: true, height: data.height, width: data.width});
     setAlbumInfo({album: data.id, albumLength: data.images_count});
   } else {
-    setMediaInfo({dataInfo: data, isClicked: true});
+    setMediaInfo({dataInfo: data, isClicked: true, height: data.height, width: data.width});
     setAlbumInfo({album: null, albumLength: 1});
   }
 }
