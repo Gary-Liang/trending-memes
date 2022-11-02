@@ -11,7 +11,9 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [mediaInfo, setMediaInfo] = useState([{
     dataInfo: null,
-    isClicked: false
+    isClicked: false,
+    height: 0,
+    width: 0
   }]);
   const [albumInfo, setAlbumInfo] = useState([{
     album: null,
