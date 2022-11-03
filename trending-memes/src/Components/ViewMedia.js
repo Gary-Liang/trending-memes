@@ -120,7 +120,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     return (
         <>
             {(mediaInfo.isClicked) ? 
-            <div className="popup" style={overlayDiv}>
+            ( 
+              <div className="popup" style={overlayDiv}>
                 <div className="popupMedia" style={mediaPopupDisplay}>
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
@@ -137,7 +138,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                     </button>
                   </div> : null
                 }
-            </div> : null}
+              </div>
+            ) : null}
         </>
     )
 }

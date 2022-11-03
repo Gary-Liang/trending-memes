@@ -22,17 +22,25 @@ export default function App() {
   //const [showMedia] = useState(false); 
 
   return (
-    <div className="App">
+    <div className="App" style={(mediaInfo.isClicked) ? setOverflowInBodyOn : setOverflowInBodyOff}>
       <Title /*name='The Trending Memes'*//>
 
       <SearchBar setQuery={setQuery} />
       <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} />
+      {/*(mediaInfo.isClicked) ? {setOverflowInBodyOn}: {setOverflowInBodyOff}  */}
       <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
-
+    
     </div>
   );
 }
 
+const setOverflowInBodyOn = {
+  overflow: 'noscroll'
+}
+
+const setOverflowInBodyOff = {
+  overflow: 'scroll'
+}
 
 // const appStyle = {
 //   margin: 'auto',
