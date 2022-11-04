@@ -22,28 +22,33 @@ export default function App() {
   //const [showMedia] = useState(false); 
 
   return (
-    <div className="App" style={(mediaInfo.isClicked) ? setOverflowInBodyOn : setOverflowInBodyOff}>
-      <Title /*name='The Trending Memes'*//>
-
-      <SearchBar setQuery={setQuery} />
-      <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} />
-      {/*(mediaInfo.isClicked) ? {setOverflowInBodyOn}: {setOverflowInBodyOff}  */}
-      <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
-    
+    <div className='container' style={containerStyle}>
+      <div className="App" style={(mediaInfo.isClicked === true) ? setOverflowInBodyOn : setOverflowInBodyOff}>
+        <Title /*name='The Trending Memes'*//>
+        {console.log(mediaInfo.isClicked)}
+        <SearchBar setQuery={setQuery} />
+        <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} />
+        {/*(mediaInfo.isClicked) ? {setOverflowInBodyOn}: {setOverflowInBodyOff}  */}
+        <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
+      
+      </div>
     </div>
   );
 }
 
 const setOverflowInBodyOn = {
-  overflow: 'noscroll'
+  // for overflow to have any weight we need to define it some height and width 
+  overflowY: 'noscroll',
 }
 
 const setOverflowInBodyOff = {
-  overflow: 'scroll'
+  overflowY: 'auto',
 }
 
-// const appStyle = {
-//   margin: 'auto',
-// }
+const containerStyle = {
+  maxHeight: '100%',
+  maxWidth: '100%',
+  overflowY: 'auto',
+}
 
 
