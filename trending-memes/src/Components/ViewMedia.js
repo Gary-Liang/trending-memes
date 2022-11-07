@@ -1,12 +1,27 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
 
 let currentMediaLink = "";
+let breakpoint = 400;
 
 export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
   const [imageAlbumCount, setImageAlbumCount] = useState(0);
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
+
+  // Use useLayoutEffect for modifying the DOM
+  useLayoutEffect(() => {
+      if (mediaInfo.isClicked) {
+        document.body.style.overflow = "hidden";
+        //document.body.style.minHeight = "100%"
+        document.body.style.height = "100%"
+      }
+      if (!mediaInfo.isClicked) { 
+        document.body.style.overflow = "auto";
+        document.body.style.height = "auto";
+        //document.body.style.minHeight = "auto";
+      }
+  }, [mediaInfo]);
 
   // Escape key to close view media component
   useEffect(() => {
@@ -42,7 +57,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       return function cleanup() {
         document.removeEventListener('keydown', handleKeyDown);
       } 
-  }, [albumInfo, imageAlbumCount, closeViewMediaAndReset, loadNextMediaInAlbum, loadPrevMediaInAlbum]);
+  }, [albumInfo, imageAlbumCount]);
 
 
   async function loadNextMediaInAlbum() {
@@ -72,9 +87,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                       width: imageAlbumData.data[updateImageIncrement].width})
         console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
       })  
-      // setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-      //              isClicked: true});
-      // console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
     }
   
   }
@@ -120,7 +132,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     return (
         <>
             {(mediaInfo.isClicked) ? 
-            ( 
               <div className="popup" style={overlayDiv}>
                 <div className="popupMedia" style={mediaPopupDisplay}>
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
@@ -138,8 +149,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                     </button>
                   </div> : null
                 }
-              </div>
-            ) : null}
+              </div>: null}
         </>
     )
 }
@@ -152,7 +162,7 @@ const overlayDiv = {
     position: "fixed",
     top: "0",
     zIndex: "5",
-    // overflow: "hidden"
+    overflow: "hidden"
 }
 
 const closeButton = {
@@ -271,6 +281,7 @@ function renderFullMedia(data) {
   }
 
   const imageResize = {
+    //TODO: add min and max dimensions here? 
     height: "100%",
     width: "auto",
     top: "0",
@@ -282,6 +293,7 @@ function renderFullMedia(data) {
   }
 
   const videoResize = {
+    //TODO: add min and max dimensions here? 
     height: "100%",
     width: "100%",
     left: "0",

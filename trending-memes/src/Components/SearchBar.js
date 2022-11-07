@@ -19,7 +19,6 @@ export default function SearchBar({setQuery}) {
 }
 
 
-
 const styleSearch = {
   padding: '10px',
   width: '25%',

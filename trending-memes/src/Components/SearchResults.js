@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import ViewMedia from './ViewMedia';
-
-let breakpoint = 400;
 
 export default function SearchResults({query, setMediaInfo, setAlbumInfo}) {
 
