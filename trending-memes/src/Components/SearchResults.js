@@ -131,10 +131,27 @@ function renderMediaPreview(data) {
   }
 }
 
+// (imgur) generate a media link based on data passed in and what type of media it is 
+function getMediaLink(data) {
+  if (data.link) {
+    if (data.link.includes("mp4")) {
+
+    } else if (data.link.includes("/a/")) {
+      if (data.images[0].type.includes("mp4")) {
+
+      } else {
+
+      }
+    } else {
+    }
+  }
+
+}
+
 // data.id is album hash link
 function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
   if (data.images_count > 1) {
-    setMediaInfo({dataInfo: data, isClicked: true, height: data.height, width: data.width});
+    setMediaInfo({dataInfo: data, isClicked: true, mediaLink: data, height: data.height, width: data.width});
     setAlbumInfo({album: data.id, albumLength: data.images_count});
   } else {
     setMediaInfo({dataInfo: data, isClicked: true, height: data.height, width: data.width});

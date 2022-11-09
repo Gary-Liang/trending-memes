@@ -12,6 +12,7 @@ export default function App() {
   const [mediaInfo, setMediaInfo] = useState([{
     dataInfo: null,
     isClicked: false,
+    mediaLink: null,
     height: 0,
     width: 0
   }]);
