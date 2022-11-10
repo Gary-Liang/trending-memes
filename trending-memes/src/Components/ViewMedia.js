@@ -77,6 +77,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
             setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
             setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
                           isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
                           height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
                           width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
             console.log("I was here first");
@@ -86,6 +87,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
         setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
                       isClicked: true,
+                      mediaLink: imageAlbumData.data[updateImageIncrement].link, 
                       height: imageAlbumData.data[updateImageIncrement].height,
                       width: imageAlbumData.data[updateImageIncrement].width})
         console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
@@ -108,6 +110,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
             setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
             setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
                           isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
                           height: imageAlbumData.data[updateImageIncrement].height,
                           width: imageAlbumData.data[updateImageIncrement].width});
             console.log("I was here first");
@@ -116,6 +119,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     } else {
       setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
                    isClicked: true,
+                   mediaLink: imageAlbumData.data[updateImageIncrement].link, 
                    height: imageAlbumData.data[updateImageIncrement].height,
                    width: imageAlbumData.data[updateImageIncrement].width});
       console.log("rendered here second");
@@ -123,7 +127,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   }
 
   function closeViewMediaAndReset() {
-    setMediaInfo({dataInfo: "", isClicked: false});
+    setMediaInfo({dataInfo: null, isClicked: false, mediaLink: null});
     setImageAlbumCount(0);
     setImageAlbumData(null);
   }
