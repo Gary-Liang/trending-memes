@@ -1,4 +1,5 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react'
+import ClipboardImage from '../Images/copyToClipboard.png'
 
 // Global fields 
 let currentMediaLink = "";
@@ -212,7 +213,7 @@ const closeButton = {
 const copyToClipboardButton = {
   color: "black",
   position: "fixed",
-  background: "none",
+  //background: "none",
   fontSize: "24px",
   zIndex: "5",
   top: "60px",
@@ -220,6 +221,7 @@ const copyToClipboardButton = {
   border: "none",
   fontWeight: "bold",
   WebkitTextStroke: "0.10px white",
+  backgroundImage: `url(${ClipboardImage}`
 }
 
 const arrowLeftButton = {
@@ -306,7 +308,7 @@ function checkMediaSize() {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
-                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}>Δ</button>
+                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
