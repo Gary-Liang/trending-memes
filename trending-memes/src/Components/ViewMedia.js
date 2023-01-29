@@ -1,4 +1,5 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react'
+import ClipboardImage from '../Images/copyToClipboard.png'
 
 // Global fields 
 let currentMediaLink = "";
@@ -17,7 +18,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       if (mediaInfo.isClicked) {
         document.body.style.overflow = "hidden";
         //document.body.style.minHeight = "100%"
-        document.body.style.height = "100%"
+        document.body.style.height = "100%";
       }
       if (!mediaInfo.isClicked) { 
         document.body.style.overflow = "auto";
@@ -140,8 +141,10 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     if (data.link) {
       if (data.link.includes(".mp4")) {
         currentMediaLink = data.link
+        currentMediaWidth = mediaInfo.width;
+        currentMediaHeight = mediaInfo.height;
         return (
-          <video key={data.link} style={videoResize} preload="auto" controls autoPlay loop>
+          <video key={data.link} style={mediaResizing()} preload="auto" controls autoPlay loop>
             {console.log(data.link)}
             <source src={data.link} type="video/mp4"/>
           </video>
@@ -154,32 +157,35 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
           currentMediaLink = mediaURL
-          currentMediaWidth = "";
-          currentMediaHeight = "";
+          currentMediaWidth = mediaInfo.width;
+          currentMediaHeight = mediaInfo.height;
           return (
-            <video key={mediaURL} style={videoResize} preload="auto" controls autoPlay loop>
+            <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
               <source src={mediaURL} type="video/mp4"/>
             </video>
           )
         } else {
           mediaURL += data.images[0].type.split("/")[1];
           currentMediaLink = mediaURL
-          currentMediaWidth = 0;
-          currentMediaHeight = 0;
+          console.log("data info" + data);
+          console.log("width at first function: " + mediaInfo.width);
+          currentMediaWidth = mediaInfo.width;
+          currentMediaHeight = mediaInfo.height;
           return (
             <>
-              <img key={mediaURL} style={imageResize} src={mediaURL}  alt=""/>
+              <img key={mediaURL} style={mediaResizing()} src={mediaURL}  alt=""/>
             </>
           )
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
         currentMediaLink = data.link
-        currentMediaWidth = 0;
-        currentMediaHeight = 0;
+        console.log("width at first function: " + mediaInfo.width);
+        currentMediaWidth = mediaInfo.width;
+        currentMediaHeight = mediaInfo.height;
         return (
           <>
-            <img key={data.link} style={imageResize} src={data.link} alt=""/>
+            <img key={data.link} style={mediaResizing()} src={data.link} alt=""/>
           </>
         )
       }
@@ -212,14 +218,22 @@ const closeButton = {
 const copyToClipboardButton = {
   color: "black",
   position: "fixed",
-  background: "none",
-  fontSize: "24px",
+  width: "30px",
+  height: "30px",
+  //background: "none",
+  //fontSize: "24px",
   zIndex: "5",
   top: "60px",
   left: "30px",
-  border: "none",
-  fontWeight: "bold",
-  WebkitTextStroke: "0.10px white",
+  //border: "24px",
+  //fontWeight: "bold",
+  //WebkitTextStroke: "0.10px white",
+  backgroundImage: "url(" + ClipboardImage  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  opacity: "0.9",
+  backgroundColor: "rgba(0, 0, 0, .1)"
 }
 
 const arrowLeftButton = {
@@ -266,36 +280,84 @@ const mediaPopupDisplay = {
     height: "0"
 }
 
-const imageResize = {
-  //TODO: add min and max dimensions here? 
-  // intristic vs rendered size
-  height: "100%",
-  width: "auto",
-  top: "0",
-  left: "0",
-  right: "0",
-  bottom: "0",
-  margin: "0 auto",
-  position: "absolute",
-}
-
-const videoResize = {
-  //TODO: add min and max dimensions here? 
-  // instristic vs rendered size
-  height: "100%",
-  width: "100%",
-  left: "0",
-  top: "0",
-  position: "absolute",
-}
-
-// const spinnerStyle = {
-//   zIndex: "5"
+// const imageResize = {
+//   //TODO: add min and max dimensions here? 
+//   // intristic vs rendered size
+//   height: "100%",
+//   width: "auto",
+//   top: "0",
+//   left: "0",
+//   right: "0",
+//   bottom: "0",
+//   margin: "0 auto",
+//   position: "absolute",
 // }
 
+// const videoResize = {
+//   //TODO: add min and max dimensions here? 
+//   // instristic vs rendered size
+//   height: "100%",
+//   width: "100%",
+//   left: "0",
+//   top: "0",
+//   position: "absolute",
+// }
 
-function checkMediaSize() {
+function mediaResizing() {
+  let styles = {};
+  console.log('current width value: ' + currentMediaWidth);
+  if (currentMediaWidth > breakpoint) {
+    styles= {  
+              height: "100%",
+              width: "60%",
+              top: "0",
+              left: "0",
+              right: "0",
+              bottom: "0",
+              margin: "0 auto",
+              position: "absolute"
+    };
+  } else {
+    styles = {  
+                height: "100%",
+                width: "auto",
+                top: "0",
+                left: "0",
+                right: "0",
+                bottom: "0",
+                margin: "0 auto",
+                position: "absolute"
+              };
 
+  }
+  return styles;
+}
+
+
+function videoResizing() {
+  // let screenWidth = window.innerWidth;
+  // let screenHeight = window.innerHeight;
+  let styles = {};
+  console.log('current width value: ' + currentMediaWidth);
+  if (currentMediaWidth > breakpoint) {
+    styles= {  
+                height: "100%",
+                width: "60%",
+                left: "0",
+                top: "0",
+                position: "absolute",
+    };
+  } else {
+    styles = {  
+                height: "100%",
+                width: "100%",
+                left: "0",
+                top: "0",
+                position: "absolute",
+              };
+
+  }
+  return styles;
 }
 
     return (
@@ -306,7 +368,7 @@ function checkMediaSize() {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
-                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}>Δ</button>
+                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
@@ -322,177 +384,3 @@ function checkMediaSize() {
         </>
     )
 }
-
-
-// const overlayDiv = {
-//     background: 'rgba(0,0,0, 0.75)',
-//     width: "100%",
-//     height: "100%",
-//     position: "fixed",
-//     top: "0",
-//     zIndex: "5",
-//     overflow: "hidden"
-// }
-
-// const closeButton = {
-//     color: "black",
-//     position: "fixed",
-//     background: "none",
-//     fontSize: "24px",
-//     zIndex: "5",
-//     top: "10px",
-//     left: "10px",
-//     border: "none",
-//     fontWeight: "bold",
-//     WebkitTextStroke: "0.10px white",
-// }
-
-// const copyToClipboardButton = {
-//   color: "black",
-//   position: "fixed",
-//   background: "none",
-//   fontSize: "24px",
-//   zIndex: "5",
-//   top: "60px",
-//   left: "30px",
-//   border: "none",
-//   fontWeight: "bold",
-//   WebkitTextStroke: "0.10px white",
-// }
-
-// const arrowLeftButton = {
-//   color: "white",
-//   position: "fixed",
-//   background: "none",
-//   fontSize: "24px",
-//   zIndex: "5",
-//   top: "50%",
-//   left: "10px",
-//   fontWeight: "bold",
-//   border: "none",
-//   WebkitTextStroke: "0.10px black",
-// }
-
-// const arrowRightButton = {
-//   color: "white",
-//   position: "fixed",
-//   background: "none",
-//   fontSize: "24px",
-//   zIndex: "5",
-//   top: "50%",
-//   right: "10px",
-//   fontWeight: "bold",
-//   border: "none",
-//   WebkitTextStroke: "0.10px black",
-// }
-
-// const imageNumber = {
-//   color: "white",
-//   position: "fixed",
-//   background: "none",
-//   fontSize: "24px",
-//   zIndex: "5",
-//   top: "15%",
-//   left: "15px",
-//   border: "none",
-//   WebkitTextStroke: "0.10px black",
-// }
-
-// const mediaPopupDisplay = {
-//     zIndex: "5",
-//     background: "rgba(0,0,0, 1)",
-//     height: "0"
-// }
-
-
-// function renderFullMedia(data) {
-//     if (data.link) {
-//       if (data.link.includes(".mp4")) {
-//         currentMediaLink = data.link
-//         return (
-//           <video key={data.link} style={videoResize} preload="auto" controls autoPlay loop>
-//             {console.log(data.link)}
-//             <source src={data.link} type="video/mp4"/>
-//           </video>
-//         )
-//       } else if (data.link.includes("/a/")) {
-//         let mediaURL = "http://i.imgur.com/" + data.cover + ".";
-//         let previewHeaderText = "";
-//         if (data.images_count > 1)
-//           previewHeaderText = "(Meme Album)";
-//         if (data.images[0].type.includes("mp4")) {
-//           mediaURL += "mp4";
-//           currentMediaLink = mediaURL
-//           currentMediaWidth = "";
-//           currentMediaHeight = "";
-//           return (
-//             <video key={mediaURL} style={videoResize} preload="auto" controls autoPlay loop>
-//               <source src={mediaURL} type="video/mp4"/>
-//             </video>
-//           )
-//         } else {
-//           mediaURL += data.images[0].type.split("/")[1];
-//           currentMediaLink = mediaURL
-//           currentMediaWidth = 0;
-//           currentMediaHeight = 0;
-//           return (
-//             <>
-//               <img key={mediaURL} style={imageResize} src={mediaURL}  alt=""/>
-//             </>
-//           )
-//         }
-//       } else {
-//         // if link is just a normal image or a gifv, render it normally. 
-//         currentMediaLink = data.link
-//         currentMediaWidth = 0;
-//         currentMediaHeight = 0;
-//         return (
-//           <>
-//             <img key={data.link} style={imageResize} src={data.link} alt=""/>
-//           </>
-//         )
-//       }
-//     }
-//   }
-
-//   const imageResize = {
-//     //TODO: add min and max dimensions here? 
-//     // intristic vs rendered size
-//     height: "100%",
-//     width: "auto",
-//     top: "0",
-//     left: "0",
-//     right: "0",
-//     bottom: "0",
-//     margin: "0 auto",
-//     position: "absolute",
-//   }
-
-//   const videoResize = {
-//     //TODO: add min and max dimensions here? 
-//     // instristic vs rendered size
-//     height: "100%",
-//     width: "100%",
-//     left: "0",
-//     top: "0",
-//     position: "absolute",
-//   }
-
-//   // const spinnerStyle = {
-//   //   zIndex: "5"
-//   // }
-
-
-// function checkMediaSize() {
-
-//   }
-
-// function loadingSpinner() {
-//   return (
-//     <>
-//       <div style={spinnerStyle}>
-//         <p>Please wait while media is loading...</p>
-//       </div>
-//     </>
-//   )
-// }

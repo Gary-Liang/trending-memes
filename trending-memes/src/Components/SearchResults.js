@@ -118,15 +118,47 @@ function getMediaLink(data) {
   }
 }
 
+function getHeightLink(data) {
+  if (data.link) {
+    if (data.link.includes("/a/")) {
+      return data.images[0].height;
+    } else {
+      return data.height;
+    }
+  }
+}
+
+function getWidthLink(data) {
+  if (data.link) {
+    if (data.link.includes("/a/")) {
+      return data.images[0].width;
+    } else {
+      return data.width;
+    }
+  }
+}
+
+function getAlbumLink(data) {
+  if (data.images_count > 1) {
+    return data.images_count;
+  } else {
+    return 1;
+  }
+}
+
+function getAlbumData(data) {
+  if (data.images_count > 1) {
+    return data.id;
+  } else {
+    return null;
+  }
+}
+
 // data.id is album hash link
 function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
-  if (data.images_count > 1) {
-    setMediaInfo({dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: data.height, width: data.width});
-    setAlbumInfo({album: data.id, albumLength: data.images_count});
-  } else {
-    setMediaInfo({dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: data.height, width: data.width});
-    setAlbumInfo({album: null, albumLength: 1});
-  }
+    setMediaInfo({dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)});
+    setAlbumInfo({album: getAlbumData(data), albumLength: getAlbumLink(data)});
+
 }
 
   return (
