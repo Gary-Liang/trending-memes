@@ -10,6 +10,9 @@ import re
 import hashlib
 from dotenv import load_dotenv
 from time import time 
+import ast
+import redis
+import pymongo
 
 # Load variables from .env file (not in version control)
 load_dotenv()
@@ -19,9 +22,16 @@ CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('SECRET_KEY')
 SESSION_SECRET_KEY= os.getenv('SESSION_SECRET_KEY')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
+TOKEN_EXPIRATION_TIME = os.getenv('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
+FIRST_TIME_LAUNCHED = ast.literal_eval(os.getenv('FIRST_TIME_LAUNCH'))
+EXPIRATION = 3600
+
+# 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
+# cache 
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -78,20 +88,73 @@ app = Flask(__name__)
 
 # First landing page
 @app.route('/', methods=['GET'])
-def authsamplecall():
+def launch():
+
+    app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
     
+    # first, check if expiration time on token has expired 
+    if (FIRST_TIME_LAUNCHED): 
+        # if the user manual process has been done to authenticate the application, we can go ahead
+        # and validate if access token has expired. 
+        validate_access_token()
+        return redirect(url_for('.search'))
+    else: 
+        imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+        # Construct authorization url from the base auth url:
+        authorization_url, state = imgur.authorization_url(
+            url=authorization_base_url)
+            # consider specific parameters from imgur
+            # response_type=RESPONSE_TYPE)
 
-    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
-    # Construct authorization url from the base auth url:
-    authorization_url, state = imgur.authorization_url(
-        url=authorization_base_url)
-        # consider specific parameters from imgur
-        #response_type=RESPONSE_TYPE)
+        app.logger.info('authorization url:  ' + authorization_url)
+        app.logger.info('state: ' + state)
+        session['oauth_state'] = state
 
-    app.logger.info('authorization url:  ' + authorization_url)
-    app.logger.info('state: ' + state)
-    session['oauth_state'] = state
+
+    # Update the FIRST_TIME_LAUNCHED value in the .env file
+    with open("../../../.env", "r") as file:
+        content = file.readlines()
+        
+    with open("../../../.env", "w") as file:
+        for line in content:
+            if "FIRST_TIME_LAUNCH" in line:
+                file.write(f"FIRST_TIME_LAUNCH={True}\n")
+            else:
+                file.write(line)
+
     return redirect(authorization_url)
+
+
+
+def validate_access_token():
+    if (float(time()) >= float(TOKEN_EXPIRATION_TIME)):
+        automatic_refresh()
+
+
+def store_session_cache(session):
+    # expiration is a field variable
+    redis_client.set('session', session, ex=EXPIRATION)
+
+def get_session_cache(): 
+    session = redis_client.get('session')
+    if (session is None):
+        generate_session_cache()
+
+
+def generate_session_cache():
+        imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+        # Construct authorization url from the base auth url:
+        authorization_url, state = imgur.authorization_url(
+            url=authorization_base_url)
+            # consider specific parameters from imgur
+            # response_type=RESPONSE_TYPE)
+
+        app.logger.info('authorization url:  ' + authorization_url)
+        app.logger.info('state: ' + state)
+        session['oauth_state'] = state
+
+
+
 
 
 @app.route('/json2')
@@ -110,6 +173,15 @@ def callback():
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
     session['oauth_token'] = token
+    session['refresh_token'] = token['refresh_token']
+
+
+    # store session and token in redis db 
+    store_session_cache(session)
+    app.logger.info('session[oauth_state]: ' + session['oauth_state'])
+    app.logger.info('session[oauth_token]: ' + session['oauth_token'])
+    app.logger.info('session[refresh_token]: ' + session['refresh_token']) 
+
     return redirect(url_for('.search'))
 
 
@@ -139,6 +211,25 @@ def automatic_refresh():
     
     def token_updater(token):
         session['oauth_token'] = token
+
+    
+    os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
+    token_expiration_time = token['expires_at']
+
+
+    # Update the values in the .env file
+    with open("../../../.env", "r") as file:
+        content = file.readlines()
+        
+    with open("../../../.env", "w") as file:
+        for line in content:
+            if "TOKEN_EXPIRATION_TIME" in line:
+                file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
+            elif "SESSION_SECRET_KEY" in line:
+                file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+            else:
+                file.write(line)
+
 
     imgur = OAuth2Session(client_id=CLIENT_ID, token=token, auto_refresh_kwargs=extra, auto_refresh_url=refresh_url, token_updater=token_updater)
     return jsonify(session['oauth_token'])
