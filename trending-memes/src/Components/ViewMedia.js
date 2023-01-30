@@ -233,7 +233,10 @@ const copyToClipboardButton = {
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
   opacity: "0.9",
-  backgroundColor: "rgba(0, 0, 0, .1)"
+  backgroundColor: "rgba(0, 0, 0, .1)",
+  outline: "none",
+  pointerEvents: "none",
+  border: "none"
 }
 
 const arrowLeftButton = {
@@ -304,12 +307,14 @@ const mediaPopupDisplay = {
 // }
 
 function mediaResizing() {
+  let adjustedWidth = 0;
   let styles = {};
-  console.log('current width value: ' + currentMediaWidth);
   if (currentMediaWidth > breakpoint) {
+    adjustedWidth = (currentMediaWidth * .60).toString();
+    console.log('current width value: ' + adjustedWidth);
     styles= {  
               height: "100%",
-              width: "60%",
+              width: adjustedWidth,
               top: "0",
               left: "0",
               right: "0",
