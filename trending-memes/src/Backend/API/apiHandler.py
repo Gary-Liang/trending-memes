@@ -94,6 +94,8 @@ def launch():
     
     # first, check if expiration time on token has expired 
     if (FIRST_TIME_LAUNCHED): 
+        # re-load .env file to dynamically get updated data
+        load_dotenv()
         # if the user manual process has been done to authenticate the application, we can go ahead
         # and validate if access token has expired. 
         validate_access_token()
@@ -111,61 +113,85 @@ def launch():
         session['oauth_state'] = state
 
 
-    # Update the FIRST_TIME_LAUNCHED value in the .env file
-    with open("../../../.env", "r") as file:
-        content = file.readlines()
-        
-    with open("../../../.env", "w") as file:
-        for line in content:
-            if "FIRST_TIME_LAUNCH" in line:
-                file.write(f"FIRST_TIME_LAUNCH={True}\n")
-            else:
-                file.write(line)
+        # Update the FIRST_TIME_LAUNCHED value in the .env file
+        with open("../../../.env", "r") as file:
+            content = file.readlines()
+            
+        with open("../../../.env", "w") as file:
+            for line in content:
+                if "FIRST_TIME_LAUNCH" in line:
+                    file.write(f"FIRST_TIME_LAUNCH={True}\n")
+                else:
+                    file.write(line)
 
-    return redirect(authorization_url)
-
+        return redirect(authorization_url)
 
 
 def validate_access_token():
     if (float(time()) >= float(TOKEN_EXPIRATION_TIME)):
+        app.logger.info('condition statement triggered.')
         automatic_refresh()
 
 
-def store_session_cache(session):
+def set_session_cache(session):
     # expiration is a field variable
-    redis_client.set('session', session, ex=EXPIRATION)
+    redis_client.set('oauth_state', session['oauth_state'], ex=EXPIRATION)
+    redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=EXPIRATION)
+    redis_client.set('refresh_token', json.dumps(session['refresh_token']), ex=None)
 
 def get_session_cache(): 
-    session = redis_client.get('session')
-    if (session is None):
-        generate_session_cache()
+    session['oauth_state'] = redis_client.get('oauth_state')
+    session['oauth_token'] = json.loads(redis_client.get('oauth_token'))
+    session['refresh_token'] = json.loads(redis_client.get('refresh_token'))
+    # if (session is None):
+    #     session = generate_session_cache()
+    return session
 
 
 def generate_session_cache():
-        imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
-        # Construct authorization url from the base auth url:
-        authorization_url, state = imgur.authorization_url(
-            url=authorization_base_url)
-            # consider specific parameters from imgur
-            # response_type=RESPONSE_TYPE)
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+        url=authorization_base_url)
+        # consider specific parameters from imgur
+        # response_type=RESPONSE_TYPE)
 
-        app.logger.info('authorization url:  ' + authorization_url)
-        app.logger.info('state: ' + state)
-        session['oauth_state'] = state
+    app.logger.info('authorization url:  ' + authorization_url)
+    app.logger.info('state: ' + state)
+    session['oauth_state'] = state
+
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
+    session['oauth_token'] = token
+    session['refresh_token'] = token['refresh_token']
+
+    return session
+
+def reload_env_vars():
+    load_dotenv()
+    # client id and client secret
+    global CLIENT_ID; CLIENT_ID = os.getenv('CLIENT_ID')
+    global CLIENT_SECRET; CLIENT_SECRET = os.getenv('SECRET_KEY')
+    SESSION_SECRET_KEY= os.getenv('SESSION_SECRET_KEY')
+    REDIRECT_URI = os.getenv('REDIRECT_URI')
+    TOKEN_EXPIRATION_TIME = os.getenv('TOKEN_EXPIRATION_TIME')
+    RESPONSE_TYPE = 'code'
+    # optional parameter for authorization field
+    APPLICATION_STATE = 'TEST'
+    FIRST_TIME_LAUNCHED = ast.literal_eval(os.getenv('FIRST_TIME_LAUNCH'))
+    EXPIRATION = 3600
 
 
 
 
-
-@app.route('/json2')
-def members_two():
-    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-    app.logger.info(SITE_ROOT)
-    json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA_2.json")
-    # Load json from a file 
-    json_data = json.load(open(json_url))
-    # returns the json data, serialized 
-    return json.dumps(json_data)
+# @app.route('/json2')
+# def members_two():
+#     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+#     app.logger.info(SITE_ROOT)
+#     json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA_2.json")
+#     # Load json from a file 
+#     json_data = json.load(open(json_url))
+#     # returns the json data, serialized 
+#     return json.dumps(json_data)
 
 # Callback
 @app.route('/oauth/callback/', methods=['GET'])
@@ -177,10 +203,23 @@ def callback():
 
 
     # store session and token in redis db 
-    store_session_cache(session)
+    set_session_cache(session)
     app.logger.info('session[oauth_state]: ' + session['oauth_state'])
-    app.logger.info('session[oauth_token]: ' + session['oauth_token'])
-    app.logger.info('session[refresh_token]: ' + session['refresh_token']) 
+    app.logger.info('session[oauth_token]: ' + json.dumps(session['oauth_token']))
+    app.logger.info('session[refresh_token]: ' + json.dumps(session['refresh_token'])) 
+
+        # Update the values in the .env file
+    with open("../../../.env", "r") as file:
+        content = file.readlines()
+        
+    with open("../../../.env", "w") as file:
+        for line in content:
+            if "TOKEN_EXPIRATION_TIME" in line:
+                file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
+            elif "SESSION_SECRET_KEY" in line:
+                file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+            else:
+                file.write(line)
 
     return redirect(url_for('.search'))
 
@@ -200,9 +239,10 @@ def all_album_image_links(album_hash_info):
     
 @app.route('/automatic_refresh', methods=['GET'])
 def automatic_refresh():
+    app.logger.info('Called automatic refresh function.')
     token = session['oauth_token']
 
-    token['expires_at'] = time() - 10
+    token['expires_at'] = time() + 3600
 
     extra = {
         'client_id': CLIENT_ID,
@@ -213,7 +253,7 @@ def automatic_refresh():
         session['oauth_token'] = token
 
     
-    os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
+    # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
     token_expiration_time = token['expires_at']
 
 
@@ -229,7 +269,6 @@ def automatic_refresh():
                 file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
             else:
                 file.write(line)
-
 
     imgur = OAuth2Session(client_id=CLIENT_ID, token=token, auto_refresh_kwargs=extra, auto_refresh_url=refresh_url, token_updater=token_updater)
     return jsonify(session['oauth_token'])
