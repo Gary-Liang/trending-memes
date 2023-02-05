@@ -232,7 +232,7 @@ const copyToClipboardButton = {
   backgroundPosition: "center",
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
-  opacity: "0.9",
+  opacity: "0.99",
   backgroundColor: "rgba(0, 0, 0, .1)",
   outline: "none",
   pointerEvents: "none",
@@ -307,14 +307,20 @@ const mediaPopupDisplay = {
 // }
 
 function mediaResizing() {
+  let windowWidth = window.innerWidth;
+  console.log('window width: ' + windowWidth)
   let adjustedWidth = 0;
   let styles = {};
   if (currentMediaWidth > breakpoint) {
-    adjustedWidth = (currentMediaWidth * .60).toString();
+    if (currentMediaWidth > windowWidth) {
+      console.log('current media width > windowwidth condition triggered. ');
+      currentMediaWidth = windowWidth;
+    }
+    adjustedWidth = (currentMediaWidth * .85).toString();
     console.log('current width value: ' + adjustedWidth);
     styles= {  
               height: "100%",
-              width: adjustedWidth,
+              width:  adjustedWidth + "px",
               top: "0",
               left: "0",
               right: "0",
@@ -347,7 +353,7 @@ function videoResizing() {
   if (currentMediaWidth > breakpoint) {
     styles= {  
                 height: "100%",
-                width: "60%",
+                width: "75%",
                 left: "0",
                 top: "0",
                 position: "absolute",

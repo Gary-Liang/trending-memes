@@ -15,18 +15,18 @@ import redis
 import pymongo
 
 # Load variables from .env file (not in version control)
-load_dotenv()
+load_dotenv('../../../.env')
 
 # client id and client secret
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('SECRET_KEY')
-SESSION_SECRET_KEY= os.getenv('SESSION_SECRET_KEY')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
-TOKEN_EXPIRATION_TIME = os.getenv('TOKEN_EXPIRATION_TIME')
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('SECRET_KEY')
+SESSION_SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
+REDIRECT_URI = os.environ.get('REDIRECT_URI')
+TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
-FIRST_TIME_LAUNCHED = ast.literal_eval(os.getenv('FIRST_TIME_LAUNCH'))
+FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
 EXPIRATION = 3600
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
@@ -90,12 +90,13 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def launch():
 
+    # re-load .env file to dynamically get updated data
+    reload_env_vars()
+
     app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
     
     # first, check if expiration time on token has expired 
     if (FIRST_TIME_LAUNCHED): 
-        # re-load .env file to dynamically get updated data
-        load_dotenv()
         # if the user manual process has been done to authenticate the application, we can go ahead
         # and validate if access token has expired. 
         validate_access_token()
@@ -131,20 +132,22 @@ def validate_access_token():
     if (float(time()) >= float(TOKEN_EXPIRATION_TIME)):
         app.logger.info('condition statement triggered.')
         automatic_refresh()
+    else: 
+        app.logger.info('condition statement not triggered.')
 
 
 def set_session_cache(session):
     # expiration is a field variable
-    redis_client.set('oauth_state', session['oauth_state'], ex=EXPIRATION)
+    redis_client.set('oauth_state', session['oauth_state'], ex=None)
     redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=EXPIRATION)
     redis_client.set('refresh_token', json.dumps(session['refresh_token']), ex=None)
 
 def get_session_cache(): 
     session['oauth_state'] = redis_client.get('oauth_state')
-    session['oauth_token'] = json.loads(redis_client.get('oauth_token'))
-    session['refresh_token'] = json.loads(redis_client.get('refresh_token'))
-    # if (session is None):
-    #     session = generate_session_cache()
+    if (redis_client.get('oauth_token') is not None):
+        app.logger.info('triggered condition for getting oauth_token')
+        session['oauth_token'] = redis_client.get('oauth_token')
+    session['refresh_token'] = redis_client.get('refresh_token')
     return session
 
 
@@ -167,17 +170,34 @@ def generate_session_cache():
     return session
 
 def reload_env_vars():
-    load_dotenv()
-    # client id and client secret
-    global CLIENT_ID; CLIENT_ID = os.getenv('CLIENT_ID')
-    global CLIENT_SECRET; CLIENT_SECRET = os.getenv('SECRET_KEY')
-    SESSION_SECRET_KEY= os.getenv('SESSION_SECRET_KEY')
-    REDIRECT_URI = os.getenv('REDIRECT_URI')
-    TOKEN_EXPIRATION_TIME = os.getenv('TOKEN_EXPIRATION_TIME')
-    RESPONSE_TYPE = 'code'
-    # optional parameter for authorization field
-    APPLICATION_STATE = 'TEST'
-    FIRST_TIME_LAUNCHED = ast.literal_eval(os.getenv('FIRST_TIME_LAUNCH'))
+    # Read environment variables from .env file
+    with open("../../../.env") as f:
+        for line in f:
+            line_parts = line.strip().split("=")
+            if len(line_parts) == 2:
+                key, value = line_parts
+                app.logger.info(key + " " + value)
+                os.environ[key] = value
+
+    global CLIENT_ID
+    CLIENT_ID = os.environ.get('CLIENT_ID')
+
+    global CLIENT_SECRET
+    CLIENT_SECRET = os.environ.get('SECRET_KEY')
+
+    global SESSION_SECRET_KEY
+    SESSION_SECRET_KEY = os.environ.get('SESSION_SECRET_KEY')
+
+    global REDIRECT_URI
+    REDIRECT_URI = os.environ.get('REDIRECT_URI')
+
+    global TOKEN_EXPIRATION_TIME
+    TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
+
+    global FIRST_TIME_LAUNCHED
+    FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
+
+    global EXPIRATION
     EXPIRATION = 3600
 
 
@@ -240,7 +260,9 @@ def all_album_image_links(album_hash_info):
 @app.route('/automatic_refresh', methods=['GET'])
 def automatic_refresh():
     app.logger.info('Called automatic refresh function.')
+    session = get_session_cache()
     token = session['oauth_token']
+    print(session)
 
     token['expires_at'] = time() + 3600
 
