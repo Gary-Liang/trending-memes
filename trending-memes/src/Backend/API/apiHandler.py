@@ -105,7 +105,8 @@ def launch():
         imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
         # Construct authorization url from the base auth url:
         authorization_url, state = imgur.authorization_url(
-            url=authorization_base_url)
+            url=authorization_base_url, access_type='offline',
+            include_granted_scopes='true')
             # consider specific parameters from imgur
             # response_type=RESPONSE_TYPE)
 
@@ -138,12 +139,13 @@ def validate_access_token():
 
 def set_session_cache(session):
     # expiration is a field variable
-    redis_client.set('oauth_state', session['oauth_state'], ex=None)
+    redis_client.set('oauth_state', session['oauth_state'], ex=EXPIRATION)
     redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=EXPIRATION)
     redis_client.set('refresh_token', json.dumps(session['refresh_token']), ex=None)
 
 def get_session_cache(): 
-    session['oauth_state'] = redis_client.get('oauth_state')
+    if (redis_client.get('oauth_state') is not None):
+        session['oauth_state'] = redis_client.get('oauth_state')
     if (redis_client.get('oauth_token') is not None):
         app.logger.info('triggered condition for getting oauth_token')
         session['oauth_token'] = redis_client.get('oauth_token')
@@ -165,7 +167,7 @@ def generate_session_cache():
 
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
     session['oauth_token'] = token
-    session['refresh_token'] = token['refresh_token']
+    # session['refresh_token'] = token['refresh_token']
 
     return session
 
@@ -236,8 +238,8 @@ def callback():
         for line in content:
             if "TOKEN_EXPIRATION_TIME" in line:
                 file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
-            elif "SESSION_SECRET_KEY" in line:
-                file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+            # elif "SESSION_SECRET_KEY" in line:
+            #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
             else:
                 file.write(line)
 
@@ -257,14 +259,16 @@ def all_album_image_links(album_hash_info):
     return jsonify(imgur.get('https://api.imgur.com/3/album/' + album_hash_info + '/images').json())
 
     
-@app.route('/automatic_refresh', methods=['GET'])
+@app.route('/automatic_refresh', methods=['POST'])
 def automatic_refresh():
     app.logger.info('Called automatic refresh function.')
     session = get_session_cache()
-    token = session['oauth_token']
-    print(session)
+    # token = session['oauth_token']
+    refresh_token = session['refresh_token']
+    app.logger.info("refresh token: " + str(refresh_token))
 
-    token['expires_at'] = time() + 3600
+    # token['expires_at'] = time() + 3600
+    new_expiration_time = time() + 3600
 
     extra = {
         'client_id': CLIENT_ID,
@@ -276,10 +280,17 @@ def automatic_refresh():
 
     
     # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
-    token_expiration_time = token['expires_at']
+    token_expiration_time = new_expiration_time
+
+    imgur = OAuth2Session(client_id=CLIENT_ID, token={"refresh_token": refresh_token})
+    new_tokens = imgur.refresh_token(refresh_url, client_secret=CLIENT_SECRET)
+    session['oauth_state'] = imgur.state
+    session['oauth_token'] = new_tokens['access_token']
+    session['refresh_token'] = new_tokens['refresh_token']
+    set_session_cache(session)
 
 
-    # Update the values in the .env file
+        # Update the values in the .env file
     with open("../../../.env", "r") as file:
         content = file.readlines()
         
@@ -287,12 +298,11 @@ def automatic_refresh():
         for line in content:
             if "TOKEN_EXPIRATION_TIME" in line:
                 file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
-            elif "SESSION_SECRET_KEY" in line:
-                file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+            # elif "SESSION_SECRET_KEY" in line:
+            #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
             else:
                 file.write(line)
 
-    imgur = OAuth2Session(client_id=CLIENT_ID, token=token, auto_refresh_kwargs=extra, auto_refresh_url=refresh_url, token_updater=token_updater)
     return jsonify(session['oauth_token'])
 
 @app.route('/validate', methods=['GET'])
