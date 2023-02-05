@@ -1,7 +1,4 @@
 import React, {useState} from 'react'
-import SearchResults from './SearchResults';
-
-
 
 
 export default function SearchBar({setQuery}) {
@@ -11,10 +8,13 @@ export default function SearchBar({setQuery}) {
   // }
 
   return (
-    <div style={styleDiv}>
+    <>
+      <div style={styleDiv}>
           {/*input type matters for e.target.value or else it will return an undefined object  */}
           <input type="string" placeholder="Search Here!" style={styleSearch} onChange={e => setQuery(e.target.value)}/>
-    </div>
+      </div>
+      <button className='searchButton' style={styleSearchButton}>O</button>
+    </>
   );
 }
 
@@ -28,9 +28,17 @@ const styleSearch = {
 const styleDiv = {
   alignItems: 'center',
   display: 'flex',
+  flexDirection: 'row',
   justifyContent: 'center',
   marginBottom: '15px'
 
+}
+
+const styleSearchButton = {
+  alignItems: 'right',
+  display: 'flex',
+  justifyContent: 'right',
+  // marginBottom: '15px',
 }
 
 
