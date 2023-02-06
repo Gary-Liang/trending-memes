@@ -12,8 +12,8 @@ export default function SearchBar({setQuery}) {
       <div style={styleDiv}>
           {/*input type matters for e.target.value or else it will return an undefined object  */}
           <input type="string" placeholder="Search Here!" style={styleSearch} onChange={e => setQuery(e.target.value)}/>
+          <button className='searchButton' style={styleSearchButton}>Q</button>
       </div>
-      <button className='searchButton' style={styleSearchButton}>O</button>
     </>
   );
 }
@@ -35,10 +35,12 @@ const styleDiv = {
 }
 
 const styleSearchButton = {
-  alignItems: 'right',
+  // alignItems: 'right',
   display: 'flex',
-  justifyContent: 'right',
+  // justifyContent: 'right',
   // marginBottom: '15px',
+  marginLeft: '10px',
+  padding: '10px'
 }
 
 

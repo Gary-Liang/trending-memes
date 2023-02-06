@@ -248,24 +248,56 @@ def callback():
 
 @app.route('/search', methods=['GET'])
 def search():
-    imgur = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
-    
+    imgur = None
+    oauth_token = None
+    refresh_token = None
+
+    if (session['oauth_token'] is not None):
+        # session['oauth_token'] can be a dict or a str
+        if (type(session['oauth_token']) == dict):
+            oauth_token = session['oauth_token'].get('access_token')
+        else:
+            oauth_token = session['oauth_token']
+        imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+    elif (session['refresh_token'] is not None):
+        imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+    else:
+        return "Error: Both oauth_token and refresh_token are missing"
+
     return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_filter + '/' + page_filter).json())
 
 
 @app.route('/all_album_image_links/<string:album_hash_info>', methods=['GET'])
 def all_album_image_links(album_hash_info):
-    imgur = OAuth2Session(CLIENT_ID, token=session['oauth_token'])
+    imgur = None
+    oauth_token = None
+    refresh_token = None
+
+    if (session['oauth_token'] is not None):
+        # session['oauth_token'] can be a dict or a str
+        if (type(session['oauth_token']) == dict):
+            oauth_token = session['oauth_token'].get('access_token')
+        else:
+            oauth_token = session['oauth_token']
+        imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+    elif (session['refresh_token'] is not None):
+        imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+    else:
+        return "Error: Both oauth_token and refresh_token are missing"
+
     return jsonify(imgur.get('https://api.imgur.com/3/album/' + album_hash_info + '/images').json())
 
     
-@app.route('/automatic_refresh', methods=['POST'])
+@app.route('/automatic_refresh', methods=['GET, POST'])
 def automatic_refresh():
     app.logger.info('Called automatic refresh function.')
     session = get_session_cache()
     # token = session['oauth_token']
     refresh_token = session['refresh_token']
+    str_refresh_token = str(refresh_token, 'utf-8').replace('"', '')
+
     app.logger.info("refresh token: " + str(refresh_token))
+    print("refresh_token " + str_refresh_token)
 
     # token['expires_at'] = time() + 3600
     new_expiration_time = time() + 3600
@@ -280,13 +312,36 @@ def automatic_refresh():
 
     
     # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
-    token_expiration_time = new_expiration_time
+    # token_expiration_time = new_expiration_time
+    app.logger.info("decoded refresh token: " + str_refresh_token)
 
-    imgur = OAuth2Session(client_id=CLIENT_ID, token={"refresh_token": refresh_token})
-    new_tokens = imgur.refresh_token(refresh_url, client_secret=CLIENT_SECRET)
-    session['oauth_state'] = imgur.state
-    session['oauth_token'] = new_tokens['access_token']
-    session['refresh_token'] = new_tokens['refresh_token']
+    params = {
+        "grant_type": "refresh_token",
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "refresh_token": str_refresh_token
+    }
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    imgur = OAuth2Session(client_id=CLIENT_ID)
+    # For some reason, imgur.refresh_tokens function is not working as it mentions I 
+    # need the access token. Temporarily replacing this with a post call to get json response in the meantime
+    response_json = imgur.post(refresh_url, data=params, headers=headers).json()
+
+    app.logger.info(response_json)
+
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+    url=authorization_base_url, access_type='offline',
+    include_granted_scopes='true')
+
+    session['oauth_state'] = state
+    session['oauth_token'] = response_json['access_token']
+    session['refresh_token'] = response_json['refresh_token']
+    token_expiration_time = response_json['expires_in']
     set_session_cache(session)
 
 
@@ -303,7 +358,7 @@ def automatic_refresh():
             else:
                 file.write(line)
 
-    return jsonify(session['oauth_token'])
+    return jsonify(session)
 
 @app.route('/validate', methods=['GET'])
 def validate():
