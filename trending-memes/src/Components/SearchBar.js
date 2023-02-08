@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useRef, useState} from 'react'
 
 
 export default function SearchBar({setQuery}) {
@@ -7,12 +7,27 @@ export default function SearchBar({setQuery}) {
   //   setQuery(e.target.value);
   // }
 
+  const inputRef = useRef();
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      setQuery(inputRef.current.value);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Don't forget to clean up
+    return function cleanup() {
+      document.removeEventListener('keydown', handleKeyDown);
+    } 
+  };
+
   return (
     <>
       <div style={styleDiv}>
           {/*input type matters for e.target.value or else it will return an undefined object  */}
-          <input type="string" placeholder="Search Here!" style={styleSearch} onChange={e => setQuery(e.target.value)}/>
-          <button className='searchButton' style={styleSearchButton}>Q</button>
+          <input type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown}/>
+          <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}>Q</button>
       </div>
     </>
   );
@@ -40,7 +55,9 @@ const styleSearchButton = {
   // justifyContent: 'right',
   // marginBottom: '15px',
   marginLeft: '10px',
-  padding: '10px'
+  padding: '10px',
+  WebkitAppearance: 'none',
+  border: '0'
 }
 
 

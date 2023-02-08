@@ -10,7 +10,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo}) {
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
-    fetch('/search').then(
+    fetch(`/search?q=${query}`).then(
       // Promise
       res => res.json()
     ).then(
@@ -19,7 +19,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo}) {
         console.log(JSON.parse(JSON.stringify(data)).data.items)
       }
     ) 
-  }, [])  // render once
+  }, [query])  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   const divStyle = {
     color: 'black',
