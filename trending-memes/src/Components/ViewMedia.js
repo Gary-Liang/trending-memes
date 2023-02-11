@@ -134,7 +134,11 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   }
 
   function copyMediaToClipboard() {
-    navigator.clipboard.writeText(currentMediaLink)
+    if (currentMediaLink) {
+      navigator.clipboard.writeText(currentMediaLink)
+    } else {
+      console.error("currentMediaLink is not defined or null")
+    }
   }
 
   function renderFullMedia(data) {
@@ -161,12 +165,14 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
           currentMediaHeight = mediaInfo.height;
           return (
             <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
+              {console.log(data.link)}
               <source src={mediaURL} type="video/mp4"/>
             </video>
           )
         } else {
           mediaURL += data.images[0].type.split("/")[1];
           currentMediaLink = mediaURL
+          {console.log(data.link)}
           console.log("data info" + data);
           console.log("width at first function: " + mediaInfo.width);
           currentMediaWidth = mediaInfo.width;
@@ -185,6 +191,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         currentMediaHeight = mediaInfo.height;
         return (
           <>
+            {console.log(data.link)}
             <img key={data.link} style={mediaResizing()} src={data.link} alt=""/>
           </>
         )
@@ -235,7 +242,6 @@ const copyToClipboardButton = {
   opacity: "0.99",
   backgroundColor: "rgba(0, 0, 0, .1)",
   outline: "none",
-  pointerEvents: "none",
   border: "none"
 }
 
