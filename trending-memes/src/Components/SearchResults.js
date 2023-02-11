@@ -168,7 +168,7 @@ function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
     <>
       { <div className='mediaBox' style={divStyle}>
         {
-          data.filter(data => {
+          (data ? data.filter(data => {
               if (query === "") {
                   // if query is empty
                   return data;
@@ -186,7 +186,7 @@ function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
                   {renderMediaPreview(data)}
                 </div> : null
 
-          ))
+          )) : null)
         }
       </div>}
     </>

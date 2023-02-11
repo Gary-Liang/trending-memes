@@ -10,7 +10,7 @@ export default function SearchBar({setQuery}) {
   const inputRef = useRef();
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && inputRef.current) {
       event.preventDefault();
       setQuery(inputRef.current.value);
     }
