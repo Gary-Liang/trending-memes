@@ -1,0 +1,1 @@
+web: cd ../Scripts && python ../API/apihandler.py
