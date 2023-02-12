@@ -1,1 +1,1 @@
-web: python apihandler.py
+web: cd ../Scripts && python ../API/apihandler.py
