@@ -1,6 +1,6 @@
 {
   "name": "trending-memes",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "proxy": "http://localhost:5000",
   "dependencies": {
     "cacheable-request": "^10.2.7",
