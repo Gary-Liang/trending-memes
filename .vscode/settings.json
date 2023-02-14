@@ -1,6 +1,6 @@
 {
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.defaultInterpreterPath": "${env:PYTHON_PATH}",
-    "_comment_": "Read from env var. if .env file is not available, default python path is ./trending-memes/src/Backend/bin/python or ./trending-memes/src/Backend/Scripts/python.exe",
+    "_comment_": "Read from env var. if .env file is not available, default python path is ./trending-memes/Backend/bin/python or ./trending-memes/Backend/Scripts/python.exe",
     "python.analysis.typeCheckingMode": "basic",
 }

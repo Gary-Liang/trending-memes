@@ -17,7 +17,7 @@ import redis
 import pymongo
 
 # Load variables from .env file (not in version control)
-load_dotenv('../../../.env')
+load_dotenv('../../.env')
 
 # client id and client secret
 CLIENT_ID = os.environ.get('CLIENT_ID')
@@ -28,7 +28,7 @@ TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
-FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
+FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 EXPIRATION = 3600
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
@@ -121,10 +121,10 @@ def launch():
 
 
         # Update the FIRST_TIME_LAUNCHED value in the .env file
-        with open("../../../.env", "r") as file:
+        with open("../../.env", "r") as file:
             content = file.readlines()
             
-        with open("../../../.env", "w") as file:
+        with open("../../.env", "w") as file:
             for line in content:
                 if "FIRST_TIME_LAUNCH" in line:
                     file.write(f"FIRST_TIME_LAUNCH={True}\n")
@@ -183,7 +183,7 @@ def generate_session_cache():
 
 def reload_env_vars():
     # Read environment variables from .env file
-    with open("../../../.env") as f:
+    with open("../../.env") as f:
         for line in f:
             line_parts = line.strip().split("=")
             if len(line_parts) == 2:
@@ -241,10 +241,10 @@ def callback():
     app.logger.info('session[refresh_token]: ' + json.dumps(session['refresh_token'])) 
 
         # Update the values in the .env file
-    with open("../../../.env", "r") as file:
+    with open("../../.env", "r") as file:
         content = file.readlines()
         
-    with open("../../../.env", "w") as file:
+    with open("../../.env", "w") as file:
         for line in content:
             if "TOKEN_EXPIRATION_TIME" in line:
                 file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
@@ -361,10 +361,10 @@ def automatic_refresh():
 
 
         # Update the values in the .env file
-    with open("../../../.env", "r") as file:
+    with open("../../.env", "r") as file:
         content = file.readlines()
         
-    with open("../../../.env", "w") as file:
+    with open("../../.env", "w") as file:
         for line in content:
             if "TOKEN_EXPIRATION_TIME" in line:
                 file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
