@@ -4,6 +4,8 @@ from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from logging.config import dictConfig
+from flask.helpers import send_from_directory
+from flask_cors import CORS, cross_origin
 import os
 import base64
 import re
@@ -85,10 +87,12 @@ dictConfig({
     }
 })
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='trending-memes/build', static_url_path='')
+CORS(app)
 
 # First landing page
 @app.route('/', methods=['GET'])
+@cross_origin()
 def launch():
 
     # re-load .env file to dynamically get updated data
@@ -128,6 +132,11 @@ def launch():
                     file.write(line)
 
         return redirect(authorization_url)
+
+@app.route('/serve')
+@cross_origin
+def serve():
+    return send_from_directory(app.static_folder, 'apihandler.html')
 
 
 def validate_access_token():
@@ -382,4 +391,4 @@ if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
     app.config['SECRET_KEY'] = SESSION_SECRET_KEY
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=False)
