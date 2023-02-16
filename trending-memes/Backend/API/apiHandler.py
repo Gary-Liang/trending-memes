@@ -30,10 +30,11 @@ RESPONSE_TYPE = 'code'
 APPLICATION_STATE = 'TEST'
 FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 EXPIRATION = 3600
+REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
+redis_client = redis.Redis(host=REDIS_HOST, port=6379, db=0)
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -87,7 +88,7 @@ dictConfig({
     }
 })
 
-app = Flask(__name__, static_folder='trending-memes/build', static_url_path='')
+app = Flask(__name__, static_folder='trending-memes/backend/build', static_url_path='')
 CORS(app)
 
 # First landing page
