@@ -90,9 +90,7 @@ dictConfig({
 
 def create_app():
     app = Flask(__name__, static_folder='trending-memes/backend/build', static_url_path='')
-    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-    app.config['SECRET_KEY'] = SESSION_SECRET_KEY
-    app.run(port=5000, debug=False)
+    app.config.from_object('config.ProductionConfig')
     return app
 
 app = create_app()
@@ -395,8 +393,12 @@ def validate():
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
     
-    # Plain HTTP callback
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
-    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-    app.config['SECRET_KEY'] = SESSION_SECRET_KEY
+    # # Plain HTTP callback
+    # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
+    # app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+    # app.config['SECRET_KEY'] = SESSION_SECRET_KEY
+
+    # development build
     app.run(port=5000, debug=False)
+# else: 
+#     app = create_app()
