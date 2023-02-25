@@ -282,7 +282,7 @@ def search():
             session['oauth_token'] = redis_client.get('oauth_token')
             imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
         elif (redis_client.get('refresh_token') is not None):
-            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": redis_client.get('refresh_token')})
     else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
