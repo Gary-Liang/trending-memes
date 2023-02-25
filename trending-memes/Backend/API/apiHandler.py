@@ -277,7 +277,13 @@ def search():
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    else:
+    elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
+        if (redis_client.get('oauth_token') is not None):
+            session['oauth_token'] = redis_client.get('oauth_token')
+            imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+        elif (redis_client.get('refresh_token') is not None):
+            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+    else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
     query = request.args.get('q')
@@ -294,16 +300,22 @@ def all_album_image_links(album_hash_info):
     oauth_token = None
     refresh_token = None
 
-    if (session['oauth_token'] is not None):
+    if (session.get('oauth_token') is not None):
         # session['oauth_token'] can be a dict or a str
         if (type(session['oauth_token']) == dict):
             oauth_token = session['oauth_token'].get('access_token')
         else:
             oauth_token = session['oauth_token']
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-    elif (session['refresh_token'] is not None):
+    elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    else:
+    elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
+        if (redis_client.get('oauth_token') is not None):
+            session['oauth_token'] = redis_client.get('oauth_token')
+            imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+        elif (redis_client.get('refresh_token') is not None):
+            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+    else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
     return jsonify(imgur.get('https://api.imgur.com/3/album/' + album_hash_info + '/images').json())
@@ -394,7 +406,7 @@ def validate():
 if __name__ == '__main__':
     
     # # Plain HTTP callback
-    # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
     # app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
     # app.config['SECRET_KEY'] = SESSION_SECRET_KEY
 
