@@ -327,10 +327,10 @@ def automatic_refresh():
     session = get_session_cache()
     # token = session['oauth_token']
     refresh_token = session['refresh_token']
-    str_refresh_token = str(refresh_token, 'utf-8').replace('"', '')
+    # str_refresh_token = str(refresh_token, 'utf-8').replace('"', '')
 
     app.logger.info("refresh token: " + str(refresh_token))
-    print("refresh_token " + str_refresh_token)
+    # print("refresh_token " + str_refresh_token)
 
     # token['expires_at'] = time() + 3600
     new_expiration_time = time() + 3600
@@ -346,13 +346,13 @@ def automatic_refresh():
     
     # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
     # token_expiration_time = new_expiration_time
-    app.logger.info("decoded refresh token: " + str_refresh_token)
+    # app.logger.info("decoded refresh token: " + str_refresh_token)
 
     params = {
         "grant_type": "refresh_token",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
-        "refresh_token": str_refresh_token
+       # "refresh_token": str_refresh_token
     }
 
     headers = {
