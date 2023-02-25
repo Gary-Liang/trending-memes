@@ -88,7 +88,14 @@ dictConfig({
     }
 })
 
-app = Flask(__name__, static_folder='trending-memes/backend/build', static_url_path='')
+def create_app():
+    app = Flask(__name__, static_folder='trending-memes/backend/build', static_url_path='')
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+    app.config['SECRET_KEY'] = SESSION_SECRET_KEY
+    app.run(port=5000, debug=False)
+    return app
+
+app = create_app()
 CORS(app)
 
 # First landing page
