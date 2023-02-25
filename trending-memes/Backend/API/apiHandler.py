@@ -352,7 +352,7 @@ def automatic_refresh():
         "grant_type": "refresh_token",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
-       # "refresh_token": str_refresh_token
+        "refresh_token": refresh_token
     }
 
     headers = {
