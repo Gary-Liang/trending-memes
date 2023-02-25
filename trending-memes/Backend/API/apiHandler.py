@@ -165,7 +165,7 @@ def get_session_cache():
     if (redis_client.get('oauth_token') is not None):
         app.logger.info('triggered condition for getting oauth_token')
         session['oauth_token'] = redis_client.get('oauth_token')
-    session['refresh_token'] = redis_client.get('refresh_token')
+        session['refresh_token'] = redis_client.get('refresh_token')
     return session
 
 
@@ -268,14 +268,14 @@ def search():
     oauth_token = None
     refresh_token = None
 
-    if (session['oauth_token'] is not None):
+    if (session.get('oauth_token') is not None):
         # session['oauth_token'] can be a dict or a str
         if (type(session['oauth_token']) == dict):
             oauth_token = session['oauth_token'].get('access_token')
         else:
             oauth_token = session['oauth_token']
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-    elif (session['refresh_token'] is not None):
+    elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
     else:
         return "Error: Both oauth_token and refresh_token are missing"
