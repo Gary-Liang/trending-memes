@@ -1,7 +1,7 @@
 {
   "name": "trending-memes",
   "version": "1.0.0",
-  "proxy": "https://trending-memess.onrender.com",
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "cacheable-request": "^10.2.7",
     "got": "^12.5.3",

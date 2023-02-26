@@ -6,6 +6,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 from logging.config import dictConfig
 from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
+from flask.sessions import SecureCookieSession
 import os
 import base64
 import re
@@ -24,11 +25,11 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SECRET_KEY')
 SESSION_SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
-TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
+# TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
-FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
+# FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 EXPIRATION = 3600
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 
@@ -89,7 +90,7 @@ dictConfig({
 })
 
 def create_app():
-    app = Flask(__name__, static_folder='trending-memes/backend/build', static_url_path='')
+    app = Flask(__name__, static_folder='trending-memes/Backend/build', static_url_path='')
     app.config.from_object('config.ProductionConfig')
     return app
 
@@ -102,9 +103,15 @@ CORS(app)
 def launch():
 
     # re-load .env file to dynamically get updated data
-    reload_env_vars()
+    # reload_env_vars()
+
+    FIRST_TIME_LAUNCHED = redis_client.get("first_time_launched") 
+
+    if (type(FIRST_TIME_LAUNCHED) is bytes): 
+        FIRST_TIME_LAUNCHED = eval(FIRST_TIME_LAUNCHED.decode("utf-8"))
 
     app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
+    print('type of bool status: ', type(FIRST_TIME_LAUNCHED))
     
     # first, check if expiration time on token has expired 
     if (FIRST_TIME_LAUNCHED): 
@@ -127,15 +134,18 @@ def launch():
 
 
         # Update the FIRST_TIME_LAUNCHED value in the .env file
-        with open("../../.env", "r") as file:
-            content = file.readlines()
+        # with open("../../.env", "r") as file:
+        #     content = file.readlines()
             
-        with open("../../.env", "w") as file:
-            for line in content:
-                if "FIRST_TIME_LAUNCH" in line:
-                    file.write(f"FIRST_TIME_LAUNCH={True}\n")
-                else:
-                    file.write(line)
+        # with open("../../.env", "w") as file:
+        #     for line in content:
+        #         if "FIRST_TIME_LAUNCH" in line:
+        #             file.write(f"FIRST_TIME_LAUNCH={True}\n")
+        #         else:
+        #             file.write(line)
+
+        redis_client.set("first_time_launched", "True")
+        FIRST_TIME_LAUNCHED = True
 
         return redirect(authorization_url)
 
@@ -146,26 +156,56 @@ def serve():
 
 
 def validate_access_token():
-    if (float(time()) >= float(TOKEN_EXPIRATION_TIME)):
-        app.logger.info('condition statement triggered.')
-        automatic_refresh()
+    expires_at = session.get('expires_at')
+    if (type(expires_at) is bytes):
+        expires_at = expires_at.decode('utf-8')
+        if (float(time()) >= float(expires_at)):
+            app.logger.info('condition statement triggered.')
+            automatic_refresh()
+        else: 
+            app.logger.info('condition statement not triggered.')
     else: 
-        app.logger.info('condition statement not triggered.')
+        app.logger.info('non-existing expiration')
 
 
 def set_session_cache(session):
     # expiration is a field variable
-    redis_client.set('oauth_state', session['oauth_state'], ex=EXPIRATION)
-    redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=EXPIRATION)
+    app.logger.info('expires in:', float(session['expires_in']))
+    redis_client.set('oauth_state', session['oauth_state'], ex=float(session['expires_in']))
+    redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=float(session['expires_in']))
     redis_client.set('refresh_token', json.dumps(session['refresh_token']), ex=None)
 
 def get_session_cache(): 
     if (redis_client.get('oauth_state') is not None):
-        session['oauth_state'] = redis_client.get('oauth_state')
+        oauth_state = redis_client.get('oauth_state')
+        if (type(oauth_state) is bytes):
+            app.logger.info("executed decode for oauth_state")
+            session['oauth_state'] = oauth_state.decode('utf-8')
+        else: 
+            # may not actually execute
+            app.logger.info("type of oauth_state" + str(type(oauth_state)))
+            session['oauth_state'] = oauth_state
     if (redis_client.get('oauth_token') is not None):
         app.logger.info('triggered condition for getting oauth_token')
-        session['oauth_token'] = redis_client.get('oauth_token')
-        session['refresh_token'] = redis_client.get('refresh_token')
+        oauth_token = redis_client.get('oauth_token')
+        if (type(oauth_token) is bytes):
+            app.logger.info("executed decode for oauth_token")
+            session['oauth_token'] = oauth_token.decode('utf-8')
+        else: 
+            # may not actually execute
+            app.logger.info("type of oauth_token" + str(type(oauth_token)))
+            session['oauth_token'] = oauth_token
+
+        refresh_token = redis_client.get('refresh_token')
+        if (type(refresh_token) is bytes):
+            app.logger.info("executed decode for refresh_token")
+            session['refresh_token'] = refresh_token.decode('utf-8')
+        else: 
+            # may not actually execute
+            app.logger.info("type of refresh_token" + str(type(refresh_token)))
+            session['refresh_token'] = refresh_token
+
+    print('flow did not get executed')
     return session
 
 
@@ -187,36 +227,36 @@ def generate_session_cache():
 
     return session
 
-def reload_env_vars():
-    # Read environment variables from .env file
-    with open("../../.env") as f:
-        for line in f:
-            line_parts = line.strip().split("=")
-            if len(line_parts) == 2:
-                key, value = line_parts
-                app.logger.info(key + " " + value)
-                os.environ[key] = value
+# def reload_env_vars():
+#     # Read environment variables from .env file
+#     with open("../../.env") as f:
+#         for line in f:
+#             line_parts = line.strip().split("=")
+#             if len(line_parts) == 2:
+#                 key, value = line_parts
+#                 app.logger.info(key + " " + value)
+#                 os.environ[key] = value
 
-    global CLIENT_ID
-    CLIENT_ID = os.environ.get('CLIENT_ID')
+#     global CLIENT_ID
+#     CLIENT_ID = os.environ.get('CLIENT_ID')
 
-    global CLIENT_SECRET
-    CLIENT_SECRET = os.environ.get('SECRET_KEY')
+#     global CLIENT_SECRET
+#     CLIENT_SECRET = os.environ.get('SECRET_KEY')
 
-    global SESSION_SECRET_KEY
-    SESSION_SECRET_KEY = os.environ.get('SESSION_SECRET_KEY')
+#     global SESSION_SECRET_KEY
+#     SESSION_SECRET_KEY = os.environ.get('SESSION_SECRET_KEY')
 
-    global REDIRECT_URI
-    REDIRECT_URI = os.environ.get('REDIRECT_URI')
+#     global REDIRECT_URI
+#     REDIRECT_URI = os.environ.get('REDIRECT_URI')
 
-    global TOKEN_EXPIRATION_TIME
-    TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
+#     global TOKEN_EXPIRATION_TIME
+#     TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 
-    global FIRST_TIME_LAUNCHED
-    FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
+#     global FIRST_TIME_LAUNCHED
+#     FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
 
-    global EXPIRATION
-    EXPIRATION = 3600
+#     global EXPIRATION
+#     EXPIRATION = 3600
 
 
 
@@ -240,6 +280,7 @@ def callback():
     session['refresh_token'] = token['refresh_token']
 
 
+    print('full session info:' + str(session))
     # store session and token in redis db 
     set_session_cache(session)
     app.logger.info('session[oauth_state]: ' + session['oauth_state'])
@@ -247,17 +288,19 @@ def callback():
     app.logger.info('session[refresh_token]: ' + json.dumps(session['refresh_token'])) 
 
         # Update the values in the .env file
-    with open("../../.env", "r") as file:
-        content = file.readlines()
+    # with open("../../.env", "r") as file:
+    #     content = file.readlines()
         
-    with open("../../.env", "w") as file:
-        for line in content:
-            if "TOKEN_EXPIRATION_TIME" in line:
-                file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
-            # elif "SESSION_SECRET_KEY" in line:
-            #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-            else:
-                file.write(line)
+    # with open("../../.env", "w") as file:
+    #     for line in content:
+    #         if "TOKEN_EXPIRATION_TIME" in line:
+    #             file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
+    #         # elif "SESSION_SECRET_KEY" in line:
+    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+    #         else:
+    #             file.write(line)
+
+    redis_client.set('token_expiration', session['expires_at'])
 
     return redirect(url_for('.search'))
 
@@ -268,6 +311,8 @@ def search():
     oauth_token = None
     refresh_token = None
 
+    session = get_session_cache()
+
     if (session.get('oauth_token') is not None):
         # session['oauth_token'] can be a dict or a str
         if (type(session['oauth_token']) == dict):
@@ -277,12 +322,12 @@ def search():
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
-        if (redis_client.get('oauth_token') is not None):
-            session['oauth_token'] = redis_client.get('oauth_token')
-            imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-        elif (redis_client.get('refresh_token') is not None):
-            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": redis_client.get('refresh_token')})
+    # elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
+    #     if (redis_client.get('oauth_token') is not None):
+    #         session['oauth_token'] = redis_client.get('oauth_token')
+    #         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+    #     elif (redis_client.get('refresh_token') is not None):
+    #         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": redis_client.get('refresh_token')})
     else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
@@ -300,6 +345,8 @@ def all_album_image_links(album_hash_info):
     oauth_token = None
     refresh_token = None
 
+    session = get_session_cache()
+
     if (session.get('oauth_token') is not None):
         # session['oauth_token'] can be a dict or a str
         if (type(session['oauth_token']) == dict):
@@ -309,12 +356,12 @@ def all_album_image_links(album_hash_info):
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
-        if (redis_client.get('oauth_token') is not None):
-            session['oauth_token'] = redis_client.get('oauth_token')
-            imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-        elif (redis_client.get('refresh_token') is not None):
-            imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
+    # elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
+    #     if (redis_client.get('oauth_token') is not None):
+    #         session = get_session_cache()
+    #         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+    #     elif (redis_client.get('refresh_token') is not None):
+    #         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
     else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
@@ -374,22 +421,22 @@ def automatic_refresh():
     session['oauth_state'] = state
     session['oauth_token'] = response_json['access_token']
     session['refresh_token'] = response_json['refresh_token']
-    token_expiration_time = response_json['expires_in']
+    session['expires_at'] = response_json['expires_at']
     set_session_cache(session)
 
 
-        # Update the values in the .env file
-    with open("../../.env", "r") as file:
-        content = file.readlines()
+    #     # Update the values in the .env file
+    # with open("../../.env", "r") as file:
+    #     content = file.readlines()
         
-    with open("../../.env", "w") as file:
-        for line in content:
-            if "TOKEN_EXPIRATION_TIME" in line:
-                file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
-            # elif "SESSION_SECRET_KEY" in line:
-            #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-            else:
-                file.write(line)
+    # with open("../../.env", "w") as file:
+    #     for line in content:
+    #         if "TOKEN_EXPIRATION_TIME" in line:
+    #             file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
+    #         # elif "SESSION_SECRET_KEY" in line:
+    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
+    #         else:
+    #             file.write(line)
 
     return jsonify(session)
 
