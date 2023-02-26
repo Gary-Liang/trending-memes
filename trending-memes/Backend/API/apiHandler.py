@@ -53,12 +53,12 @@ refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 
 # code verifiers: Secure random strings. Used to create a code challenge.
-code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8")
+code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").strip('\"')
 code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
 
 # code challenge - base64 encoded string, SHA256
 code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
-code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8")
+code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
 code_challenge = code_challenge.replace("=", "")
 
 """
@@ -108,7 +108,7 @@ def launch():
     FIRST_TIME_LAUNCHED = redis_client.get("first_time_launched") 
 
     if (type(FIRST_TIME_LAUNCHED) is bytes): 
-        FIRST_TIME_LAUNCHED = eval(FIRST_TIME_LAUNCHED.decode("utf-8"))
+        FIRST_TIME_LAUNCHED = eval(FIRST_TIME_LAUNCHED.decode("utf-8").strip('\"'))
 
     app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
     print('type of bool status: ', type(FIRST_TIME_LAUNCHED))
@@ -156,9 +156,9 @@ def serve():
 
 
 def validate_access_token():
-    expires_at = session.get('expires_at')
+    expires_at = redis_client.get('expires_at')
     if (type(expires_at) is bytes):
-        expires_at = expires_at.decode('utf-8')
+        expires_at = expires_at.decode('utf-8').strip('\"')
         if (float(time()) >= float(expires_at)):
             app.logger.info('condition statement triggered.')
             automatic_refresh()
@@ -170,17 +170,19 @@ def validate_access_token():
 
 def set_session_cache(session):
     # expiration is a field variable
-    app.logger.info('expires in:', float(session['expires_in']))
-    redis_client.set('oauth_state', session['oauth_state'], ex=float(session['expires_in']))
-    redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=float(session['expires_in']))
-    redis_client.set('refresh_token', json.dumps(session['refresh_token']), ex=None)
+    expires_in = session.get('oauth_token').get('expires_in')
+    app.logger.info('expires in: ' + str(int(expires_in)))
+    redis_client.set('oauth_state', session['oauth_state'], ex=int(expires_in))
+    redis_client.set('oauth_token', json.dumps(session['oauth_token']), ex=int(expires_in))
+    redis_client.set('refresh_token', session['refresh_token'], ex=None)
+    redis_client.set('expires_at', int(session['oauth_token'].get('expires_at')), ex=int(expires_in))
 
 def get_session_cache(): 
     if (redis_client.get('oauth_state') is not None):
         oauth_state = redis_client.get('oauth_state')
         if (type(oauth_state) is bytes):
-            app.logger.info("executed decode for oauth_state")
-            session['oauth_state'] = oauth_state.decode('utf-8')
+            app.logger.info("executed decode for oauth_state " + oauth_state.decode('utf-8').strip('\"'))
+            session['oauth_state'] = oauth_state.decode('utf-8').strip('\"')
         else: 
             # may not actually execute
             app.logger.info("type of oauth_state" + str(type(oauth_state)))
@@ -189,8 +191,8 @@ def get_session_cache():
         app.logger.info('triggered condition for getting oauth_token')
         oauth_token = redis_client.get('oauth_token')
         if (type(oauth_token) is bytes):
-            app.logger.info("executed decode for oauth_token")
-            session['oauth_token'] = oauth_token.decode('utf-8')
+            app.logger.info("executed decode for oauth_token " + oauth_token.decode('utf-8').strip('\"'))
+            session['oauth_token'] = json.loads(oauth_token.decode('utf-8').strip('\"'))
         else: 
             # may not actually execute
             app.logger.info("type of oauth_token" + str(type(oauth_token)))
@@ -198,14 +200,14 @@ def get_session_cache():
 
         refresh_token = redis_client.get('refresh_token')
         if (type(refresh_token) is bytes):
-            app.logger.info("executed decode for refresh_token")
-            session['refresh_token'] = refresh_token.decode('utf-8')
+            app.logger.info("executed decode for refresh_token " + refresh_token.decode('utf-8').strip('\"'))
+            session['refresh_token'] = refresh_token.decode('utf-8').strip('\"')
         else: 
             # may not actually execute
             app.logger.info("type of refresh_token" + str(type(refresh_token)))
             session['refresh_token'] = refresh_token
 
-    print('flow did not get executed')
+    print('return statement before session executed')
     return session
 
 
@@ -300,7 +302,7 @@ def callback():
     #         else:
     #             file.write(line)
 
-    redis_client.set('token_expiration', session['expires_at'])
+    redis_client.set('expires_at', session['oauth_token']['expires_at'])
 
     return redirect(url_for('.search'))
 
@@ -316,10 +318,10 @@ def search():
     if (session.get('oauth_token') is not None):
         # session['oauth_token'] can be a dict or a str
         if (type(session['oauth_token']) == dict):
-            oauth_token = session['oauth_token'].get('access_token')
+            oauth_token = session['oauth_token']
         else:
             oauth_token = session['oauth_token']
-        imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
+        imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token.get('access_token')})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
     # elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
@@ -419,9 +421,9 @@ def automatic_refresh():
     include_granted_scopes='true')
 
     session['oauth_state'] = state
-    session['oauth_token'] = response_json['access_token']
+    session['oauth_token'] = response_json['oauth_token']
     session['refresh_token'] = response_json['refresh_token']
-    session['expires_at'] = response_json['expires_at']
+    # session['expires_at'] = response_json['oauth_token']['expires_in']
     set_session_cache(session)
 
 
