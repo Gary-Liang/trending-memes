@@ -60,6 +60,7 @@ code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
 code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
 code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
 code_challenge = code_challenge.replace("=", "")
+print(code_challenge)
 
 """
     You need a client id and a client secret to get an access token from the API.
@@ -95,11 +96,9 @@ def create_app():
     return app
 
 app = create_app()
-CORS(app)
 
 # First landing page
 @app.route('/', methods=['GET'])
-@cross_origin()
 def launch():
 
     # re-load .env file to dynamically get updated data
