@@ -91,7 +91,7 @@ dictConfig({
 })
 
 def create_app():
-    app = Flask(__name__, static_folder='trending-memes/Backend/build', static_url_path='')
+    app = Flask(__name__)
     app.config.from_object('config.ProductionConfig')
     return app
 
