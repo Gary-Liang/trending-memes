@@ -148,11 +148,6 @@ def launch():
 
         return redirect(authorization_url)
 
-@app.route('/serve')
-@cross_origin
-def serve():
-    return send_from_directory(app.static_folder, 'apihandler.html')
-
 
 def validate_access_token():
     expires_at = redis_client.get('expires_at')
@@ -449,16 +444,24 @@ def validate():
     return jsonify(requests.get(validate_url).json())
 
 
+@app.errorhandler(404) 
+def invalid_route(e): 
+    return "Invalid route."
+
+
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
 if __name__ == '__main__':
     
     # # Plain HTTP callback
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
+    # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "0"
     # app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
     # app.config['SECRET_KEY'] = SESSION_SECRET_KEY
 
+    # enable HTTPS, cert.pem and key.pem not in version control
+    context = ('cert.pem', 'key.pem')
+
     # development build
-    app.run(port=5000, debug=False)
+    app.run(port=5000, debug=False, ssl_context=context)
 # else: 
 #     app = create_app()
