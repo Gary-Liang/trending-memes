@@ -16,6 +16,7 @@ from time import time
 import ast
 import redis
 import pymongo
+from waitress import serve
 
 # Load variables from .env file (not in version control)
 load_dotenv('../../.env')
@@ -96,6 +97,7 @@ def create_app():
     return app
 
 app = create_app()
+serve(app, url_scheme='https')
 
 # First landing page
 @app.route('/', methods=['GET'])
@@ -462,6 +464,7 @@ if __name__ == '__main__':
     context = ('cert.pem', 'key.pem')
 
     # development build
-    app.run(port=5000, debug=False, ssl_context=context)
+    # app.run(port=5000, debug=False, ssl_context=context)
+    serve(app, host='0.0.0.0', port=5000, url_scheme='https')
 # else: 
 #     app = create_app()
