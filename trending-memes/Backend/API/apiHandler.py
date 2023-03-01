@@ -97,7 +97,7 @@ def create_app():
     return app
 
 app = create_app()
-serve(app, url_scheme='https')
+# serve(app, url_scheme='https')
 
 # First landing page
 @app.route('/', methods=['GET'])
@@ -272,6 +272,7 @@ def generate_session_cache():
 # Callback
 @app.route('/callback', methods=['GET'])
 def callback():
+    print(session)
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
     session['oauth_token'] = token
@@ -464,7 +465,7 @@ if __name__ == '__main__':
     context = ('cert.pem', 'key.pem')
 
     # development build
-    # app.run(port=5000, debug=False, ssl_context=context)
-    serve(app, host='0.0.0.0', port=5000, url_scheme='https')
+    app.run(port=5000, debug=False, ssl_context=context)
+    # serve(app, host='0.0.0.0', port=5000, url_scheme='https')
 # else: 
 #     app = create_app()
