@@ -97,7 +97,7 @@ def create_app():
     return app
 
 app = create_app()
-serve(app, url_scheme='https')
+
 
 # First landing page
 @app.route('/', methods=['GET'])
@@ -453,7 +453,7 @@ def invalid_route(e):
 
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
 # HTTPS (Hypertext Transfer Protocol Secure) is a secure version of the HTTP protocol as it adds an extra layer of encryption, authentication, and integrity via the SSL/TLS protocol
-# if __name__ == '__main__':
+if __name__ == '__main__':
     
     # # Plain HTTP callback
     # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "0"
@@ -461,10 +461,10 @@ def invalid_route(e):
     # app.config['SECRET_KEY'] = SESSION_SECRET_KEY
 
     # enable HTTPS, cert.pem and key.pem not in version control
-    # context = ('cert.pem', 'key.pem')
+    context = ('cert.pem', 'key.pem')
 
     # development build
     # app.run(port=5000, debug=False, ssl_context=context)
-    # serve(app, host='0.0.0.0', port=5000, url_scheme='https')
+    serve(app, host='0.0.0.0', port=5000, url_scheme='https')
 # else: 
 #     app = create_app()
