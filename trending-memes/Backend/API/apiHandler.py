@@ -272,8 +272,8 @@ def generate_session_cache():
 # Callback
 @app.route('/callback', methods=['GET'])
 def callback():
-    print("session" + jsonify(session))
-    app.logger.info('session: ' + session)
+    print("session", jsonify(session))
+    app.logger.info('session: ', session)
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
     session['oauth_token'] = token
