@@ -5,3 +5,4 @@ class ProductionConfig(object):
     TESTING = False
     JSONIFY_PRETTYPRINT_REGULAR = True
     SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
+    # SSL_CONTEXT=('cert.pem', 'key.pem')
