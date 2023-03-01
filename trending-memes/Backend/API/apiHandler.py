@@ -97,7 +97,7 @@ def create_app():
     return app
 
 app = create_app()
-
+serve(app, url_scheme='https')
 
 # First landing page
 @app.route('/', methods=['GET'])
