@@ -1,7 +1,7 @@
 {
   "name": "trending-memes",
   "version": "1.0.0",
-  "proxy": "https://tm-back.onrender.com/",
+  "proxy": "https://tm-back.onrender.com",
   "homepage": "https://trending-memes.onrender.com",
   "dependencies": {
     "cacheable-request": "^10.2.7",
