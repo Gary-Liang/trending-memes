@@ -164,6 +164,38 @@ def validate_access_token():
         app.logger.info('non-existing expiration')
 
 
+app.route('/authenticate', methods=['GET'])
+def authenticate():
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+    url=authorization_base_url, access_type='offline',
+    include_granted_scopes='true')
+    # consider specific parameters from imgur
+    # response_type=RESPONSE_TYPE)
+
+    app.logger.info('authorization url:  ' + authorization_url)
+    app.logger.info('state: ' + state)
+    session['oauth_state'] = state
+
+
+    # Update the FIRST_TIME_LAUNCHED value in the .env file
+    # with open("../../.env", "r") as file:
+    #     content = file.readlines()
+            
+    # with open("../../.env", "w") as file:
+    #     for line in content:
+    #         if "FIRST_TIME_LAUNCH" in line:
+    #             file.write(f"FIRST_TIME_LAUNCH={True}\n")
+    #         else:
+    #             file.write(line)
+
+    redis_client.set("first_time_launched", "True")
+    FIRST_TIME_LAUNCHED = True
+
+    return redirect(authorization_url)
+
+
 def set_session_cache(session):
     # expiration is a field variable
     expires_in = session.get('oauth_token').get('expires_in')
