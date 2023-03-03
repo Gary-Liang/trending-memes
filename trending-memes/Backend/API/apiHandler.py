@@ -257,18 +257,6 @@ def generate_session_cache():
 #     EXPIRATION = 3600
 
 
-
-
-# @app.route('/json2')
-# def members_two():
-#     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-#     app.logger.info(SITE_ROOT)
-#     json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA_2.json")
-#     # Load json from a file 
-#     json_data = json.load(open(json_url))
-#     # returns the json data, serialized 
-#     return json.dumps(json_data)
-
 # Callback
 @app.route('/callback', methods=['GET'])
 def callback():
@@ -286,19 +274,6 @@ def callback():
     app.logger.info('session[oauth_state]: ' + session['oauth_state'])
     app.logger.info('session[oauth_token]: ' + json.dumps(session['oauth_token']))
     app.logger.info('session[refresh_token]: ' + json.dumps(session['refresh_token'])) 
-
-        # Update the values in the .env file
-    # with open("../../.env", "r") as file:
-    #     content = file.readlines()
-        
-    # with open("../../.env", "w") as file:
-    #     for line in content:
-    #         if "TOKEN_EXPIRATION_TIME" in line:
-    #             file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
-    #         # elif "SESSION_SECRET_KEY" in line:
-    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-    #         else:
-    #             file.write(line)
 
     redis_client.set('expires_at', session['oauth_token']['expires_at'])
 
@@ -390,11 +365,6 @@ def automatic_refresh():
     def token_updater(token):
         session['oauth_token'] = token
 
-    
-    # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
-    # token_expiration_time = new_expiration_time
-    # app.logger.info("decoded refresh token: " + str_refresh_token)
-
     params = {
         "grant_type": "refresh_token",
         "client_id": CLIENT_ID,
@@ -423,20 +393,6 @@ def automatic_refresh():
     session['refresh_token'] = response_json['refresh_token']
     # session['expires_at'] = response_json['oauth_token']['expires_in']
     set_session_cache(session)
-
-
-    #     # Update the values in the .env file
-    # with open("../../.env", "r") as file:
-    #     content = file.readlines()
-        
-    # with open("../../.env", "w") as file:
-    #     for line in content:
-    #         if "TOKEN_EXPIRATION_TIME" in line:
-    #             file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
-    #         # elif "SESSION_SECRET_KEY" in line:
-    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-    #         else:
-    #             file.write(line)
 
     return jsonify(session)
 
