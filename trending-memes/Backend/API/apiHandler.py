@@ -36,7 +36,7 @@ REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host=REDIS_HOST, port=6379, db=0)
+redis_client = redis.Redis(host=REDIS_HOST, password='sr5i2vbgXUUTIDpXKn5T', port=5591, health_check_interval=30)
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -164,6 +164,38 @@ def validate_access_token():
         app.logger.info('non-existing expiration')
 
 
+@app.route('/authenticate', methods=['GET'])
+def authenticate():
+    imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
+    # Construct authorization url from the base auth url:
+    authorization_url, state = imgur.authorization_url(
+    url=authorization_base_url, access_type='offline',
+    include_granted_scopes='true')
+    # consider specific parameters from imgur
+    # response_type=RESPONSE_TYPE)
+
+    app.logger.info('authorization url:  ' + authorization_url)
+    app.logger.info('state: ' + state)
+    session['oauth_state'] = state
+
+
+    # Update the FIRST_TIME_LAUNCHED value in the .env file
+    # with open("../../.env", "r") as file:
+    #     content = file.readlines()
+            
+    # with open("../../.env", "w") as file:
+    #     for line in content:
+    #         if "FIRST_TIME_LAUNCH" in line:
+    #             file.write(f"FIRST_TIME_LAUNCH={True}\n")
+    #         else:
+    #             file.write(line)
+
+    redis_client.set("first_time_launched", "True")
+    # FIRST_TIME_LAUNCHED = True
+
+    return redirect(authorization_url)
+
+
 def set_session_cache(session):
     # expiration is a field variable
     expires_in = session.get('oauth_token').get('expires_in')
@@ -257,24 +289,16 @@ def generate_session_cache():
 #     EXPIRATION = 3600
 
 
-
-
-# @app.route('/json2')
-# def members_two():
-#     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-#     app.logger.info(SITE_ROOT)
-#     json_url = os.path.join(SITE_ROOT, "static/data", "MOCK_DATA_2.json")
-#     # Load json from a file 
-#     json_data = json.load(open(json_url))
-#     # returns the json data, serialized 
-#     return json.dumps(json_data)
-
 # Callback
 @app.route('/callback', methods=['GET'])
 def callback():
-    print(session)
+    print("session", jsonify(session))
+    app.logger.info('session: ', session)
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
-    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
+    new_url = request.url
+    if "http:" in new_url:
+        new_url = "https:" + new_url[5:]
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=new_url)
     session['oauth_token'] = token
     session['refresh_token'] = token['refresh_token']
 
@@ -285,19 +309,6 @@ def callback():
     app.logger.info('session[oauth_state]: ' + session['oauth_state'])
     app.logger.info('session[oauth_token]: ' + json.dumps(session['oauth_token']))
     app.logger.info('session[refresh_token]: ' + json.dumps(session['refresh_token'])) 
-
-        # Update the values in the .env file
-    # with open("../../.env", "r") as file:
-    #     content = file.readlines()
-        
-    # with open("../../.env", "w") as file:
-    #     for line in content:
-    #         if "TOKEN_EXPIRATION_TIME" in line:
-    #             file.write(f"TOKEN_EXPIRATION_TIME={time() + 3600}\n")
-    #         # elif "SESSION_SECRET_KEY" in line:
-    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-    #         else:
-    #             file.write(line)
 
     redis_client.set('expires_at', session['oauth_token']['expires_at'])
 
@@ -389,11 +400,6 @@ def automatic_refresh():
     def token_updater(token):
         session['oauth_token'] = token
 
-    
-    # os.environ["TOKEN_EXPIRATION_TIME"] = str(token['expires_at'])
-    # token_expiration_time = new_expiration_time
-    # app.logger.info("decoded refresh token: " + str_refresh_token)
-
     params = {
         "grant_type": "refresh_token",
         "client_id": CLIENT_ID,
@@ -422,20 +428,6 @@ def automatic_refresh():
     session['refresh_token'] = response_json['refresh_token']
     # session['expires_at'] = response_json['oauth_token']['expires_in']
     set_session_cache(session)
-
-
-    #     # Update the values in the .env file
-    # with open("../../.env", "r") as file:
-    #     content = file.readlines()
-        
-    # with open("../../.env", "w") as file:
-    #     for line in content:
-    #         if "TOKEN_EXPIRATION_TIME" in line:
-    #             file.write(f"TOKEN_EXPIRATION_TIME={token_expiration_time}\n")
-    #         # elif "SESSION_SECRET_KEY" in line:
-    #         #     file.write(f"SESSION_SECRET_KEY={code_challenge}\n")
-    #         else:
-    #             file.write(line)
 
     return jsonify(session)
 
