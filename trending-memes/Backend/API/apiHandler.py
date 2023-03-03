@@ -164,7 +164,7 @@ def validate_access_token():
         app.logger.info('non-existing expiration')
 
 
-app.route('/authenticate', methods=['GET'])
+@app.route('/authenticate', methods=['GET'])
 def authenticate():
     imgur = OAuth2Session(client_id=CLIENT_ID, redirect_uri=REDIRECT_URI)
     # Construct authorization url from the base auth url:
@@ -191,7 +191,7 @@ def authenticate():
     #             file.write(line)
 
     redis_client.set("first_time_launched", "True")
-    FIRST_TIME_LAUNCHED = True
+    # FIRST_TIME_LAUNCHED = True
 
     return redirect(authorization_url)
 
