@@ -36,7 +36,7 @@ REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host=REDIS_HOST, port=6379, db=0)
+redis_client = redis.Redis(host=REDIS_HOST, db=0)
 
 headers = {'Connnection' : 'keep-alive'}
 
