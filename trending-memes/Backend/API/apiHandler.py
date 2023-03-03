@@ -36,7 +36,7 @@ REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host=REDIS_HOST, password='sr5i2vbgXUUTIDpXKn5T', port=5591, db=1, health_check_interval=30)
+redis_client = redis.Redis(host=REDIS_HOST, password='sr5i2vbgXUUTIDpXKn5T', port=5591, health_check_interval=30)
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -295,7 +295,10 @@ def callback():
     print("session", jsonify(session))
     app.logger.info('session: ', session)
     imgur = OAuth2Session(CLIENT_ID, state=session['oauth_state'])
-    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
+    new_url = request.url
+    if "http:" in new_url:
+        new_url = "https:" + new_url[5:]
+    token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=new_url)
     session['oauth_token'] = token
     session['refresh_token'] = token['refresh_token']
 
