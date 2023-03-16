@@ -1,25 +1,25 @@
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const fetch = require('node-fetch')
 
-const options = {
-    target: 'https://trending-memes-production.up.railway.app',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/search:' : '/search'
-    }
-
-};
-
-const proxy = createProxyMiddleware(options);
+const API_ENDPOINT = 'https://trending-memes-production.up.railway.app'
 
 exports.handler = async (event, context) => {
-    return new Promise((resolve, reject) => {
-        proxy(event, context, (error) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
+  let response
+  try {
+    response = await fetch(API_ENDPOINT)
+    // handle response
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({
+        error: err.message
+      })
+    }
+  }
 
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      data: response
+    })
+  }
+}
