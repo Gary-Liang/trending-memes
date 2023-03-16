@@ -6,6 +6,7 @@ exports.handler = async (event, context) => {
   let response
   try {
     response = await fetch(API_ENDPOINT)
+    console.log(response)
     // handle response
   } catch (err) {
     return {
