@@ -2,7 +2,7 @@
   "name": "trending-memes",
   "version": "1.0.0",
   "proxy": "https://trending-memes-production.up.railway.app",
-  "homepage": "https://trending-memes.onrender.com",
+  "homepage": "https://trendingmemes.org/",
   "dependencies": {
     "cacheable-request": "^10.2.7",
     "got": "^12.5.3",
