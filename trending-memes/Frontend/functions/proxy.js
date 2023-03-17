@@ -2,7 +2,7 @@ const fetch = require('http-proxy-middleware')
 
 
 const options = {
-    target: 'https://trending-memes-production.up.railway.app',
+    target: 'https://tmback.xyz',
     changeOrigin: true,
     pathRewrite: {
       '^/search': '/search'
