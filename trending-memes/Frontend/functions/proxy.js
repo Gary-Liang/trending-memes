@@ -1,24 +1,21 @@
-const fetch = require('http-proxy-middleware')
+const fetch = require('node-fetch')
 
+const API_ENDPOINT = 'https://tmback.xyz/search'
 
-const options = {
-    target: 'https://tmback.xyz',
-    changeOrigin: true,
-    pathRewrite: {
-      '^/search': '/search'
-    }
-  };
-  
-  const proxy = createProxyMiddleware(options);
-  
-  exports.handler = async (event, context) => {
-    return new Promise((resolve, reject) => {
-      proxy(event, context, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
-    });
-  };
+exports.handler = async (event, context) => {   let response   
+  try {
+    response = await fetch(API_ENDPOINT)
+    // handle response   
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({
+        error: err.message
+      })
+  }   }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      data: response
+    })   } }
