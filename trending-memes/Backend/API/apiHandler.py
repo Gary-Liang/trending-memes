@@ -112,7 +112,6 @@ def launch():
         FIRST_TIME_LAUNCHED = eval(FIRST_TIME_LAUNCHED.decode("utf-8").strip('\"'))
 
     app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
-    print('type of bool status: ', type(FIRST_TIME_LAUNCHED))
     
     # first, check if expiration time on token has expired 
     if (FIRST_TIME_LAUNCHED): 

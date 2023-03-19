@@ -138,3 +138,6 @@ __pycache__/
 *.ps1
 *.pem
 activate
+
+# Local Netlify folder
+.netlify
