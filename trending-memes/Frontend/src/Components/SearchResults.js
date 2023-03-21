@@ -11,7 +11,8 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
     setLoading(true);
-    fetch(`/search?q=${query}`).then(
+    // fetch(`/search?q=${query}`).then(
+    fetch(`/.netlify/functions/search?q=${query}`).then(  
       // Promise
       res => res.json()
     ).then(
