@@ -1,4 +1,6 @@
 
+const fetch = require('isomorphic-fetch');
+
 const API_ENDPOINT = 'https://trending-memes-production.up.railway.app/search?q=';
 //const API_ENDPOINT = `${RAILWAY_API_ENDPOINT}/search`;
 

@@ -11,7 +11,8 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
     setLoading(true);
-    fetch(`/search?q=${query}`).then(
+    // fetch(`/search?q=${query}`).then(
+    fetch(`/.netlify/functions/search?q=${query}`).then(  
       // Promise
       res => res.json()
     ).then(
@@ -70,13 +71,14 @@ function renderMediaPreview(data) {
   console.log('Rendering.');
   if (data && data.link) {
     if (data.link.includes(".mp4")) {
+      let mediaURL = data.link.replace("http://", "https://");
       return (
         <video key={data.id} style={mediaMaxSize} preload="auto" controls autoPlay muted loop>
-          <source src={data.link} type="video/mp4"/>
+          <source src={mediaURL} type="video/mp4"/>
         </video>
       )
     } else if (data.link.includes("/a/")) {
-      let mediaURL = getMediaLink(data);
+      let mediaURL = getMediaLink(data).replace("http://", "https://");
       //let mediaURL = "http://i.imgur.com/" + data.cover + ".";
       let previewHeaderText = "";
       if (data.images_count > 1)
@@ -102,8 +104,9 @@ function renderMediaPreview(data) {
       }
     } else {
       // if link is just a normal image or a gifv, render it normally. 
+      let mediaURL = data.link.replace("http://", "https://");
       return (
-        <img key={data.link} src={data.link} style={mediaMaxSize} alt=""/>
+        <img key={mediaURL} src={mediaURL} style={mediaMaxSize} alt=""/>
       )
     }
   }

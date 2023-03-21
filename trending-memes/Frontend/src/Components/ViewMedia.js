@@ -5,6 +5,8 @@ import ClipboardImage from '../Images/copyToClipboard.png'
 let currentMediaLink = "";
 let currentMediaWidth = 0;
 let currentMediaHeight = 0;
+let previewHeaderText = "";
+
 let breakpoint = 400;
 
 export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
@@ -12,6 +14,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   const [imageAlbumCount, setImageAlbumCount] = useState(0);
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
+
+  const [mediaLoading, setMediaLoading] = useState(false);
 
   // Use useLayoutEffect for modifying the DOM prior to page rendering
   useLayoutEffect(() => {
@@ -61,7 +65,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       return function cleanup() {
         document.removeEventListener('keydown', handleKeyDown);
       } 
-  }, [albumInfo, imageAlbumCount]);
+  }, [albumInfo, imageAlbumCount, closeViewMediaAndReset, loadNextMediaInAlbum, loadPrevMediaInAlbum]);
 
 
   async function loadNextMediaInAlbum() {
@@ -70,7 +74,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      await fetch('/all_album_image_links/' + albumInfo.album).then(
+      await fetch('/.netlify/functions/album/all_album_image_links/?q=' + `${albumInfo.album}`).then(
+      // await fetch('/all_album_image_links/' + albumInfo.album).then(
           // Promise
           res => res.json()
         ).then(
@@ -103,7 +108,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      fetch('/all_album_image_links/' + albumInfo.album).then(
+      fetch('/.netlify/functions/album/all_album_image_links/?q=' + `${albumInfo.album}`).then(
           // Promise
           res => res.json()
         ).then(
@@ -147,15 +152,15 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         currentMediaLink = data.link
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
+        let mediaURL = data.link.replace("http://", "https://");
         return (
-          <video key={data.link} style={mediaResizing()} preload="auto" controls autoPlay loop>
-            {console.log(data.link)}
-            <source src={data.link} type="video/mp4"/>
+          <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
+            {console.log(mediaURL)}
+            <source src={mediaURL} type="video/mp4"/>
           </video>
         )
       } else if (data.link.includes("/a/")) {
-        let mediaURL = "http://i.imgur.com/" + data.cover + ".";
-        let previewHeaderText = "";
+        let mediaURL = "https://i.imgur.com/" + data.cover + ".";
         if (data.images_count > 1)
           previewHeaderText = "(Meme Album)";
         if (data.images[0].type.includes("mp4")) {
@@ -170,7 +175,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
             </video>
           )
         } else {
-          mediaURL += data.images[0].type.split("/")[1];
+          mediaURL += data.images[0].type.split("/")[1].replace("http://", "https://");
           currentMediaLink = mediaURL
           {console.log(data.link)}
           console.log("data info" + data);
@@ -185,7 +190,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
-        currentMediaLink = data.link
+        currentMediaLink = data.link.replace("http://", "https://");
         console.log("width at first function: " + mediaInfo.width);
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
@@ -351,31 +356,31 @@ function mediaResizing() {
 }
 
 
-function videoResizing() {
-  // let screenWidth = window.innerWidth;
-  // let screenHeight = window.innerHeight;
-  let styles = {};
-  console.log('current width value: ' + currentMediaWidth);
-  if (currentMediaWidth > breakpoint) {
-    styles= {  
-                height: "100%",
-                width: "75%",
-                left: "0",
-                top: "0",
-                position: "absolute",
-    };
-  } else {
-    styles = {  
-                height: "100%",
-                width: "100%",
-                left: "0",
-                top: "0",
-                position: "absolute",
-              };
+// function videoResizing() {
+//   // let screenWidth = window.innerWidth;
+//   // let screenHeight = window.innerHeight;
+//   let styles = {};
+//   console.log('current width value: ' + currentMediaWidth);
+//   if (currentMediaWidth > breakpoint) {
+//     styles= {  
+//                 height: "100%",
+//                 width: "75%",
+//                 left: "0",
+//                 top: "0",
+//                 position: "absolute",
+//     };
+//   } else {
+//     styles = {  
+//                 height: "100%",
+//                 width: "100%",
+//                 left: "0",
+//                 top: "0",
+//                 position: "absolute",
+//               };
 
-  }
-  return styles;
-}
+//   }
+//   return styles;
+// }
 
     return (
         <>
