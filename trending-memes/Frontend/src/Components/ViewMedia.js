@@ -152,14 +152,15 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         currentMediaLink = data.link
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
+        let mediaURL = data.link.replace("http://", "https://");
         return (
-          <video key={data.link} style={mediaResizing()} preload="auto" controls autoPlay loop>
-            {console.log(data.link)}
-            <source src={data.link} type="video/mp4"/>
+          <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
+            {console.log(mediaURL)}
+            <source src={mediaURL} type="video/mp4"/>
           </video>
         )
       } else if (data.link.includes("/a/")) {
-        let mediaURL = "http://i.imgur.com/" + data.cover + ".";
+        let mediaURL = "https://i.imgur.com/" + data.cover + ".";
         if (data.images_count > 1)
           previewHeaderText = "(Meme Album)";
         if (data.images[0].type.includes("mp4")) {
@@ -174,7 +175,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
             </video>
           )
         } else {
-          mediaURL += data.images[0].type.split("/")[1];
+          mediaURL += data.images[0].type.split("/")[1].replace("http://", "https://");
           currentMediaLink = mediaURL
           {console.log(data.link)}
           console.log("data info" + data);
@@ -189,7 +190,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
-        currentMediaLink = data.link
+        currentMediaLink = data.link.replace("http://", "https://");
         console.log("width at first function: " + mediaInfo.width);
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
