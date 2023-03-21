@@ -1,12 +1,12 @@
 {
   "name": "trending-memes",
   "version": "1.0.0",
-  "proxy": "https://tmback.xyz",
   "homepage": "https://trendingmemes.org/",
   "dependencies": {
     "cacheable-request": "^10.2.7",
     "got": "^12.5.3",
     "http-cache-semantics": "^4.1.1",
+    "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^3.3.1",
     "printf": "^0.6.1",
     "react": "^18.2.0",
