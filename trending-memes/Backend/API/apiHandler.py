@@ -33,10 +33,11 @@ APPLICATION_STATE = 'TEST'
 # FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 EXPIRATION = 3600
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
+REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host=REDIS_HOST, password='BcL63ztfDKb1KGbbl6cx', port=5591, health_check_interval=30)
+redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
 
 headers = {'Connnection' : 'keep-alive'}
 
