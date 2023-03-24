@@ -15,6 +15,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
 
+  const [showCopyMessage, setShowCopyMessage] = useState(false);
+
   const [mediaLoading, setMediaLoading] = useState(false);
 
   // Use useLayoutEffect for modifying the DOM prior to page rendering
@@ -74,7 +76,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      await fetch('/.netlify/functions/album/all_album_image_links/?q=' + `${albumInfo.album}`).then(
+      await fetch(`/.netlify/functions/album/all_album_image_links/?q=${albumInfo.album}`).then(
       // await fetch('/all_album_image_links/' + albumInfo.album).then(
           // Promise
           res => res.json()
@@ -108,7 +110,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      fetch('/.netlify/functions/album/all_album_image_links/?q=' + `${albumInfo.album}`).then(
+      fetch(`/.netlify/functions/album/all_album_image_links/?q=${albumInfo.album}`).then(
           // Promise
           res => res.json()
         ).then(
@@ -140,7 +142,12 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
   function copyMediaToClipboard() {
     if (currentMediaLink) {
-      navigator.clipboard.writeText(currentMediaLink)
+      navigator.clipboard.writeText(currentMediaLink);
+      setShowCopyMessage(true);
+
+      setTimeout(() => {
+        setShowCopyMessage(false);
+      }, 2000) // Set to false after 2 seconds 
     } else {
       console.error("currentMediaLink is not defined or null")
     }
@@ -177,7 +184,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         } else {
           mediaURL += data.images[0].type.split("/")[1].replace("http://", "https://");
           currentMediaLink = mediaURL
-          {console.log(data.link)}
+          console.log(data.link)
           console.log("data info" + data);
           console.log("width at first function: " + mediaInfo.width);
           currentMediaWidth = mediaInfo.width;
@@ -245,7 +252,7 @@ const copyToClipboardButton = {
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
   opacity: "0.99",
-  backgroundColor: "rgba(0, 0, 0, .1)",
+  backgroundColor: "transparent",
   outline: "none",
   border: "none"
 }
@@ -293,6 +300,31 @@ const mediaPopupDisplay = {
     background: "rgba(0,0,0, 1)",
     height: "0"
 }
+
+const fadeOut = `
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      display: none;
+    }
+  }
+`;
+
+const copyMessageStyle = {
+  zIndex: "5",
+  position: "fixed",
+  top: "15%",
+  left: "10%",
+  transform: "translate(-50%, -50%)",
+  backgroundColor: "white",
+  border: "0.5px solid black",
+  padding: "10px",
+  borderRadius: "5px",
+  animation: `${fadeOut} 2s forwards`
+};
 
 // const imageResize = {
 //   //TODO: add min and max dimensions here? 
@@ -390,7 +422,10 @@ function mediaResizing() {
                     {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
-                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+                <div className="copyToClipBoardContainer"> 
+                  <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+                  {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
+                </div>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
                     <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>

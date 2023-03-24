@@ -1,5 +1,5 @@
-import React, {useRef, useState} from 'react'
-
+import React, {useRef} from 'react'
+import SearchButton from '../Images/searchButton.png'
 
 export default function SearchBar({setQuery}) {
 
@@ -27,7 +27,7 @@ export default function SearchBar({setQuery}) {
       <div style={styleDiv}>
           {/*input type matters for e.target.value or else it will return an undefined object  */}
           <input type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown}/>
-          <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}>Q</button>
+          <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}></button>
       </div>
     </>
   );
@@ -55,9 +55,16 @@ const styleSearchButton = {
   // justifyContent: 'right',
   // marginBottom: '15px',
   marginLeft: '10px',
-  padding: '10px',
+  padding: '15px',
   WebkitAppearance: 'none',
-  border: '0'
+  border: '0',
+  backgroundImage: "url(" + SearchButton  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  // opacity: "0.99",
+  backgroundColor: "transparent",
+  outline: "none",
 }
 
 
