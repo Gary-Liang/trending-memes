@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoading}) {
+export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoadingScreen}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
@@ -10,9 +10,9 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
  useEffect(() => {
-    setLoading(true);
+  setLoadingScreen(true);
     // fetch(`/search?q=${query}`).then(
-    fetch(`/.netlify/functions/search?q=${query}`).then(  
+    fetch(`/api/search?q=${query}`).then(  
       // Promise
       res => res.json()
     ).then(
@@ -20,10 +20,10 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
         setData(JSON.parse(JSON.stringify(data)).data.items);
         //console.log(JSON.parse(JSON.stringify(data)).data.items);
         console.log(JSON.parse(JSON.stringify(data)));
-        setLoading(false);
+        setLoadingScreen(false);
       }
     ) 
-  }, [query, setLoading])  // by putting query as a dependency here, we render more than once, every time the query changes.
+  }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   const divStyle = {
     color: 'black',

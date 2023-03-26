@@ -73,10 +73,10 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   async function loadNextMediaInAlbum() {
     let updateImageIncrement = imageAlbumCount + 1;
     setImageAlbumCount(imageAlbumCount + 1);
-
+    setMediaLoading(true);
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      await fetch(`/.netlify/functions/album/all_album_image_links/?q=${albumInfo.album}`).then(
+      await fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
       // await fetch('/all_album_image_links/' + albumInfo.album).then(
           // Promise
           res => res.json()
@@ -88,7 +88,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                           mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
                           height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
                           width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
-            console.log("I was here first");
           }
       )
     } else {
@@ -98,19 +97,20 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                       mediaLink: imageAlbumData.data[updateImageIncrement].link, 
                       height: imageAlbumData.data[updateImageIncrement].height,
                       width: imageAlbumData.data[updateImageIncrement].width})
-        console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
       })  
     }
+    setMediaLoading(false);
   
   }
 
   function loadPrevMediaInAlbum() {
     let updateImageIncrement = imageAlbumCount - 1;
     setImageAlbumCount(imageAlbumCount - 1);
+    setMediaLoading(true);
 
     // make a promise and pull imgur album based on album hash 
     if (!imageAlbumData) { 
-      fetch(`/.netlify/functions/album/all_album_image_links/?q=${albumInfo.album}`).then(
+      fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
           // Promise
           res => res.json()
         ).then(
@@ -121,7 +121,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                           mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
                           height: imageAlbumData.data[updateImageIncrement].height,
                           width: imageAlbumData.data[updateImageIncrement].width});
-            console.log("I was here first");
           }
       )
     } else {
@@ -130,8 +129,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
                    mediaLink: imageAlbumData.data[updateImageIncrement].link, 
                    height: imageAlbumData.data[updateImageIncrement].height,
                    width: imageAlbumData.data[updateImageIncrement].width});
-      console.log("rendered here second");
     }
+    setMediaLoading(false);
   }
 
   function closeViewMediaAndReset() {
@@ -209,6 +208,25 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         )
       }
     }
+  }
+
+  function renderLoadIcon() {
+    return (
+      <>
+        <div className='loadIcon' style={loadIconStyle}>
+          Loading ... 
+        </div>
+      </>
+    )
+  }
+
+  const loadIconStyle = {
+    zIndex: "5",
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    color: "white",
+
   }
 
   const overlayDiv = {
@@ -419,7 +437,8 @@ function mediaResizing() {
             {(mediaInfo.isClicked) ? 
               <div className="popup" style={overlayDiv}>
                 <div className="popupMedia" style={mediaPopupDisplay}>
-                    {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
+                    {(mediaLoading) ? renderLoadIcon() : renderFullMedia(mediaInfo.dataInfo)}
+                    {/* {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null} */}
                 </div>
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
                 <div className="copyToClipBoardContainer"> 
