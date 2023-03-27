@@ -82,7 +82,7 @@ function renderMediaPreview(data) {
       //let mediaURL = "http://i.imgur.com/" + data.cover + ".";
       let previewHeaderText = "";
       if (data.images_count > 1)
-        previewHeaderText = "(Meme Album)";
+        previewHeaderText = "(Album Count: " + data.images_count +")";
       if (data.images[0].type.includes("mp4")) {
         //mediaURL += "mp4";
         return (

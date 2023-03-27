@@ -1,11 +1,10 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react'
+import React, {useEffect, useCallback, useLayoutEffect, useState} from 'react'
 import ClipboardImage from '../Images/copyToClipboard.png'
 
 // Global fields 
 let currentMediaLink = "";
 let currentMediaWidth = 0;
 let currentMediaHeight = 0;
-let previewHeaderText = "";
 
 let breakpoint = 400;
 
@@ -32,6 +31,75 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         //document.body.style.minHeight = "auto";
       }
   }, [mediaInfo]);
+
+  const loadNextMediaInAlbum = useCallback(async () => {
+    let updateImageIncrement = imageAlbumCount + 1;
+    setImageAlbumCount(imageAlbumCount + 1);
+    setMediaLoading(true);
+    // make a promise and pull imgur album based on album hash 
+    if (!imageAlbumData) { 
+      await fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
+          // Promise
+          res => res.json()
+        ).then(
+          albumInfoData => {
+            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
+            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
+                          isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
+                          height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
+                          width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
+          }
+      )
+    } else {
+      await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
+        setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+                      isClicked: true,
+                      mediaLink: imageAlbumData.data[updateImageIncrement].link, 
+                      height: imageAlbumData.data[updateImageIncrement].height,
+                      width: imageAlbumData.data[updateImageIncrement].width})
+      })  
+    }
+    setMediaLoading(false);
+  
+  }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
+
+  const loadPrevMediaInAlbum = useCallback(() => {
+    let updateImageIncrement = imageAlbumCount - 1;
+    setImageAlbumCount(imageAlbumCount - 1);
+    setMediaLoading(true);
+
+    // make a promise and pull imgur album based on album hash 
+    if (!imageAlbumData) { 
+      fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
+          // Promise
+          res => res.json()
+        ).then(
+          albumInfoData => {
+            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
+            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
+                          isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
+                          height: imageAlbumData.data[updateImageIncrement].height,
+                          width: imageAlbumData.data[updateImageIncrement].width});
+          }
+      )
+    } else {
+      setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+                   isClicked: true,
+                   mediaLink: imageAlbumData.data[updateImageIncrement].link, 
+                   height: imageAlbumData.data[updateImageIncrement].height,
+                   width: imageAlbumData.data[updateImageIncrement].width});
+    }
+    setMediaLoading(false);
+  }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
+
+  const closeViewMediaAndReset = useCallback(() => {
+    setMediaInfo({dataInfo: null, isClicked: false, mediaLink: null});
+    setImageAlbumCount(0);
+    setImageAlbumData(null);
+  }, [setMediaInfo, setImageAlbumCount, setImageAlbumData]);
+
 
   // Escape key to close view media component
   useEffect(() => {
@@ -69,76 +137,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       } 
   }, [albumInfo, imageAlbumCount, closeViewMediaAndReset, loadNextMediaInAlbum, loadPrevMediaInAlbum]);
 
-
-  async function loadNextMediaInAlbum() {
-    let updateImageIncrement = imageAlbumCount + 1;
-    setImageAlbumCount(imageAlbumCount + 1);
-    setMediaLoading(true);
-    // make a promise and pull imgur album based on album hash 
-    if (!imageAlbumData) { 
-      await fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
-      // await fetch('/all_album_image_links/' + albumInfo.album).then(
-          // Promise
-          res => res.json()
-        ).then(
-          albumInfoData => {
-            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
-            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true,
-                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
-                          height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
-                          width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
-          }
-      )
-    } else {
-      await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
-        setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                      isClicked: true,
-                      mediaLink: imageAlbumData.data[updateImageIncrement].link, 
-                      height: imageAlbumData.data[updateImageIncrement].height,
-                      width: imageAlbumData.data[updateImageIncrement].width})
-      })  
-    }
-    setMediaLoading(false);
-  
-  }
-
-  function loadPrevMediaInAlbum() {
-    let updateImageIncrement = imageAlbumCount - 1;
-    setImageAlbumCount(imageAlbumCount - 1);
-    setMediaLoading(true);
-
-    // make a promise and pull imgur album based on album hash 
-    if (!imageAlbumData) { 
-      fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
-          // Promise
-          res => res.json()
-        ).then(
-          albumInfoData => {
-            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
-            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true,
-                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
-                          height: imageAlbumData.data[updateImageIncrement].height,
-                          width: imageAlbumData.data[updateImageIncrement].width});
-          }
-      )
-    } else {
-      setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                   isClicked: true,
-                   mediaLink: imageAlbumData.data[updateImageIncrement].link, 
-                   height: imageAlbumData.data[updateImageIncrement].height,
-                   width: imageAlbumData.data[updateImageIncrement].width});
-    }
-    setMediaLoading(false);
-  }
-
-  function closeViewMediaAndReset() {
-    setMediaInfo({dataInfo: null, isClicked: false, mediaLink: null});
-    setImageAlbumCount(0);
-    setImageAlbumData(null);
-  }
-
   function copyMediaToClipboard() {
     if (currentMediaLink) {
       navigator.clipboard.writeText(currentMediaLink);
@@ -167,8 +165,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         )
       } else if (data.link.includes("/a/")) {
         let mediaURL = "https://i.imgur.com/" + data.cover + ".";
-        if (data.images_count > 1)
-          previewHeaderText = "(Meme Album)";
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
           currentMediaLink = mediaURL
@@ -440,14 +436,14 @@ function mediaResizing() {
                     {(mediaLoading) ? renderLoadIcon() : renderFullMedia(mediaInfo.dataInfo)}
                     {/* {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null} */}
                 </div>
-                <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
+                <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
                 <div className="copyToClipBoardContainer"> 
                   <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
                   {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
                 </div>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
-                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
+                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1 + "/" + albumInfo.albumLength}</div>
                     <button className="viewNextInAlbum" style={arrowRightButton} onClick={loadNextMediaInAlbum}>
                       {(imageAlbumCount + 1 < albumInfo.albumLength) ? "▶" : null}
                     </button>
