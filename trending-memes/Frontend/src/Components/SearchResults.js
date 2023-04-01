@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import StarButton from '../Images/starButton.png'
 
 export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoadingScreen}) {
 
@@ -44,6 +45,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
     //minWidth: '100px',
     gap: '6.5px',
     //gridRowStart: 'span 2',
+    position: 'relative'
 
 }
 
@@ -55,7 +57,6 @@ const searchResults = {
     // margin: 'auto',
     // width: '30%',
     padding: '25px',
-    
 }
 
 const mediaMaxSize = {
@@ -63,6 +64,21 @@ const mediaMaxSize = {
   maxWidth: '250px',
   height: 'auto',
   width: 'auto',
+}
+
+const favoriteIcon = {
+  backgroundImage: "url(" + StarButton  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  position: 'absolute',
+  height: '25px',
+  width: '25px',
+  top: '2%',
+  right: '1%',
+  backgroundColor: 'transparent',
+  border: 'none'
+
 }
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
@@ -186,6 +202,7 @@ function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
               Object.keys(data).length !== 0 ? 
                 <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo)}>
                   <p>{data.title}</p>
+                  <button className={"favorite" + data.id} style={favoriteIcon}></button>
                   {renderMediaPreview(data)}
                 </div> : null
 
