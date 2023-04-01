@@ -1,10 +1,11 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react'
+import React, {useEffect, useCallback, useLayoutEffect, useState} from 'react'
 import ClipboardImage from '../Images/copyToClipboard.png'
 
 // Global fields 
 let currentMediaLink = "";
 let currentMediaWidth = 0;
 let currentMediaHeight = 0;
+
 let breakpoint = 400;
 
 export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
@@ -12,6 +13,10 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   const [imageAlbumCount, setImageAlbumCount] = useState(0);
 
   const [imageAlbumData, setImageAlbumData] = useState(null);
+
+  const [showCopyMessage, setShowCopyMessage] = useState(false);
+
+  const [mediaLoading, setMediaLoading] = useState(false);
 
   // Use useLayoutEffect for modifying the DOM prior to page rendering
   useLayoutEffect(() => {
@@ -26,6 +31,75 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         //document.body.style.minHeight = "auto";
       }
   }, [mediaInfo]);
+
+  const loadNextMediaInAlbum = useCallback(async () => {
+    let updateImageIncrement = imageAlbumCount + 1;
+    setImageAlbumCount(imageAlbumCount + 1);
+    setMediaLoading(true);
+    // make a promise and pull imgur album based on album hash 
+    if (!imageAlbumData) { 
+      await fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
+          // Promise
+          res => res.json()
+        ).then(
+          albumInfoData => {
+            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
+            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
+                          isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
+                          height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
+                          width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
+          }
+      )
+    } else {
+      await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
+        setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+                      isClicked: true,
+                      mediaLink: imageAlbumData.data[updateImageIncrement].link, 
+                      height: imageAlbumData.data[updateImageIncrement].height,
+                      width: imageAlbumData.data[updateImageIncrement].width})
+      })  
+    }
+    setMediaLoading(false);
+  
+  }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
+
+  const loadPrevMediaInAlbum = useCallback(() => {
+    let updateImageIncrement = imageAlbumCount - 1;
+    setImageAlbumCount(imageAlbumCount - 1);
+    setMediaLoading(true);
+
+    // make a promise and pull imgur album based on album hash 
+    if (!imageAlbumData) { 
+      fetch(`/api/album/all_album_image_links/?q=${albumInfo.album}`).then(
+          // Promise
+          res => res.json()
+        ).then(
+          albumInfoData => {
+            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
+            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
+                          isClicked: true,
+                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
+                          height: imageAlbumData.data[updateImageIncrement].height,
+                          width: imageAlbumData.data[updateImageIncrement].width});
+          }
+      )
+    } else {
+      setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
+                   isClicked: true,
+                   mediaLink: imageAlbumData.data[updateImageIncrement].link, 
+                   height: imageAlbumData.data[updateImageIncrement].height,
+                   width: imageAlbumData.data[updateImageIncrement].width});
+    }
+    setMediaLoading(false);
+  }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
+
+  const closeViewMediaAndReset = useCallback(() => {
+    setMediaInfo({dataInfo: null, isClicked: false, mediaLink: null});
+    setImageAlbumCount(0);
+    setImageAlbumData(null);
+  }, [setMediaInfo, setImageAlbumCount, setImageAlbumData]);
+
 
   // Escape key to close view media component
   useEffect(() => {
@@ -61,81 +135,16 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       return function cleanup() {
         document.removeEventListener('keydown', handleKeyDown);
       } 
-  }, [albumInfo, imageAlbumCount]);
-
-
-  async function loadNextMediaInAlbum() {
-    let updateImageIncrement = imageAlbumCount + 1;
-    setImageAlbumCount(imageAlbumCount + 1);
-
-    // make a promise and pull imgur album based on album hash 
-    if (!imageAlbumData) { 
-      await fetch('/all_album_image_links/' + albumInfo.album).then(
-          // Promise
-          res => res.json()
-        ).then(
-          albumInfoData => {
-            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
-            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true,
-                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
-                          height: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].height,
-                          width: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].width});
-            console.log("I was here first");
-          }
-      )
-    } else {
-      await fetch(imageAlbumData.data[updateImageIncrement].link).then(() => {
-        setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                      isClicked: true,
-                      mediaLink: imageAlbumData.data[updateImageIncrement].link, 
-                      height: imageAlbumData.data[updateImageIncrement].height,
-                      width: imageAlbumData.data[updateImageIncrement].width})
-        console.log("rendered here second: " + imageAlbumData.data[updateImageIncrement].link);
-      })  
-    }
-  
-  }
-
-  function loadPrevMediaInAlbum() {
-    let updateImageIncrement = imageAlbumCount - 1;
-    setImageAlbumCount(imageAlbumCount - 1);
-
-    // make a promise and pull imgur album based on album hash 
-    if (!imageAlbumData) { 
-      fetch('/all_album_image_links/' + albumInfo.album).then(
-          // Promise
-          res => res.json()
-        ).then(
-          albumInfoData => {
-            setImageAlbumData(JSON.parse(JSON.stringify(albumInfoData)));
-            setMediaInfo({dataInfo: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement], 
-                          isClicked: true,
-                          mediaLink: JSON.parse(JSON.stringify(albumInfoData)).data[updateImageIncrement].link, 
-                          height: imageAlbumData.data[updateImageIncrement].height,
-                          width: imageAlbumData.data[updateImageIncrement].width});
-            console.log("I was here first");
-          }
-      )
-    } else {
-      setMediaInfo({dataInfo: imageAlbumData.data[updateImageIncrement], 
-                   isClicked: true,
-                   mediaLink: imageAlbumData.data[updateImageIncrement].link, 
-                   height: imageAlbumData.data[updateImageIncrement].height,
-                   width: imageAlbumData.data[updateImageIncrement].width});
-      console.log("rendered here second");
-    }
-  }
-
-  function closeViewMediaAndReset() {
-    setMediaInfo({dataInfo: null, isClicked: false, mediaLink: null});
-    setImageAlbumCount(0);
-    setImageAlbumData(null);
-  }
+  }, [albumInfo, imageAlbumCount, closeViewMediaAndReset, loadNextMediaInAlbum, loadPrevMediaInAlbum]);
 
   function copyMediaToClipboard() {
     if (currentMediaLink) {
-      navigator.clipboard.writeText(currentMediaLink)
+      navigator.clipboard.writeText(currentMediaLink);
+      setShowCopyMessage(true);
+
+      setTimeout(() => {
+        setShowCopyMessage(false);
+      }, 2000) // Set to false after 2 seconds 
     } else {
       console.error("currentMediaLink is not defined or null")
     }
@@ -147,17 +156,15 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         currentMediaLink = data.link
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
+        let mediaURL = data.link.replace("http://", "https://");
         return (
-          <video key={data.link} style={mediaResizing()} preload="auto" controls autoPlay loop>
-            {console.log(data.link)}
-            <source src={data.link} type="video/mp4"/>
+          <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
+            {console.log(mediaURL)}
+            <source src={mediaURL} type="video/mp4"/>
           </video>
         )
       } else if (data.link.includes("/a/")) {
-        let mediaURL = "http://i.imgur.com/" + data.cover + ".";
-        let previewHeaderText = "";
-        if (data.images_count > 1)
-          previewHeaderText = "(Meme Album)";
+        let mediaURL = "https://i.imgur.com/" + data.cover + ".";
         if (data.images[0].type.includes("mp4")) {
           mediaURL += "mp4";
           currentMediaLink = mediaURL
@@ -170,9 +177,9 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
             </video>
           )
         } else {
-          mediaURL += data.images[0].type.split("/")[1];
+          mediaURL += data.images[0].type.split("/")[1].replace("http://", "https://");
           currentMediaLink = mediaURL
-          {console.log(data.link)}
+          console.log(data.link)
           console.log("data info" + data);
           console.log("width at first function: " + mediaInfo.width);
           currentMediaWidth = mediaInfo.width;
@@ -185,7 +192,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         }
       } else {
         // if link is just a normal image or a gifv, render it normally. 
-        currentMediaLink = data.link
+        currentMediaLink = data.link.replace("http://", "https://");
         console.log("width at first function: " + mediaInfo.width);
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
@@ -197,6 +204,25 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         )
       }
     }
+  }
+
+  function renderLoadIcon() {
+    return (
+      <>
+        <div className='loadIcon' style={loadIconStyle}>
+          Loading ... 
+        </div>
+      </>
+    )
+  }
+
+  const loadIconStyle = {
+    zIndex: "5",
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    color: "white",
+
   }
 
   const overlayDiv = {
@@ -240,7 +266,7 @@ const copyToClipboardButton = {
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
   opacity: "0.99",
-  backgroundColor: "rgba(0, 0, 0, .1)",
+  backgroundColor: "transparent",
   outline: "none",
   border: "none"
 }
@@ -288,6 +314,31 @@ const mediaPopupDisplay = {
     background: "rgba(0,0,0, 1)",
     height: "0"
 }
+
+const fadeOut = `
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      display: none;
+    }
+  }
+`;
+
+const copyMessageStyle = {
+  zIndex: "5",
+  position: "fixed",
+  top: "15%",
+  left: "10%",
+  transform: "translate(-50%, -50%)",
+  backgroundColor: "white",
+  border: "0.5px solid black",
+  padding: "10px",
+  borderRadius: "5px",
+  animation: `${fadeOut} 2s forwards`
+};
 
 // const imageResize = {
 //   //TODO: add min and max dimensions here? 
@@ -351,44 +402,48 @@ function mediaResizing() {
 }
 
 
-function videoResizing() {
-  // let screenWidth = window.innerWidth;
-  // let screenHeight = window.innerHeight;
-  let styles = {};
-  console.log('current width value: ' + currentMediaWidth);
-  if (currentMediaWidth > breakpoint) {
-    styles= {  
-                height: "100%",
-                width: "75%",
-                left: "0",
-                top: "0",
-                position: "absolute",
-    };
-  } else {
-    styles = {  
-                height: "100%",
-                width: "100%",
-                left: "0",
-                top: "0",
-                position: "absolute",
-              };
+// function videoResizing() {
+//   // let screenWidth = window.innerWidth;
+//   // let screenHeight = window.innerHeight;
+//   let styles = {};
+//   console.log('current width value: ' + currentMediaWidth);
+//   if (currentMediaWidth > breakpoint) {
+//     styles= {  
+//                 height: "100%",
+//                 width: "75%",
+//                 left: "0",
+//                 top: "0",
+//                 position: "absolute",
+//     };
+//   } else {
+//     styles = {  
+//                 height: "100%",
+//                 width: "100%",
+//                 left: "0",
+//                 top: "0",
+//                 position: "absolute",
+//               };
 
-  }
-  return styles;
-}
+//   }
+//   return styles;
+// }
 
     return (
         <>
             {(mediaInfo.isClicked) ? 
               <div className="popup" style={overlayDiv}>
                 <div className="popupMedia" style={mediaPopupDisplay}>
-                    {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null}
+                    {(mediaLoading) ? renderLoadIcon() : renderFullMedia(mediaInfo.dataInfo)}
+                    {/* {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null} */}
                 </div>
-                <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>X</button>
-                <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+                <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
+                <div className="copyToClipBoardContainer"> 
+                  <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+                  {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
+                </div>
                 { (albumInfo && albumInfo.albumLength > 1) ? 
                   <div>
-                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1}</div>
+                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1 + "/" + albumInfo.albumLength}</div>
                     <button className="viewNextInAlbum" style={arrowRightButton} onClick={loadNextMediaInAlbum}>
                       {(imageAlbumCount + 1 < albumInfo.albumLength) ? "▶" : null}
                     </button>

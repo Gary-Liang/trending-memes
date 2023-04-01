@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function LoadingIcon() {
+export default function LoadingScreen() {
 
     const loadingstyle = {
         background: 'rgba(0,0,0, 0.75)',
@@ -18,7 +18,7 @@ export default function LoadingIcon() {
 
     return(
         <>
-            <div className='loadingIcon' style={loadingstyle}>
+            <div className='loadingScreen' style={loadingstyle}>
                 Loading . . . 
             </div>
         </>

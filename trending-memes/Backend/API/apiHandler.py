@@ -33,10 +33,11 @@ APPLICATION_STATE = 'TEST'
 # FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 EXPIRATION = 3600
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
+REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
-redis_client = redis.Redis(host=REDIS_HOST, password='sr5i2vbgXUUTIDpXKn5T', port=5591, health_check_interval=30)
+redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -112,7 +113,6 @@ def launch():
         FIRST_TIME_LAUNCHED = eval(FIRST_TIME_LAUNCHED.decode("utf-8").strip('\"'))
 
     app.logger.info('first launched bool status: ' + str(FIRST_TIME_LAUNCHED))
-    print('type of bool status: ', type(FIRST_TIME_LAUNCHED))
     
     # first, check if expiration time on token has expired 
     if (FIRST_TIME_LAUNCHED): 

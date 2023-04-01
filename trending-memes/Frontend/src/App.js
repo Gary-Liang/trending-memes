@@ -1,16 +1,23 @@
-import './Components/Title'
+import Login from './Components/Login';
+import Registration from './Components/Registration';
+import NavBar from './Components/NavBar';
 import Title from './Components/Title';
 import SearchBar from './Components/SearchBar';
 import SearchResults from './Components/SearchResults';
 import ViewMedia from './Components/ViewMedia';
-import LoadingIcon from './Components/LoadingIcon';
+import LoadingScreen from './Components/LoadingScreen';
+// Used routing to navigate to a different page in react
+import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
+
 
 import React, {useState} from 'react'
 
 export default function App() {
   // use State
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingScreen, setLoadingScreen] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [mediaInfo, setMediaInfo] = useState([{
     dataInfo: null,
     isClicked: false,
@@ -26,10 +33,13 @@ export default function App() {
 
   return (
       <div className="App">
+        <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>
         <Title /*name='The Trending Memes'*//>
         <SearchBar setQuery={setQuery} />
-        {loading && <LoadingIcon></LoadingIcon>}
-        <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoading={setLoading} />
+        {loadingScreen && <LoadingScreen></LoadingScreen>}
+        {showLoginModal && <Login></Login>}
+        {showRegistrationModal && <Registration></Registration>}
+        <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
       
       </div>
