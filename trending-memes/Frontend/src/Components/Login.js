@@ -2,14 +2,21 @@ import React, {useState} from 'react'
 
 export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
-    const inputChange = (event) => {
-
-    };
-
     const [formData, setFormData] = useState({
         username: "",
         password: "",
     });
+
+    const handleSubmit = (event) => {
+        // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
+        event.preventDefault();
+    }
+
+    const inputChange = (event) => {
+
+    };
+
+
     const loginFormModalStyle = {
         background: 'rgba(0,0,0, 0.75)',
         width: "100%",
@@ -56,35 +63,38 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         position: 'fixed',
         top: '30%',
         left: '40%',
+        transform: 'scale(1.1)'
     }
 
     const passwordStyle = {
         position: 'fixed',
         top: '37.5%',
         left: '40%',
+        transform: 'scale(1.1)'
     }
 
     const submitButtonStyle = {
-        background: 'cyan',
+        backgroundColor: '#3F3D56',
         position: 'fixed',
         top: '45%',
         left: '55%',
+        border: 'none',
+        transform: 'scale(1.5)',
+        color: 'white'
 
     }
 
-
-
     return (
         <>
-            <div className='loginFormModal' style={loginFormModalStyle}>
+            <form className='loginFormModal' style={loginFormModalStyle} onSubmit={handleSubmit}>
                 <div className='authForm' style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowLoginModal(false)}>x</button>
                     <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
-                    <input className='usernameInput' placeholder='Enter username' type='text' value={formData.username} style={usernameStyle} onChange={inputChange()}></input>
-                    <input className='passwordInput' placeholder='Enter password' type='text' value={formData.password} style={passwordStyle} onChange={inputChange()}></input>
-                    <button className='submitButton' style={submitButtonStyle}>Submit</button>
+                    <input className='usernameInput' placeholder='Enter Username' type='text' value={formData.username} style={usernameStyle} onChange={inputChange()}></input>
+                    <input className='passwordInput' placeholder='Enter Password' type='text' value={formData.password} style={passwordStyle} onChange={inputChange()}></input>
+                    <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
                 </div>
-            </div>
+            </form>
 
         </>
     )
