@@ -40,9 +40,9 @@ MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
 # cache 
 redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
 
-mongo_client = MongoClient(MONGO_CLIENT)
-db = mongo_client.trending_memes
-users = db.users
+# mongo_client = MongoClient(MONGO_CLIENT)
+# db = mongo_client.trending_memes
+# users = db.users
 
 headers = {'Connnection' : 'keep-alive'}
 
