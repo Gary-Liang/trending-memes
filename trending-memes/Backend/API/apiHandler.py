@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from time import time 
 import ast
 import redis
-import pymongo
+from pymongo import MongoClient
 from waitress import serve
 
 # Load variables from .env file (not in version control)
@@ -34,10 +34,15 @@ APPLICATION_STATE = 'TEST'
 EXPIRATION = 3600
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
+MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
 
 # 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
 # cache 
 redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
+
+mongo_client = MongoClient(MONGO_CLIENT)
+db = mongo_client.trending_memes
+users = db.users
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -437,6 +442,18 @@ def validate():
 
     validate_url = 'https://api.imgur.com/oauth2/secret?' 'access_token=%s' % token['access_token']
     return jsonify(requests.get(validate_url).json())
+
+
+@app.route('login_user', methods=['POST'])
+def login_user():
+    # Get the form data from the POST Request 
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    # validate username and password 
+
+
+    # then, return a response 
 
 
 @app.errorhandler(404) 
