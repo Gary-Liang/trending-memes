@@ -36,8 +36,8 @@ export default function App() {
         <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>
         <Title /*name='The Trending Memes'*//>
         <SearchBar setQuery={setQuery} />
-        {loadingScreen && <LoadingScreen></LoadingScreen>}
-        {showLoginModal && <Login></Login>}
+        {loadingScreen && <LoadingScreen/>}
+        {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
         {showRegistrationModal && <Registration></Registration>}
         <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
