@@ -444,7 +444,7 @@ def validate():
     return jsonify(requests.get(validate_url).json())
 
 
-@app.route('login_user', methods=['POST'])
+@app.route('/login_user', methods=['POST'])
 def login_user():
     # Get the form data from the POST Request 
     username = request.form.get('username')
