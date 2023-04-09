@@ -1,6 +1,15 @@
 [build]
   functions = "functions/"
 
+[[redirects]]
+  from ="/api/login"
+  to = ".netlify/functions/login"
+  status = 200
+
+[[redirects]]
+  from ="/api/register"
+  to = ".netlify/functions/register"
+  status = 200
 
 [[redirects]]
   from = "/api/*"

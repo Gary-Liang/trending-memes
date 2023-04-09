@@ -1,7 +1,7 @@
 
 const fetch = require('isomorphic-fetch');
 
-const API_ENDPOINT = 'http://127.0.0.1:8000/login_user';
+const API_ENDPOINT = 'http://127.0.0.1:8000/register_new_user';
 
 exports.handler = async (event, context) => {
   try {
@@ -10,7 +10,8 @@ exports.handler = async (event, context) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            },
+            'Connection': 'keep-alive'
+        },
         body: JSON.stringify(formData),
     });
     const data = await response.json();

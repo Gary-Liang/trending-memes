@@ -7,13 +7,42 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         password: "",
     });
 
+    const [errorMessage, setErrorMessage] = useState("")
+
     const handleSubmit = (event) => {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
+          // Send data to the server
+        fetch("/api/login", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+            // Handle server response
+                console.log(data);
+                console.log(data.success);
+                if (data.success === false) {
+                    setErrorMessage(data.message);
+                } else if (data.success === true) {
+                    setErrorMessage("");
+                }
+
+            })
+            .catch((error) => {
+            console.error("Error:", error);
+            });
     }
 
     const inputChange = (event) => {
-
+        const {className, value} = event.target;
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [className]: value,
+        }));
     };
 
 
@@ -84,15 +113,23 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
     }
 
+    const errorMessageStyle = {
+        position: 'fixed',
+        color: 'red',
+        top: '55%',
+        left: '40%'
+    }
+
     return (
         <>
             <form className='loginFormModal' style={loginFormModalStyle} onSubmit={handleSubmit}>
                 <div className='authForm' style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowLoginModal(false)}>x</button>
                     <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
-                    <input className='usernameInput' placeholder='Enter Username' type='text' value={formData.username} style={usernameStyle} onChange={inputChange()}></input>
-                    <input className='passwordInput' placeholder='Enter Password' type='text' value={formData.password} style={passwordStyle} onChange={inputChange()}></input>
+                    <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange}></input>
+                    <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange}></input>
                     <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
+                    {errorMessage !== "" ? <p className='errorMessage' style={errorMessageStyle}>{errorMessage}</p> : null}
                 </div>
             </form>
 

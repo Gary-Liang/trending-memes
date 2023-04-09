@@ -38,7 +38,7 @@ export default function App() {
         <SearchBar setQuery={setQuery} />
         {loadingScreen && <LoadingScreen/>}
         {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
-        {showRegistrationModal && <Registration></Registration>}
+        {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
         <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
       

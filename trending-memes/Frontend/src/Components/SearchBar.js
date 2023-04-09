@@ -26,7 +26,7 @@ export default function SearchBar({setQuery}) {
     <>
       <div style={styleDiv}>
           {/*input type matters for e.target.value or else it will return an undefined object  */}
-          <input type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown}/>
+          <input className='searchInput' type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown}/>
           <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}></button>
       </div>
     </>

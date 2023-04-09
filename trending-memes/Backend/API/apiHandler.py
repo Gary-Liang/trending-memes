@@ -15,8 +15,9 @@ from dotenv import load_dotenv
 from time import time 
 import ast
 import redis
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 from waitress import serve
+import bcrypt
 
 # Load variables from .env file (not in version control)
 load_dotenv('../../.env')
@@ -40,9 +41,10 @@ MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
 # cache 
 redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
 
-# mongo_client = MongoClient(MONGO_CLIENT)
-# db = mongo_client.trending_memes
-# users = db.users
+mongo_client = MongoClient(MONGO_CLIENT)
+db = mongo_client['trending_memes']
+# users is a collection 
+users = db['users']
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -446,19 +448,67 @@ def validate():
 
 @app.route('/login_user', methods=['POST'])
 def login_user():
-    # Get the form data from the POST Request 
-    username = request.form.get('username')
-    password = request.form.get('password')
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    username = data.get('username').lower()
+    password = data.get('password')
 
-    # validate username and password 
+    # find the user in the database by their username
+    user = users.find_one({'username': username})
+
+    if user:
+        # check if the password matches 
+        if password == user['password'].decode('utf-8'):
+            # return a success message and any other data you want to include
+            return jsonify({'success': True, 'message': 'Login successful'}), 200
+        else:
+            # return a failure message if the password doesn't match, 401 unauthorized
+            return jsonify({'success': False, 'message': 'Invalid password'}), 401
+    else:
+        # return a failure message if the user doesn't exist, 404 not found
+        return jsonify({'success': False, 'message': 'User does not exist'}), 404
+    
 
 
-    # then, return a response 
+@app.route('/register_new_user', methods=['POST'])
+def register_new_user():
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+
+    # lowercase all usernames
+    username = data.get('username').lower()
+    password = data.get('password').encode('utf-8')
+    print(request)
+    print(request.get_json())
+    print(password)
+    app.logger.info('Invoking registering a new user.')
+
+    user = {'username': username, 'password': password}
+    if username is None or not username: 
+        return jsonify({'success': False, 'message': 'Username is required.'}), 400
+    elif password is None or not password: 
+        return jsonify({'success': False, 'message': 'Password is required.'}), 400
+    elif len(username) < 3:
+        return jsonify({'success': False, 'message': 'Username needs to be at least 4 letters long.'}), 400
+    elif len(password) < 5:
+        return jsonify({'success': False, 'message': 'Password needs to be at least 6 characters long.'}), 400 
+    else:  
+        # find the user in the database by their username
+        existing_user = users.find_one({'username': username})
+        if existing_user:
+            return jsonify({'success': False, 'message': 'Username already exists.'}), 400
+        try: 
+            users.insert_one(user)
+            return jsonify({'success': True, 'message': 'User added successfully!'}), 200
+        except errors.DuplicateKeyError:
+            print('User already in DB')
+            return jsonify({'success': False, 'message': 'User already exists!'}), 409
+
 
 
 @app.errorhandler(404) 
 def invalid_route(e): 
-    return "Invalid route."
+    return jsonify({'message': '404 Not found'}), 404
 
 
 # We need to make sure the cerificate we use for HTTPS is signed by a CA (certificate authority)
