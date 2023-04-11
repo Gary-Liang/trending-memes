@@ -25,14 +25,14 @@ load_dotenv('../../.env')
 # client id and client secret
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SECRET_KEY')
-SESSION_SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
+SESSION_SECRET_KEY= ""
+DEFAULT_SESSION_TIME = 3600
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
 # TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
 # optional parameter for authorization field
 APPLICATION_STATE = 'TEST'
 # FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
-EXPIRATION = 3600
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
 MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
@@ -61,15 +61,18 @@ token_url = 'https://api.imgur.com/oauth2/token'
 refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 
-# code verifiers: Secure random strings. Used to create a code challenge.
-code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").strip('\"')
-code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
 
-# code challenge - base64 encoded string, SHA256
-code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
-code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
-code_challenge = code_challenge.replace("=", "")
-print(code_challenge)
+def generate_session_secret_key():
+    # code verifiers: Secure random strings. Used to create a code challenge.
+    code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").strip('\"')
+    code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
+
+    # code challenge - base64 encoded string, SHA256
+    code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
+    code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
+    code_challenge = code_challenge.replace("=", "")
+    print(code_challenge)
+
 
 """
     You need a client id and a client secret to get an access token from the API.
