@@ -62,7 +62,7 @@ refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 
 
-def generate_session_secret_key():
+def generate_session_token():
     # code verifiers: Secure random strings. Used to create a code challenge.
     code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").strip('\"')
     code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
@@ -72,6 +72,7 @@ def generate_session_secret_key():
     code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
     code_challenge = code_challenge.replace("=", "")
     print(code_challenge)
+    return code_challenge
 
 
 """
@@ -463,7 +464,8 @@ def login_user():
         # check if the password matches 
         if password == user['password'].decode('utf-8'):
             # return a success message and any other data you want to include
-            return jsonify({'success': True, 'message': 'Login successful'}), 200
+            user_session_token = generate_session_token()
+            return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
         else:
             # return a failure message if the password doesn't match, 401 unauthorized
             return jsonify({'success': False, 'message': 'Invalid password'}), 401
