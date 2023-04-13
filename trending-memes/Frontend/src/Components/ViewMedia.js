@@ -340,29 +340,6 @@ const copyMessageStyle = {
   animation: `${fadeOut} 2s forwards`
 };
 
-// const imageResize = {
-//   //TODO: add min and max dimensions here? 
-//   // intristic vs rendered size
-//   height: "100%",
-//   width: "auto",
-//   top: "0",
-//   left: "0",
-//   right: "0",
-//   bottom: "0",
-//   margin: "0 auto",
-//   position: "absolute",
-// }
-
-// const videoResize = {
-//   //TODO: add min and max dimensions here? 
-//   // instristic vs rendered size
-//   height: "100%",
-//   width: "100%",
-//   left: "0",
-//   top: "0",
-//   position: "absolute",
-// }
-
 function mediaResizing() {
   let windowWidth = window.innerWidth;
   console.log('window width: ' + windowWidth)
@@ -400,33 +377,6 @@ function mediaResizing() {
   }
   return styles;
 }
-
-
-// function videoResizing() {
-//   // let screenWidth = window.innerWidth;
-//   // let screenHeight = window.innerHeight;
-//   let styles = {};
-//   console.log('current width value: ' + currentMediaWidth);
-//   if (currentMediaWidth > breakpoint) {
-//     styles= {  
-//                 height: "100%",
-//                 width: "75%",
-//                 left: "0",
-//                 top: "0",
-//                 position: "absolute",
-//     };
-//   } else {
-//     styles = {  
-//                 height: "100%",
-//                 width: "100%",
-//                 left: "0",
-//                 top: "0",
-//                 position: "absolute",
-//               };
-
-//   }
-//   return styles;
-// }
 
     return (
         <>

@@ -78,7 +78,20 @@ const favoriteIcon = {
   right: '1%',
   backgroundColor: 'transparent',
   border: 'none'
+}
 
+const favoriteIconHover = {
+  backgroundImage: "url(" + StarButton  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  position: 'absolute',
+  height: '25px',
+  width: '25px',
+  top: '2%',
+  right: '1%',
+  backgroundColor: '#FFD700', // yellow color
+  border: 'none'
 }
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
