@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import Cookies from 'js-cookie'
 
 export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
@@ -6,13 +7,13 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         username: "",
         password: "",
     });
-
-    const [errorMessage, setErrorMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("");
+    const expirationTime = new Date(new Date().getTime() + 60 * 60 + 1000); // 1 hour from now
 
     const handleSubmit = (event) => {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
-          // Send data to the server
+        // Send data to the server
         fetch("/api/login", {
             method: "POST",
             headers: {
@@ -29,11 +30,12 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
                     setErrorMessage(data.message);
                 } else if (data.success === true) {
                     setErrorMessage("");
+                    Cookies.set('token', data.token, {expires: expirationTime});
                 }
 
             })
             .catch((error) => {
-            console.error("Error:", error);
+                console.error("Error:", error);
             });
     }
 
