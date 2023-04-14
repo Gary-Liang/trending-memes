@@ -394,7 +394,7 @@ def validate():
     return jsonify(requests.get(validate_url).json())
 
 
-@app.route('validate_user_session')
+@app.route('/validate_user_session')
 def validate_user_session(): 
     return False
 
