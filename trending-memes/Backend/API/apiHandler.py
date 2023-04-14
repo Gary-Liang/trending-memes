@@ -144,18 +144,6 @@ def launch():
         app.logger.info('state: ' + state)
         session['oauth_state'] = state
 
-
-        # Update the FIRST_TIME_LAUNCHED value in the .env file
-        # with open("../../.env", "r") as file:
-        #     content = file.readlines()
-            
-        # with open("../../.env", "w") as file:
-        #     for line in content:
-        #         if "FIRST_TIME_LAUNCH" in line:
-        #             file.write(f"FIRST_TIME_LAUNCH={True}\n")
-        #         else:
-        #             file.write(line)
-
         redis_client.set("first_time_launched", "True")
         FIRST_TIME_LAUNCHED = True
 
@@ -189,20 +177,7 @@ def authenticate():
     app.logger.info('state: ' + state)
     session['oauth_state'] = state
 
-
-    # Update the FIRST_TIME_LAUNCHED value in the .env file
-    # with open("../../.env", "r") as file:
-    #     content = file.readlines()
-            
-    # with open("../../.env", "w") as file:
-    #     for line in content:
-    #         if "FIRST_TIME_LAUNCH" in line:
-    #             file.write(f"FIRST_TIME_LAUNCH={True}\n")
-    #         else:
-    #             file.write(line)
-
     redis_client.set("first_time_launched", "True")
-    # FIRST_TIME_LAUNCHED = True
 
     return redirect(authorization_url)
 
@@ -267,37 +242,6 @@ def generate_session_cache():
     # session['refresh_token'] = token['refresh_token']
 
     return session
-
-# def reload_env_vars():
-#     # Read environment variables from .env file
-#     with open("../../.env") as f:
-#         for line in f:
-#             line_parts = line.strip().split("=")
-#             if len(line_parts) == 2:
-#                 key, value = line_parts
-#                 app.logger.info(key + " " + value)
-#                 os.environ[key] = value
-
-#     global CLIENT_ID
-#     CLIENT_ID = os.environ.get('CLIENT_ID')
-
-#     global CLIENT_SECRET
-#     CLIENT_SECRET = os.environ.get('SECRET_KEY')
-
-#     global SESSION_SECRET_KEY
-#     SESSION_SECRET_KEY = os.environ.get('SESSION_SECRET_KEY')
-
-#     global REDIRECT_URI
-#     REDIRECT_URI = os.environ.get('REDIRECT_URI')
-
-#     global TOKEN_EXPIRATION_TIME
-#     TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
-
-#     global FIRST_TIME_LAUNCHED
-#     FIRST_TIME_LAUNCHED = ast.literal_eval(os.environ.get('FIRST_TIME_LAUNCH'))
-
-#     global EXPIRATION
-#     EXPIRATION = 3600
 
 
 # Callback
@@ -449,6 +393,10 @@ def validate():
     validate_url = 'https://api.imgur.com/oauth2/secret?' 'access_token=%s' % token['access_token']
     return jsonify(requests.get(validate_url).json())
 
+
+@app.route('validate_user_session')
+def validate_user_session(): 
+    return False
 
 @app.route('/login_user', methods=['POST'])
 def login_user():
