@@ -2,7 +2,7 @@
 const fetch = require('isomorphic-fetch');
 
 // const API_ENDPOINT = 'http://127.0.0.1:8000/login_user';
-const API_ENDPOINT = 'https://trending-memes-production.up.railway.app/login_user';
+const API_ENDPOINT = 'https://tmback.xyz/login_user';
 
 exports.handler = async (event, context) => {
   try {
