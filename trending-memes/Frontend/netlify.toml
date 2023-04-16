@@ -4,12 +4,12 @@
 [[redirects]]
   from ="/api/login"
   to = ".netlify/functions/login"
-  status = 204
+  status = 200
 
 [[redirects]]
   from ="/api/register"
   to = ".netlify/functions/register"
-  status = 204
+  status = 200
 
 [[redirects]]
   from = "/api/*"
