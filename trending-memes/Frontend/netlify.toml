@@ -12,5 +12,9 @@
   status = 200
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/search"
+  to = "/.netlify/functions/search/:splat"
+
+[[redirects]]
+  from = "/api/album/all_album_image_links"
+  to = "/.netlify/functions/album/all_album_image_links/:splat"
