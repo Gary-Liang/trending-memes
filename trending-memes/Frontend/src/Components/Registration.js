@@ -17,6 +17,7 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
             method: "POST",
             headers: {
             "Content-Type": "application/json",
+            'Connection': 'keep-alive'
             },
             body: JSON.stringify(formData),
         })

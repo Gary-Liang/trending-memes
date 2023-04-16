@@ -398,64 +398,79 @@ def validate():
 def validate_user_session(): 
     return False
 
-@app.route('/login_user', methods=['POST'])
+@app.route('/login_user', methods=['POST', 'OPTIONS'])
 def login_user():
-    # Get the form data from the POST Request as application/json (use get_json)
-    data = request.get_json()
-    username = data.get('username').lower()
-    password = data.get('password')
-
-    # find the user in the database by their username
-    user = users.find_one({'username': username})
-
-    if user:
-        # check if the password matches 
-        if password == user['password'].decode('utf-8'):
-            # return a success message and any other data you want to include
-            user_session_token = generate_session_token()
-            return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
-        else:
-            # return a failure message if the password doesn't match, 401 unauthorized
-            return jsonify({'success': False, 'message': 'Invalid password'}), 401
+    if request.method == 'OPTIONS':
+        response_headers = {
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Connection'
+        }
+        return ('', 204, response_headers) 
     else:
-        # return a failure message if the user doesn't exist, 404 not found
-        return jsonify({'success': False, 'message': 'User does not exist'}), 404
+        # Get the form data from the POST Request as application/json (use get_json)
+        data = request.get_json()
+        username = data.get('username').lower()
+        password = data.get('password')
+
+        # find the user in the database by their username
+        user = users.find_one({'username': username})
+
+        if user:
+            # check if the password matches 
+            if password == user['password'].decode('utf-8'):
+                # return a success message and any other data you want to include
+                user_session_token = generate_session_token()
+                
+                return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
+            else:
+                # return a failure message if the password doesn't match, 401 unauthorized
+                return jsonify({'success': False, 'message': 'Invalid password'}), 401
+        else:
+            # return a failure message if the user doesn't exist, 404 not found
+            return jsonify({'success': False, 'message': 'User does not exist'}), 404
     
 
 
-@app.route('/register_new_user', methods=['POST'])
+@app.route('/register_new_user', methods=['POST', 'OPTIONS'])
 def register_new_user():
-    # Get the form data from the POST Request as application/json (use get_json)
-    data = request.get_json()
+    if request.method == 'OPTIONS':
+        response_headers = {
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Connection'
+        }
+        return ('', 204, response_headers) 
+    else:   
+        # Get the form data from the POST Request as application/json (use get_json)
+        data = request.get_json()
 
-    # lowercase all usernames
-    username = data.get('username').lower()
-    password = data.get('password').encode('utf-8')
-    print(request)
-    print(request.get_json())
-    print(password)
-    app.logger.info('Invoking registering a new user.')
+        # lowercase all usernames
+        username = data.get('username').lower()
+        password = data.get('password').encode('utf-8')
+        print(request)
+        print(request.get_json())
+        print(password)
+        app.logger.info('Invoking registering a new user.')
 
-    user = {'username': username, 'password': password}
-    if username is None or not username: 
-        return jsonify({'success': False, 'message': 'Username is required.'}), 400
-    elif password is None or not password: 
-        return jsonify({'success': False, 'message': 'Password is required.'}), 400
-    elif len(username) < 3:
-        return jsonify({'success': False, 'message': 'Username needs to be at least 4 letters long.'}), 400
-    elif len(password) < 5:
-        return jsonify({'success': False, 'message': 'Password needs to be at least 6 characters long.'}), 400 
-    else:  
-        # find the user in the database by their username
-        existing_user = users.find_one({'username': username})
-        if existing_user:
-            return jsonify({'success': False, 'message': 'Username already exists.'}), 400
-        try: 
-            users.insert_one(user)
-            return jsonify({'success': True, 'message': 'User added successfully!'}), 200
-        except errors.DuplicateKeyError:
-            print('User already in DB')
-            return jsonify({'success': False, 'message': 'User already exists!'}), 409
+        user = {'username': username, 'password': password}
+        if username is None or not username: 
+            return jsonify({'success': False, 'message': 'Username is required.'}), 400
+        elif password is None or not password: 
+            return jsonify({'success': False, 'message': 'Password is required.'}), 400
+        elif len(username) < 3:
+            return jsonify({'success': False, 'message': 'Username needs to be at least 4 letters long.'}), 400
+        elif len(password) < 5:
+            return jsonify({'success': False, 'message': 'Password needs to be at least 6 characters long.'}), 400 
+        else:  
+            # find the user in the database by their username
+            existing_user = users.find_one({'username': username})
+            if existing_user:
+                return jsonify({'success': False, 'message': 'Username already exists.'}), 400
+            try: 
+                users.insert_one(user)
+                return jsonify({'success': True, 'message': 'User added successfully!'}), 200
+            except errors.DuplicateKeyError:
+                print('User already in DB')
+                return jsonify({'success': False, 'message': 'User already exists!'}), 409
 
 
 
