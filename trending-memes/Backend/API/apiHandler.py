@@ -402,15 +402,18 @@ def validate_user_session():
 def login_user():
     if request.method == 'OPTIONS':
         response_headers = {
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Connection'
         }
+        print('OPTIONS request called.')
         return ('', 204, response_headers) 
     else:
         # Get the form data from the POST Request as application/json (use get_json)
         data = request.get_json()
         username = data.get('username').lower()
         password = data.get('password')
+        print('POST Request called')
 
         # find the user in the database by their username
         user = users.find_one({'username': username})
@@ -435,9 +438,11 @@ def login_user():
 def register_new_user():
     if request.method == 'OPTIONS':
         response_headers = {
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Connection'
         }
+        print('OPTIONS request called.')
         return ('', 204, response_headers) 
     else:   
         # Get the form data from the POST Request as application/json (use get_json)

@@ -11,7 +11,7 @@ exports.handler = async (event, context) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            'Connection': 'keep-alive'
+            'Connection': 'keep-alive',
         },
         body: JSON.stringify(formData),
     });
