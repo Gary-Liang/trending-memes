@@ -440,7 +440,7 @@ def register_new_user():
         response_headers = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Connection'
+            'Access-Control-Allow-Headers': 'Content-Type'
         }
         print('OPTIONS request called.')
         return ('', 204, response_headers) 

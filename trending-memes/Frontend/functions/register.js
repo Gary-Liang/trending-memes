@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
             "Content-Type": "application/json",
             'Connection': 'keep-alive',
             'Access-Control-Allow-Origin': 'https://tmback.xyz',
-            'Access-Control-Allow-Headers': 'Content-Type, Connection',
+            'Access-Control-Allow-Headers': 'Content-Type',
             'Access-Control-Allow-Methods': 'OPTIONS, POST'
         },
         body: JSON.stringify(formData),
