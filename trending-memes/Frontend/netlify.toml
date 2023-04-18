@@ -5,11 +5,13 @@
   from ="/api/login"
   to = ".netlify/functions/login"
   status = 200
+  headers = {Content-Type = "application/json"}
 
 [[redirects]]
   from ="/api/register"
   to = ".netlify/functions/register"
   status = 200
+  headers = {Content-Type = "application/json"}
 
 [[redirects]]
   from = "/api/search"
