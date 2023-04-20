@@ -17,7 +17,9 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         fetch("/api/login", {
             method: "POST",
             headers: {
-            "Content-Type": "application/json",
+                "Content-Type": "application/json",
+                'Connection': 'keep-alive',
+                'Access-Control-Allow-Origin': 'https://tmback.xyz',
             },
             body: JSON.stringify(formData),
         })
