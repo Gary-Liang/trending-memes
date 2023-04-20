@@ -14,10 +14,12 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
         // Send data to the server
-        fetch("/api/login", {
+        fetch("/.netlify/functions/login", {
             method: "POST",
             headers: {
-            "Content-Type": "application/json",
+                "Content-Type": "application/json",
+                'Connection': 'keep-alive',
+                'Access-Control-Allow-Origin': 'https://tmback.xyz',
             },
             body: JSON.stringify(formData),
         })
