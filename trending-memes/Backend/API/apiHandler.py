@@ -16,8 +16,6 @@ from time import time
 import ast
 import redis
 from pymongo import MongoClient, errors
-from waitress import serve
-import bcrypt
 
 # Load variables from .env file (not in version control)
 load_dotenv('../../.env')

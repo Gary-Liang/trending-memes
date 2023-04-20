@@ -14,7 +14,7 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
         // Send data to the server
-        fetch("/.netlify/functions/login", {
+        fetch("/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

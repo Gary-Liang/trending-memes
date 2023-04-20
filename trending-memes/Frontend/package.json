@@ -1,6 +1,6 @@
 {
   "name": "trending-memes",
-  "version": "1.2.0",
+  "version": "1.2.5",
   "homepage": "https://trendingmemes.org/",
   "dependencies": {
     "cacheable-request": "^10.2.7",
