@@ -11,6 +11,7 @@ import os
 import base64
 import re
 import hashlib
+import jwt
 from dotenv import load_dotenv
 from time import time 
 import ast
@@ -23,8 +24,8 @@ load_dotenv('../../.env')
 # client id and client secret
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SECRET_KEY')
-SESSION_SECRET_KEY= ""
-DEFAULT_SESSION_TIME = 3600
+SESSION_SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
+DEFAULT_SESSION_TIME = 900
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
 # TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
 RESPONSE_TYPE = 'code'
@@ -60,17 +61,14 @@ refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/t/'
 
 
-def generate_session_token():
-    # code verifiers: Secure random strings. Used to create a code challenge.
-    code_verifier = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").strip('\"')
-    code_verifier = re.sub('[^a-zA-Z0-9]+', "", code_verifier)
-
-    # code challenge - base64 encoded string, SHA256
-    code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
-    code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8").strip('\"')
-    code_challenge = code_challenge.replace("=", "")
-    print(code_challenge)
-    return code_challenge
+def generate_session_token(user_id):
+    payload = {
+        'sub': user_id,
+        'iat': time.time(),
+        'exp': DEFAULT_SESSION_TIME
+    }
+    token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
+    return token
 
 
 """
@@ -420,7 +418,7 @@ def login_user():
             # check if the password matches 
             if password == user['password'].decode('utf-8'):
                 # return a success message and any other data you want to include
-                user_session_token = generate_session_token()
+                user_session_token = generate_session_token(user)
                 
                 return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
             else:
@@ -470,7 +468,7 @@ def register_new_user():
                 return jsonify({'success': False, 'message': 'Username already exists.'}), 400
             try: 
                 users.insert_one(user)
-                return jsonify({'success': True, 'message': 'User added successfully!'}), 200
+                return jsonify({'success': True, 'message': 'Registration successful, please log in.'}), 200
             except errors.DuplicateKeyError:
                 print('User already in DB')
                 return jsonify({'success': False, 'message': 'User already exists!'}), 409

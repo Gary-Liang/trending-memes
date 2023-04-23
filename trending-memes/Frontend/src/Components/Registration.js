@@ -7,7 +7,8 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         password: "",
     });
 
-    const [errorMessage, setErrorMessage] = useState("")
+    const [statusMessage, setStatusMessage] = useState("");
+    const [statusSuccess, setStatusSuccess] = useState(false);
 
     const handleSubmit = (event) => {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
@@ -23,14 +24,12 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         })
             .then((response) => response.json())
             .then((data) => {
-            // Handle server response
+                // Handle server response
                 console.log(data);
                 console.log(data.success);
-                if (data.success === false) {
-                    setErrorMessage(data.message);
-                } else if (data.success === true) {
-                    setErrorMessage("");
-                }
+                console.log('status code: ' + data.statusCode);
+                setStatusMessage(data.message);
+                setStatusSuccess(data.success);
 
             })
             .catch((error) => {
@@ -44,6 +43,11 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
             ...prevFormData,
             [className]: value,
         }));
+    };
+
+    const switchModal = (event) => {
+        setShowRegistrationModal(false);
+        setShowLoginModal(true);
     };
 
 
@@ -114,10 +118,28 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
 
     }
 
+    const loginButtonStyle = {
+        backgroundColor: '#3F3D56',
+        position: 'fixed',
+        top: '55%',
+        left: '55%',
+        border: 'none',
+        transform: 'scale(1.5)',
+        color: 'white'
+
+    }
+
     const errorMessageStyle = {
         position: 'fixed',
         color: 'red',
-        top: '55%',
+        top: '57.5%',
+        left: '40%'
+    }
+
+    const successMessageStyle = {
+        position: 'fixed',
+        color: 'green',
+        top: '57.5%',
         left: '40%'
     }
 
@@ -126,11 +148,12 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
             <form className='registrationFormModal' style={registrationFormModalStyle} onSubmit={handleSubmit}>
                 <div className='authForm' style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowRegistrationModal(false)}>x</button>
-                    <p className='registrationTitle' style={welcomeBackTitleStyle}>Hello!</p>
+                    <p className='registrationTitle' style={welcomeBackTitleStyle}>Registration</p>
                     <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange}></input>
                     <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange}></input>
                     <button className='submitButton' style={submitButtonStyle} type='submit'>Sign Up</button>
-                    {errorMessage !== "" ? <p className='errorMessage' style={errorMessageStyle}>{errorMessage}</p> : null}
+                    <button className='loginButton' style={loginButtonStyle} onClick={switchModal}>Existing Users</button>
+                    {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
                 </div>
             </form>
 
