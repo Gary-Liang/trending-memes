@@ -1,5 +1,4 @@
 import React, {useState} from 'react'
-import Cookies from 'js-cookie'
 
 export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
@@ -7,8 +6,8 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         username: "",
         password: "",
     });
-    const [errorMessage, setErrorMessage] = useState("");
-    const expirationTime = new Date(new Date().getTime() + 60 * 60 + 1000); // 1 hour from now
+    const [statusMessage, setStatusMessage] = useState("");
+    const [statusSuccess, setStatusSuccess] = useState(false);
 
     const handleSubmit = (event) => {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
@@ -25,15 +24,18 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         })
             .then((response) => response.json())
             .then((data) => {
-            // Handle server response
+                // Handle server response
                 console.log(data);
                 console.log(data.success);
-                if (data.success === false) {
-                    setErrorMessage(data.message);
-                } else if (data.success === true) {
-                    setErrorMessage("");
-                    Cookies.set('token', data.token, {expires: expirationTime});
+                console.log('status code: ' + data.statusCode);
+                setStatusMessage(data.message);
+                setStatusSuccess(data.success);
+                sessionStorage.setItem('token', data.token);
+                if (statusMessage) {
+                    console.log('set user logged in to true.');
+                    console.log('status message: ' + statusMessage);
                 }
+
 
             })
             .catch((error) => {
@@ -48,6 +50,16 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
             [className]: value,
         }));
     };
+
+    const switchModal = (event) => {
+        setShowLoginModal(false);
+        setShowRegistrationModal(true);
+    };
+
+    const closeModal = () => {
+        setTimeout(() => setShowLoginModal(false), 3000);
+    }
+
 
 
     const loginFormModalStyle = {
@@ -117,10 +129,28 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
     }
 
+    const registrationButtonStyle = {
+        backgroundColor: '#3F3D56',
+        position: 'fixed',
+        top: '55%',
+        left: '55%',
+        border: 'none',
+        transform: 'scale(1.5)',
+        color: 'white'
+
+    }
+
     const errorMessageStyle = {
         position: 'fixed',
         color: 'red',
         top: '55%',
+        left: '40%'
+    }
+
+    const successMessageStyle = {
+        position: 'fixed',
+        color: 'green',
+        top: '57.5%',
         left: '40%'
     }
 
@@ -133,7 +163,9 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
                     <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange}></input>
                     <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange}></input>
                     <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
-                    {errorMessage !== "" ? <p className='errorMessage' style={errorMessageStyle}>{errorMessage}</p> : null}
+                    <button className='registrationButton' style={registrationButtonStyle} onClick={switchModal}>No Account?</button>
+                    {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
+                    {statusSuccess ? closeModal() : null}
                 </div>
             </form>
 
