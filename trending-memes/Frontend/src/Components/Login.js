@@ -160,8 +160,8 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
                 <div className='authForm' style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowLoginModal(false)}>x</button>
                     <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
-                    <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange}></input>
-                    <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange}></input>
+                    <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange} disabled={statusSuccess}></input>
+                    <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange} disabled={statusSuccess}></input>
                     <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
                     <button className='registrationButton' style={registrationButtonStyle} onClick={switchModal}>No Account?</button>
                     {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
