@@ -190,10 +190,14 @@ function getAlbumData(data) {
 }
 
 // data.id is album hash link
-function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
+function writeMetadataToMediaInfo(data) {
     setMediaInfo({dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)});
     setAlbumInfo({album: getAlbumData(data), albumLength: getAlbumLink(data)});
 
+}
+
+function writeFavoriteAsMetadata() {
+  // console.log(meediainfo);
 }
 
   return (
@@ -213,9 +217,9 @@ function writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo) {
           }).map((data) => (
               // data can be an empty list {}
               Object.keys(data).length !== 0 ? 
-                <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data, setMediaInfo, setAlbumInfo)}>
+                <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
                   <p>{data.title}</p>
-                  <button className={"favorite" + data.id} style={favoriteIcon}></button>
+                  <button className={"favorite" + data.id} style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
                   {renderMediaPreview(data)}
                 </div> : null
 
