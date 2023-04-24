@@ -23,7 +23,8 @@ export default function App() {
     isClicked: false,
     mediaLink: null,
     height: 0,
-    width: 0
+    width: 0,
+    favorite: false
   }]);
   const [albumInfo, setAlbumInfo] = useState([{
     album: null,

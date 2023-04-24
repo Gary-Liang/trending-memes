@@ -4,7 +4,7 @@ import ClipboardImage from '../Images/copyToClipboard.png'
 // Global fields 
 let currentMediaLink = "";
 let currentMediaWidth = 0;
-let currentMediaHeight = 0;
+let currentMediaHeight;
 
 let breakpoint = 400;
 

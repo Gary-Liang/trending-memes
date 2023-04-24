@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 
 export default function About({setShowAboutModal}) {
 
@@ -38,12 +38,18 @@ export default function About({setShowAboutModal}) {
         WebkitTextStroke: "0.10px white",
     }
     
-    const welcomeBackTitleStyle = {
-        position: 'fixed',
-        top: '15%',
-        left: '40%',
+    const aboutTitleStyle = {
+        position: 'auto',
+        padding: '35px'
 
     }
+
+    const aboutBodyTextStyle = {
+        position: 'auto',
+        padding: '4%'
+
+    }
+
 
     
 
@@ -52,7 +58,15 @@ export default function About({setShowAboutModal}) {
             <div className="aboutModal" style={aboutModalStyle}>
                 <div className="aboutText" style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowAboutModal(false)}>x</button>
-                    <p className='aboutTitle' style={welcomeBackTitleStyle}>About</p>
+                    <header className='aboutHeader'>
+                        <h2 className='aboutTitle' style={aboutTitleStyle}>About</h2>
+                        <div className='aboutBodyText' style={aboutBodyTextStyle}>
+                            <p>This web application pulls from Imgur API to pull trending 'memes'. This is a personal project started by Gary Liang</p>
+                            <p>to demonstrate a fullstack project using the following technologies: Node.js, React frontend, Flask backend, redis and mongoDB databases.</p>
+                            <p>The frontend is hosted by Netlify and the backend is hosted by railway app. https://github.com/Gary-Liang/trending-memes </p>
+                            <p> © GARY LIANG 2023</p>
+                        </div>
+                    </header>    
                 </div>
             </div>
         </>

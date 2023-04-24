@@ -1,5 +1,4 @@
 import React from 'react'
-import About from './About';
 
 export default function NavBar({setShowRegistrationModal, setShowLoginModal, setShowAboutModal}) {
 
@@ -20,7 +19,7 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
         <nav className='menuBar' style={menuBarStyle}>
           <li className='signUpLink' onClick={() => setShowRegistrationModal(true)}>Sign Up</li>
           <li className='logInLink' onClick={() => setShowLoginModal(true)}>Log In</li>
-          <li className='aboutLink'>About</li>
+          <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
         </nav> :
         <nav className='menuBar' style={menuBarStyle}>
           <li className='aboutLink' to='about'>Saved Memes</li>

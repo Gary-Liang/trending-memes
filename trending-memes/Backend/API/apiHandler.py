@@ -24,7 +24,7 @@ load_dotenv('../../.env')
 # client id and client secret
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('SECRET_KEY')
-SESSION_SECRET_KEY= os.environ.get('SESSION_SECRET_KEY')
+SESSION_SECRET_KEY= str(os.environ.get('SESSION_SECRET_KEY'))
 DEFAULT_SESSION_TIME = 900
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
 # TOKEN_EXPIRATION_TIME = os.environ.get('TOKEN_EXPIRATION_TIME')
@@ -137,7 +137,7 @@ def launch():
             # response_type=RESPONSE_TYPE)
 
         app.logger.info('authorization url:  ' + authorization_url)
-        app.logger.info('state: ' + state)
+        app.logger.info('state: ', state)
         session['oauth_state'] = state
 
         redis_client.set("first_time_launched", "True")
@@ -170,7 +170,7 @@ def authenticate():
     # response_type=RESPONSE_TYPE)
 
     app.logger.info('authorization url:  ' + authorization_url)
-    app.logger.info('state: ' + state)
+    app.logger.info('state: ', state)
     session['oauth_state'] = state
 
     redis_client.set("first_time_launched", "True")
@@ -230,7 +230,7 @@ def generate_session_cache():
         # response_type=RESPONSE_TYPE)
 
     app.logger.info('authorization url:  ' + authorization_url)
-    app.logger.info('state: ' + state)
+    app.logger.info('state: ', state)
     session['oauth_state'] = state
 
     token = imgur.fetch_token(token_url, client_secret=CLIENT_SECRET, authorization_response=request.url)
