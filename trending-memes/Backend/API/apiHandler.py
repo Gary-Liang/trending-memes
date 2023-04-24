@@ -390,8 +390,8 @@ def validate():
     return jsonify(requests.get(validate_url).json())
 
 
-@app.route('/validate_user_session')
 def validate_user_session(): 
+    
     return False
 
 @app.route('/login_user', methods=['POST', 'OPTIONS'])
@@ -407,8 +407,14 @@ def login_user():
     else:
         # Get the form data from the POST Request as application/json (use get_json)
         data = request.get_json()
-        username = data.get('username').lower()
-        password = data.get('password')
+        username = ''
+        password = ''
+        if data:
+            username = data.get('username').lower()
+            password = data.get('password')
+        else:
+            return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
         print('POST Request called')
 
         # find the user in the database by their username
@@ -444,9 +450,15 @@ def register_new_user():
         # Get the form data from the POST Request as application/json (use get_json)
         data = request.get_json()
 
+        username = ''
+        password = ''
         # lowercase all usernames
-        username = data.get('username').lower()
-        password = data.get('password').encode('utf-8')
+        if data:
+            username = data.get('username').lower()
+            password = data.get('password').encode('utf-8')
+        else:
+            return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
         print(request)
         print(request.get_json())
         print(password)
