@@ -44,6 +44,7 @@ mongo_client = MongoClient(MONGO_CLIENT)
 db = mongo_client['trending_memes']
 # users is a collection 
 users = db['users']
+# sessions = db['sessions']
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -266,6 +267,11 @@ def callback():
     return redirect(url_for('.search'))
 
 
+@app.route('/saved_favorites', methods=['GET'])
+def saved_favorites():
+    return False
+
+
 @app.route('/search', methods=['GET'])
 def search():
     imgur = None
@@ -295,7 +301,7 @@ def search():
     query = request.args.get('q')
     app.logger.info('current query: ' + str(query))
     if (query is None or query == ""):
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + window_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
     else:
         return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + query +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
 
