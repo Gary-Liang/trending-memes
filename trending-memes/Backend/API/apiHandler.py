@@ -34,11 +34,11 @@ APPLICATION_STATE = 'TEST'
 # FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
+REDIS_PORT = 5591
 MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
 
-# 6379 is the default port for redis servers, redis is a quick non-sql database to save for 
-# cache 
-redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=5591, health_check_interval=30)
+# 5591 is the default port for redis railway db, redis is a quick non-sql database to save for cache 
+redis_client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD, port=REDIS_PORT, health_check_interval=30)
 
 mongo_client = MongoClient(MONGO_CLIENT)
 db = mongo_client['trending_memes']
@@ -49,7 +49,7 @@ users = db['users']
 headers = {'Connnection' : 'keep-alive'}
 
 # variables to use for API call
-tag_name = 'funny'
+tag_name = 'viral'
 sort_filter = 'top'
 window_time_filter = 'week'
 custom_time_filter = 'month'
@@ -59,7 +59,7 @@ page_filter = '0'
 authorization_base_url = 'https://api.imgur.com/oauth2/authorize'
 token_url = 'https://api.imgur.com/oauth2/token'
 refresh_url = token_url
-get_request_url = 'https://api.imgur.com/3/gallery/t/'
+get_request_url = 'https://api.imgur.com/3/gallery/search/'
 
 
 def generate_session_token(user_id):
@@ -301,9 +301,9 @@ def search():
     query = request.args.get('q')
     app.logger.info('current query: ' + str(query))
     if (query is None or query == ""):
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
     else:
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + query +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=' + query).json())
 
 
 @app.route('/all_album_image_links/<string:album_hash_info>', methods=['GET'])
