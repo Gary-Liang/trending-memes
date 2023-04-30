@@ -65,7 +65,7 @@ get_request_url = 'https://api.imgur.com/3/gallery/search/'
 def generate_session_token(user_id):
     payload = {
         'sub': user_id,
-        'iat': time.time(),
+        'iat': time(),
         'exp': DEFAULT_SESSION_TIME
     }
     token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
