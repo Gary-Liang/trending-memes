@@ -49,7 +49,7 @@ users = db['users']
 headers = {'Connnection' : 'keep-alive'}
 
 # variables to use for API call
-tag_name = 'viral'
+tag_name = 'funny'
 sort_filter = 'top'
 window_time_filter = 'week'
 custom_time_filter = 'month'
@@ -301,9 +301,9 @@ def search():
     query = request.args.get('q')
     app.logger.info('current query: ' + str(query))
     if (query is None or query == ""):
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=funny').json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
     else:
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=' + query).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + query +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
 
 
 @app.route('/all_album_image_links/<string:album_hash_info>', methods=['GET'])
