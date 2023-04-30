@@ -301,7 +301,7 @@ def search():
     query = request.args.get('q')
     app.logger.info('current query: ' + str(query))
     if (query is None or query == ""):
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=funny').json())
     else:
         return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=' + query).json())
 
