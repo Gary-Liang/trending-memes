@@ -298,7 +298,7 @@ def callback():
 
 @app.route('/saved_favorites', methods=['GET'])
 def saved_favorites():
-    return False
+    return ""
 
 
 @app.route('/search', methods=['GET'])
@@ -464,7 +464,7 @@ def login_user():
         else:
             # return a failure message if the user doesn't exist, 404 not found
             return jsonify({'success': False, 'message': 'User does not exist'}), 404
-
+        
 
 @app.route('/logout_user', methods=['POST', 'OPTIONS'])
 def logout_user():
@@ -493,12 +493,11 @@ def logout_user():
         if validated_token:
             # if token is validated, then delete the session from sessions document
             print('deleting session token for user')
-            result = sessions.delete_one({'token': token})
-            if result.deleted_count == 1:
-                return jsonify({'success': True, 'message': 'Logout successful'}), 200
+            sessions.delete_one({'token': token})
+            return jsonify({'success': True, 'message': 'Logout successful'}), 200
+
         else:
-            # return a 202 accepted message with warning that session already expired
-            return jsonify({'success': True, 'message': 'Session already expired'}), 202
+            return jsonify({'success': True, 'message': 'Logout successful'}), 202
     
 
 
