@@ -44,7 +44,7 @@ mongo_client = MongoClient(MONGO_CLIENT)
 db = mongo_client['trending_memes']
 # users is a collection 
 users = db['users']
-# sessions = db['sessions']
+sessions = db['sessions']
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -68,8 +68,30 @@ def generate_session_token(user_id):
         'iat': time(),
         'exp': DEFAULT_SESSION_TIME
     }
+    # generates a token based on payload then stores in session for reference 
     token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
+    sessions.insert_one({'user': user_id, 'token': token})
     return token
+
+def is_token_valid(token):
+    try:
+        # see if token is originally stored in db before validating the payload 
+        validated_token = sessions.find_one('token', token) 
+        if validated_token:
+            payload = jwt.decode(validated_token, SESSION_SECRET_KEY, algorithm='HS256')
+            if (payload['exp'] < time): 
+                # token has expired 
+                return False
+            else:
+                # token is valid
+                return True
+        else:
+            return False
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        # for some reason, token is invalid
+        return False
+
+
 
 
 """
@@ -396,10 +418,6 @@ def validate():
     return jsonify(requests.get(validate_url).json())
 
 
-def validate_user_session(): 
-    
-    return False
-
 @app.route('/login_user', methods=['POST', 'OPTIONS'])
 def login_user():
     if request.method == 'OPTIONS':
@@ -439,6 +457,40 @@ def login_user():
         else:
             # return a failure message if the user doesn't exist, 404 not found
             return jsonify({'success': False, 'message': 'User does not exist'}), 404
+
+
+@app.route('/logout_user', methods=['POST', 'OPTIONS'])
+def logout_user():
+    if request.method == 'OPTIONS':
+        response_headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Connection'
+        }
+        print('OPTIONS request called.')
+        return ('', 204, response_headers) 
+    else:
+        # Get the form data from the POST Request as application/json (use get_json)
+        data = request.get_json()
+        token = ''
+        if data:
+            token = data.get('token')
+        else:
+            return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+        print('POST Request called')
+
+        # find the token in the database by token
+        validated_token = is_token_valid(token)
+
+        if validated_token:
+            # if token is validated, then delete the session from sessions document
+            result = sessions.delete_one({'token': token})
+            if result.deleted_count == 1:
+                return jsonify({'success': True, 'message': 'Logout successful'}), 200
+        else:
+            # return a 202 accepted message with warning that session already expired
+            return jsonify({'success': True, 'message': 'Session already expired'}), 202
     
 
 
@@ -511,6 +563,7 @@ if __name__ == '__main__':
     context = ('cert.pem', 'key.pem')
 
     # development build
+    # app.run(port=5000, debug=False)
     app.run(port=5000, debug=False, ssl_context=context)
     # serve(app, host='0.0.0.0', port=5000, url_scheme='https')
 # else: 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function NavBar({setShowRegistrationModal, setShowLoginModal, setShowAboutModal}) {
+export default function NavBar({setShowRegistrationModal, setShowLoginModal, setShowAboutModal, setShowLogoutModal}) {
 
 
   const menuBarStyle = {
@@ -23,7 +23,7 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
         </nav> :
         <nav className='menuBar' style={menuBarStyle}>
           <li className='aboutLink' to='about'>Saved Memes</li>
-          <li className='logInLink' onClick={() => setShowLoginModal(true)}>Log Out</li>
+          <li className='logOutLink' onClick={() => setShowLogoutModal(true)}>Log Out</li>
           <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
         </nav>
       }

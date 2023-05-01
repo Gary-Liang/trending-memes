@@ -2,7 +2,7 @@
 const fetch = require('isomorphic-fetch');
 
 const API_ENDPOINT = 'https://trending-memes-production.up.railway.app/search?q=';
-//const API_ENDPOINT = `${RAILWAY_API_ENDPOINT}/search`;
+// const API_ENDPOINT = 'http://127.0.0.1:5000/search?q=';
 
 
 exports.handler = async (event, context) => {

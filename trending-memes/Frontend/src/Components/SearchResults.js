@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import StarButton from '../Images/starButton.png'
 
 export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoadingScreen}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
+ const memorizedData = useMemo(() => data, [data]);
  // show media state variable to display media previews
  //const [showMedia, setShowMedia] = useState([]);
 

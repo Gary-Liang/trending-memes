@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
 
-export default function Login({setShowRegistrationModal, setShowLoginModal}) {
+export default function Logout({setShowLogoutModal}) {
 
     const [formData, setFormData] = useState({
-        username: "",
-        password: "",
+        token: ""
     });
+
     const [statusMessage, setStatusMessage] = useState("");
     const [statusSuccess, setStatusSuccess] = useState(false);
 
@@ -13,7 +13,7 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
         // Send data to the server
-        fetch("/api/login", {
+        fetch("/api/logout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -29,11 +29,8 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
                 console.log('status code: ' + data.statusCode);
                 setStatusMessage(data.message);
                 setStatusSuccess(data.success);
-                if (data.token !== undefined && data.token !== null) {
-                    sessionStorage.setItem('token', data.token);
-                }
-                if (statusMessage) {
-                    console.log('status message: ' + statusMessage);
+                if (statusSuccess) {
+                    sessionStorage.clear();
                 }
 
 
@@ -43,26 +40,13 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
             });
     }
 
-    const inputChange = (event) => {
-        const {className, value} = event.target;
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [className]: value,
-        }));
-    };
-
-    const switchModal = (event) => {
-        setShowLoginModal(false);
-        setShowRegistrationModal(true);
-    };
-
     const closeModal = () => {
-        setTimeout(() => setShowLoginModal(false), 1500);
+        setTimeout(() => setShowLogoutModal(false), 1500);
     }
 
 
 
-    const loginFormModalStyle = {
+    const logoutFormModalStyle = {
         background: 'rgba(0,0,0, 0.75)',
         width: "100%",
         height: "100%",
@@ -97,28 +81,14 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         transform: 'translate(-50%, -50%)'
     }
     
-    const welcomeBackTitleStyle = {
+    const logoutTitleStyle = {
         position: 'fixed',
         top: '15%',
         left: '40%',
 
     }
 
-    const usernameStyle = {
-        position: 'fixed',
-        top: '30%',
-        left: '40%',
-        transform: 'scale(1.1)'
-    }
-
-    const passwordStyle = {
-        position: 'fixed',
-        top: '37.5%',
-        left: '40%',
-        transform: 'scale(1.1)'
-    }
-
-    const submitButtonStyle = {
+    const yesButtonStyle = {
         backgroundColor: '#3F3D56',
         position: 'fixed',
         top: '45%',
@@ -129,7 +99,7 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
     }
 
-    const registrationButtonStyle = {
+    const noButtonStyle = {
         backgroundColor: '#3F3D56',
         position: 'fixed',
         top: '55%',
@@ -156,14 +126,12 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
 
     return (
         <>
-            <form className='loginFormModal' style={loginFormModalStyle} onSubmit={handleSubmit}>
+            <form className='logoutFormModal' style={logoutFormModalStyle} onSubmit={handleSubmit}>
                 <div className='authForm' style={authFormStyle}>
-                    <button className="closeButton" style={closeButton} onClick={() => setShowLoginModal(false)}>x</button>
-                    <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
-                    <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange} disabled={statusSuccess}></input>
-                    <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange} disabled={statusSuccess}></input>
-                    <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
-                    <button className='registrationButton' style={registrationButtonStyle} onClick={switchModal}>No Account?</button>
+                    <button className="closeButton" style={closeButton} onClick={() => setShowLogoutModal(false)}>x</button>
+                    <p className='logoutTitle' style={logoutTitleStyle}>Are you sure you want to Log out?</p>
+                    <button className='yesButton' style={yesButtonStyle} type='submit' onClick={() => setFormData({token: sessionStorage.getItem('token')})}>Yes</button>
+                    <button className='noButton' style={noButtonStyle} onClick={() => setShowLogoutModal(false)}>No</button>
                     {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
                     {statusSuccess ? closeModal() : null}
                 </div>
