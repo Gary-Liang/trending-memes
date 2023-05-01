@@ -46,7 +46,7 @@ export default function About({setShowAboutModal}) {
 
     const aboutBodyTextStyle = {
         position: 'auto',
-        padding: '4%'
+        padding: '4%',
 
     }
 

@@ -49,10 +49,10 @@ sessions = db['sessions']
 headers = {'Connnection' : 'keep-alive'}
 
 # variables to use for API call
-tag_name = 'funny'
+tag_name = 'top'
 sort_filter = 'top'
 window_time_filter = 'week'
-custom_time_filter = 'month'
+custom_time_filter = 'week'
 page_filter = '0'
 
 # urls
@@ -66,7 +66,7 @@ def generate_session_token(user_id):
     payload = {
         'sub': str(user_id),
         'iat': time(),
-        'exp': DEFAULT_SESSION_TIME
+        'exp': time() + DEFAULT_SESSION_TIME
     }
     # generates a token based on payload then stores in session for reference 
     token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
@@ -74,22 +74,29 @@ def generate_session_token(user_id):
     return token
 
 def is_token_valid(token):
-    try:
-        # see if token is originally stored in db before validating the payload 
-        validated_token = sessions.find_one('token', token) 
-        if validated_token:
-            payload = jwt.decode(validated_token, SESSION_SECRET_KEY, algorithm='HS256')
-            if (payload['exp'] < time): 
-                # token has expired 
-                return False
-            else:
-                # token is valid
-                return True
-        else:
+    # see if the session with the token is originally stored in db before validating the payload 
+    validated_session = sessions.find_one({'token': token}) 
+    print(validated_session)
+    if validated_session:
+        print('decoding payload')
+        payload = jwt.decode(validated_session['token'], SESSION_SECRET_KEY, algorithms=['HS256'])
+        print('After decoding payload')
+        if (payload['exp'] < time()): 
+            # token has expired. need to delete from sessions collection then return false 
+            sessions.delete_one({'token': token}) 
             return False
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        # for some reason, token is invalid
+        else:
+            # token is valid
+            return True
+    else:
         return False
+    # except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+    #     # for some reason, token is invalid
+    #     if (jwt.ExpiredSignatureError):
+    #         print(jwt.ExpiredSignatureError)
+    #     elif (jwt.InvalidTokenError):
+    #         print(jwt.InvalidTokenError)
+    #     return False
 
 
 
@@ -323,9 +330,9 @@ def search():
     query = request.args.get('q')
     app.logger.info('current query: ' + str(query))
     if (query is None or query == ""):
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + tag_name +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=funny').json())
     else:
-        return jsonify(imgur.get('https://api.imgur.com/3/gallery/t/' + query +  '/' + sort_filter + '/' + custom_time_filter + '/' + page_filter).json())
+        return jsonify(imgur.get('https://api.imgur.com/3/gallery/search/' + sort_filter + '/' + custom_time_filter + '/' + page_filter + '?q=' + query).json())
 
 
 @app.route('/all_album_image_links/<string:album_hash_info>', methods=['GET'])
@@ -485,6 +492,7 @@ def logout_user():
 
         if validated_token:
             # if token is validated, then delete the session from sessions document
+            print('deleting session token for user')
             result = sessions.delete_one({'token': token})
             if result.deleted_count == 1:
                 return jsonify({'success': True, 'message': 'Logout successful'}), 200
@@ -563,8 +571,8 @@ if __name__ == '__main__':
     context = ('cert.pem', 'key.pem')
 
     # development build
-    # app.run(port=5000, debug=False)
-    app.run(port=5000, debug=False, ssl_context=context)
+    app.run(port=5000, debug=False)
+    # app.run(port=5000, debug=False, ssl_context=context)
     # serve(app, host='0.0.0.0', port=5000, url_scheme='https')
 # else: 
 #     app = create_app()
