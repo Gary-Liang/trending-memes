@@ -1,4 +1,5 @@
 import Login from './Components/Login';
+import Logout from './Components/Logout';
 import Registration from './Components/Registration';
 import NavBar from './Components/NavBar';
 import Title from './Components/Title';
@@ -17,6 +18,7 @@ export default function App() {
   const [loadingScreen, setLoadingScreen] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [mediaInfo, setMediaInfo] = useState([{
     dataInfo: null,
@@ -33,11 +35,12 @@ export default function App() {
 
   return (
       <div className="App">
-        <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} setShowAboutModal={setShowAboutModal}/>
+        <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} setShowAboutModal={setShowAboutModal} setShowLogoutModal={setShowLogoutModal}/>
         <Title /*name='The Trending Memes'*//>
         <SearchBar setQuery={setQuery} />
         {loadingScreen && <LoadingScreen/>}
         {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
+        {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal}/>}
         {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
         {showAboutModal && <About setShowAboutModal={setShowAboutModal}/>}
         <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
