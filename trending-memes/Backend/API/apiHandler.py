@@ -74,29 +74,31 @@ def generate_session_token(user_id):
     return token
 
 def is_token_valid(token):
-    # see if the session with the token is originally stored in db before validating the payload 
-    validated_session = sessions.find_one({'token': token}) 
-    print(validated_session)
-    if validated_session:
-        print('decoding payload')
-        payload = jwt.decode(validated_session['token'], SESSION_SECRET_KEY, algorithms=['HS256'])
-        print('After decoding payload')
-        if (payload['exp'] < time()): 
-            # token has expired. need to delete from sessions collection then return false 
-            sessions.delete_one({'token': token}) 
-            return False
+    try:
+        # see if the session with the token is originally stored in db before validating the payload 
+        validated_session = sessions.find_one({'token': token}) 
+        print(validated_session)
+        if validated_session:
+            print('decoding payload')
+            payload = jwt.decode(validated_session['token'], SESSION_SECRET_KEY, algorithms=['HS256'])
+            print('After decoding payload')
+            if (payload['exp'] < time()): 
+                # token has expired. need to delete from sessions collection then return false 
+                sessions.delete_one({'token': token}) 
+                return False
+            else:
+                # token is valid
+                return True
         else:
-            # token is valid
-            return True
-    else:
+            return False
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        # for some reason, token is invalid
+        if (jwt.ExpiredSignatureError):
+            sessions.delete_one({'token': token})
+            print(jwt.ExpiredSignatureError)
+        elif (jwt.InvalidTokenError):
+            print(jwt.InvalidTokenError)
         return False
-    # except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-    #     # for some reason, token is invalid
-    #     if (jwt.ExpiredSignatureError):
-    #         print(jwt.ExpiredSignatureError)
-    #     elif (jwt.InvalidTokenError):
-    #         print(jwt.InvalidTokenError)
-    #     return False
 
 
 
