@@ -1,5 +1,6 @@
 import React, {useEffect, useCallback, useLayoutEffect, useState} from 'react'
 import ClipboardImage from '../Images/copyToClipboard.png'
+import StarButton from '../Images/starButton.png'
 
 // Global fields 
 let currentMediaLink = "";
@@ -63,6 +64,15 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     setMediaLoading(false);
   
   }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
+
+  // const saveAsFavorite = {
+  //   fetch('/api/save_as_favorite').then(
+  //       // Promise
+  //       res => res.json()
+  //   ).then(
+
+  //   )
+  // }
 
   const loadPrevMediaInAlbum = useCallback(() => {
     let updateImageIncrement = imageAlbumCount - 1;
@@ -144,7 +154,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
       setTimeout(() => {
         setShowCopyMessage(false);
-      }, 2000) // Set to false after 2 seconds 
+      }, 1500) // Set to false after 2 seconds 
     } else {
       console.error("currentMediaLink is not defined or null")
     }
@@ -236,7 +246,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 }
 
 const closeButton = {
-    color: "black",
+    color: "white",
     position: "fixed",
     background: "none",
     fontSize: "24px",
@@ -268,7 +278,8 @@ const copyToClipboardButton = {
   opacity: "0.99",
   backgroundColor: "transparent",
   outline: "none",
-  border: "none"
+  border: "none",
+  filter: 'brightness(0) invert(1)'
 }
 
 const arrowLeftButton = {
@@ -340,6 +351,25 @@ const copyMessageStyle = {
   animation: `${fadeOut} 2s forwards`
 };
 
+const favoriteIcon = {
+  backgroundImage: "url(" + StarButton  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  position: 'absolute',
+  height: '25px',
+  width: '25px',
+  top: '2%',
+  right: '1%',
+  backgroundColor: 'transparent',
+  border: 'none',
+  filter: 'brightness(0) invert(1)'
+}
+
+function writeFavoriteAsMetadata() {
+  // console.log(meediainfo);
+}
+
 function mediaResizing() {
   let windowWidth = window.innerWidth;
   console.log('window width: ' + windowWidth)
@@ -389,6 +419,7 @@ function mediaResizing() {
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
                 <div className="copyToClipBoardContainer"> 
                   <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+                  <button className="favorite" style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
                   {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
                 </div>
                 { (albumInfo && albumInfo.albumLength > 1) ? 

@@ -24,12 +24,11 @@ export default function Logout({setShowLogoutModal}) {
             .then((response) => response.json())
             .then((data) => {
                 // Handle server response
-                console.log(data);
-                console.log(data.success);
-                console.log('status code: ' + data.statusCode);
                 setStatusMessage(data.message);
+                // does not update until after due to the setstate being async
                 setStatusSuccess(data.success);
-                if (statusSuccess) {
+                if (data.success) {
+                    console.log('deleting session storage');
                     sessionStorage.clear();
                 }
 
@@ -41,7 +40,7 @@ export default function Logout({setShowLogoutModal}) {
     }
 
     const closeModal = () => {
-        setTimeout(() => setShowLogoutModal(false), 1500);
+        setTimeout(() => setShowLogoutModal(false), 100);
     }
 
 

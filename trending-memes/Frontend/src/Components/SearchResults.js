@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import StarButton from '../Images/starButton.png'
 
 export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoadingScreen}) {
 
@@ -19,7 +18,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
       res => res.json()
     ).then(
       data => {
-        setData(JSON.parse(JSON.stringify(data)).data.items);
+        setData(JSON.parse(JSON.stringify(data)).data);
         //console.log(JSON.parse(JSON.stringify(data)).data.items);
         console.log(JSON.parse(JSON.stringify(data)));
         setLoadingScreen(false);
@@ -67,33 +66,6 @@ const mediaMaxSize = {
   width: 'auto',
 }
 
-const favoriteIcon = {
-  backgroundImage: "url(" + StarButton  + ")",
-  backgroundPosition: "center",
-  backgroundSize: "cover",
-  backgroundRepeat: "no-repeat",
-  position: 'absolute',
-  height: '25px',
-  width: '25px',
-  top: '2%',
-  right: '1%',
-  backgroundColor: 'transparent',
-  border: 'none'
-}
-
-const favoriteIconHover = {
-  backgroundImage: "url(" + StarButton  + ")",
-  backgroundPosition: "center",
-  backgroundSize: "cover",
-  backgroundRepeat: "no-repeat",
-  position: 'absolute',
-  height: '25px',
-  width: '25px',
-  top: '2%',
-  right: '1%',
-  backgroundColor: '#FFD700', // yellow color
-  border: 'none'
-}
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
 // it is called for imgur
@@ -197,9 +169,6 @@ function writeMetadataToMediaInfo(data) {
 
 }
 
-function writeFavoriteAsMetadata() {
-  // console.log(meediainfo);
-}
 
   return (
     <>
@@ -220,7 +189,6 @@ function writeFavoriteAsMetadata() {
               Object.keys(data).length !== 0 ? 
                 <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
                   <p>{data.title}</p>
-                  <button className={"favorite" + data.id} style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
                   {renderMediaPreview(data)}
                 </div> : null
 
