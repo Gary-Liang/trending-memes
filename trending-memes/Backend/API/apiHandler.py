@@ -45,6 +45,7 @@ db = mongo_client['trending_memes']
 # users is a collection 
 users = db['users']
 sessions = db['sessions']
+user_favorites = db['user_favorites']
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -298,9 +299,40 @@ def callback():
     return redirect(url_for('.search'))
 
 
-@app.route('/saved_favorites', methods=['GET'])
+@app.route('/saved_favorites', methods=['POST'])
 def saved_favorites():
-    return ""
+    return jsonify({})
+
+@app.route('/is_a_favorite', methods=['POST'])
+def is_a_favorite():
+    return jsonify({})
+
+@app.route('/add_to_favorites', methods=['POST'])
+def add_to_favorite():
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    token = ''
+    media_fav = ''
+    if data:
+        token = data.get('token')
+        media_fav = data.get('media')
+    else:
+        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+    print('POST Request called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+
+    if validated_token:
+        # if token is validated, then add  the session from sessions document
+
+        return jsonify({'success': True, 'message': 'Logout successful'}), 200
+
+    else:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
 
 
 @app.route('/search', methods=['GET'])

@@ -26,6 +26,35 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
     ) 
   }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
 
+  useEffect(() => {
+      fetch('/api/is_a_favorite').then(  
+        // Promise
+        res => res.json()
+      ).then(
+        data => {
+          setData(JSON.parse(JSON.stringify(data)).data);
+          //console.log(JSON.parse(JSON.stringify(data)).data.items);
+          console.log(JSON.parse(JSON.stringify(data)));
+          setLoadingScreen(false);
+        }
+      ) 
+    }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
+
+
+  useEffect(() => {
+    fetch('/api/add_to_favorites').then(
+      // Promise
+      res => res.json()
+    ).then(
+      data => {
+        setData(JSON.parse(JSON.stringify(data)).data);
+        //console.log(JSON.parse(JSON.stringify(data)).data.items);
+        console.log(JSON.parse(JSON.stringify(data)));
+        setLoadingScreen(false);
+      }
+    )
+  }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
+
   const divStyle = {
     color: 'black',
     padding: '0.25%',
@@ -64,6 +93,21 @@ const mediaMaxSize = {
   maxWidth: '250px',
   height: 'auto',
   width: 'auto',
+}
+
+const favoriteIcon = {
+  backgroundImage: "url(" + StarButton  + ")",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  position: 'absolute',
+  height: '25px',
+  width: '25px',
+  top: '2%',
+  right: '1%',
+  backgroundColor: 'transparent',
+  border: 'none',
+  filter: 'brightness(0) invert(1)'
 }
 
 
@@ -169,6 +213,10 @@ function writeMetadataToMediaInfo(data) {
 
 }
 
+function writeFavoriteAsMetadata() {
+  // console.log(meediainfo);
+}
+
 
   return (
     <>
@@ -189,6 +237,7 @@ function writeMetadataToMediaInfo(data) {
               Object.keys(data).length !== 0 ? 
                 <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
                   <p>{data.title}</p>
+                  <button className={"favorite" + data.id} style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
                   {renderMediaPreview(data)}
                 </div> : null
 
