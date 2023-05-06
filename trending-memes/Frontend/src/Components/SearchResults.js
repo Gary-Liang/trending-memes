@@ -222,7 +222,7 @@ function writeMetadataToMediaInfo(data) {
 const toggleFavorite = (id) => {
     // setFavorites(id);
 
-    const mediaMetaData = {'id': data.id, 'mediaInfo': mediaInfo, 'albumInfo': albumInfo, token: sessionStorage.getItem('token')};
+    const mediaMetaData = {'id': data.id, 'mediaInfo': mediaInfo, 'albumInfo': albumInfo, 'token': sessionStorage.getItem('token')};
     const newFavorites = { ...favorites};
     newFavorites[id] = !newFavorites[id];
     setFavorites(newFavorites);
