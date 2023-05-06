@@ -43,7 +43,7 @@ export default function App() {
         {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal}/>}
         {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
         {showAboutModal && <About setShowAboutModal={setShowAboutModal}/>}
-        <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
+        <SearchResults query={query} mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} setAlbumInfo={setAlbumInfo} setLoadingScreen={setLoadingScreen} />
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
       </div>
   );

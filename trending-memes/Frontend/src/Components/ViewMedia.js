@@ -154,7 +154,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
       setTimeout(() => {
         setShowCopyMessage(false);
-      }, 1500) // Set to false after 2 seconds 
+      }, 1500) // Set to false after 1.5 seconds 
     } else {
       console.error("currentMediaLink is not defined or null")
     }

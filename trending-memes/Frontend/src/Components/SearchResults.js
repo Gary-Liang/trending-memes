@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react'
+import StarButton from '../Images/starButton.png'
 
-export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoadingScreen}) {
+export default function SearchResults({query, mediaInfo, setMediaInfo, albumInfo, setAlbumInfo, setLoadingScreen}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
+ const [favorites, setFavorites] = useState({});
+
  const memorizedData = useMemo(() => data, [data]);
  // show media state variable to display media previews
  //const [showMedia, setShowMedia] = useState([]);
@@ -32,13 +35,12 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setLoa
         res => res.json()
       ).then(
         data => {
-          setData(JSON.parse(JSON.stringify(data)).data);
+          setFavorites(JSON.parse(JSON.stringify(data)).data);
           //console.log(JSON.parse(JSON.stringify(data)).data.items);
           console.log(JSON.parse(JSON.stringify(data)));
-          setLoadingScreen(false);
         }
       ) 
-    }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
+    }); // by putting query as a dependency here, we render more than once, every time the query changes.
 
 
   useEffect(() => {
@@ -82,7 +84,6 @@ const searchResults = {
     border: 'black ridge 1px',
     borderRadius: '10px',
     alignSelf: 'flex-start',
-    position: 'relative',
     // margin: 'auto',
     // width: '30%',
     padding: '25px',
@@ -95,6 +96,10 @@ const mediaMaxSize = {
   width: 'auto',
 }
 
+const mediaBoxStyle = {
+  position: 'relative'
+}
+
 const favoriteIcon = {
   backgroundImage: "url(" + StarButton  + ")",
   backgroundPosition: "center",
@@ -105,9 +110,9 @@ const favoriteIcon = {
   width: '25px',
   top: '2%',
   right: '1%',
-  backgroundColor: 'transparent',
+  backgroundColor: favorites ? 'yellow' : 'transparent',
   border: 'none',
-  filter: 'brightness(0) invert(1)'
+  zIndex: '1'
 }
 
 
@@ -213,9 +218,43 @@ function writeMetadataToMediaInfo(data) {
 
 }
 
-function writeFavoriteAsMetadata() {
-  // console.log(meediainfo);
-}
+// Update state when a favorite is clicked
+const toggleFavorite = (id) => {
+    // setFavorites(id);
+
+    const mediaMetaData = {'id': data.id, 'mediaInfo': mediaInfo, 'albumInfo': albumInfo, token: sessionStorage.getItem('token')};
+    const newFavorites = { ...favorites};
+    newFavorites[id] = !newFavorites[id];
+    setFavorites(newFavorites);
+    fetch("/api/update_favorites", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          'Connection': 'keep-alive',
+      },
+      body: JSON.stringify(mediaMetaData),
+  })
+      .then((response) => response.json())
+      .then((data) => {
+          // Handle server response
+          // console.log(data);
+          // console.log(data.success);
+          // console.log('status code: ' + data.statusCode);
+          // setStatusMessage(data.message);
+          // setStatusSuccess(data.success);
+          // if (data.token !== undefined && data.token !== null) {
+          //     sessionStorage.setItem('token', data.token);
+          // }
+          // if (statusMessage) {
+          //     console.log('status message: ' + statusMessage);
+          // }
+
+
+      })
+      .catch((error) => {
+          console.error("Error:", error);
+      });
+};
 
 
   return (
@@ -232,14 +271,16 @@ function writeFavoriteAsMetadata() {
               } else {
                 return {};
               }
-          }).map((data) => (
+          }).map((data, index) => (
               // data can be an empty list {}
-              Object.keys(data).length !== 0 ? 
-                <div key={data.id} className={data.id} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
-                  <p>{data.title}</p>
-                  <button className={"favorite" + data.id} style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
-                  {renderMediaPreview(data)}
-                </div> : null
+              Object.keys(data).length !== 0 ? (
+                <div className={"mediaBox" + index} style={mediaBoxStyle}>
+                  <div key={data.id} className={"mediaInfo" + index} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
+                    <p>{data.title}</p>
+                    {renderMediaPreview(data)}
+                  </div>
+                  <button className={favorites[data.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon} onClick={() => toggleFavorite(data.id)}></button>
+                </div>): null
 
           )) : null)
         }

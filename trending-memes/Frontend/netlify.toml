@@ -17,6 +17,11 @@
   status = 200
 
 [[redirects]]
+  from ="/api/update_favorites"
+  to = "/.netlify/functions/updateFavorites"
+  status = 200
+
+[[redirects]]
   from = "/api/search"
   to = "/.netlify/functions/search/:splat"
 

@@ -63,15 +63,15 @@ refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/search/'
 
 
-def generate_session_token(user_id):
+def generate_session_token(acc_id):
     payload = {
-        'sub': str(user_id),
+        'sub': str(acc_id),
         'iat': time(),
         'exp': time() + DEFAULT_SESSION_TIME
     }
     # generates a token based on payload then stores in session for reference 
     token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
-    sessions.insert_one({'user': user_id, 'token': token})
+    sessions.insert_one({'username': acc_id['username'], 'token': token})
     return token
 
 def is_token_valid(token):
@@ -307,15 +307,19 @@ def saved_favorites():
 def is_a_favorite():
     return jsonify({})
 
-@app.route('/add_to_favorites', methods=['POST'])
-def add_to_favorite():
+@app.route('/update_favorites', methods=['POST'])
+def update_favorites():
     # Get the form data from the POST Request as application/json (use get_json)
     data = request.get_json()
     token = ''
-    media_fav = ''
+    id = ''
+    media_info = ''
+    album_info = ''
     if data:
+        id = data.get('id')
         token = data.get('token')
-        media_fav = data.get('media')
+        media_info = data.get('mediaInfo')
+        album_info = data.get('albumInfo')
     else:
         return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
         
@@ -324,12 +328,27 @@ def add_to_favorite():
     # find the token in the database by token
     validated_token = is_token_valid(token)
 
-
     if validated_token:
+        session = sessions.find_one({'token': token})
+        username = session['username']
+        print('username: ', username)
         # if token is validated, then add  the session from sessions document
-
-        return jsonify({'success': True, 'message': 'Logout successful'}), 200
-
+        favorites = user_favorites.find_one({'username': username})['favorites']
+        print('user favorite:', favorites)
+        if (len(favorites) < 1):
+            favorite_info = {id: {'media_info': media_info, 'album_info': album_info}}
+            user_favorites.update_one(
+                {"usernme": username},
+                {"$push": {"favorites": favorite_info}}
+            )
+            return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
+        else: 
+            # remove from db 
+            user_favorites.update_one(
+                {'userId': username},
+                {'$pull': {"favorites": {id}}}
+            )
+            return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
     else:
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
@@ -483,13 +502,13 @@ def login_user():
         print('POST Request called')
 
         # find the user in the database by their username
-        user = users.find_one({'username': username})
+        account = users.find_one({'username': username})
 
-        if user:
+        if account:
             # check if the password matches 
-            if password == user['password'].decode('utf-8'):
+            if password == account['password'].decode('utf-8'):
                 # return a success message and any other data you want to include
-                user_session_token = generate_session_token(user)
+                user_session_token = generate_session_token(account)
                 
                 return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
             else:
@@ -528,10 +547,10 @@ def logout_user():
             # if token is validated, then delete the session from sessions document
             print('deleting session token for user')
             sessions.delete_one({'token': token})
-            return jsonify({'success': True, 'message': 'Logout successful'}), 200
+            return jsonify({'success': True, 'message': 'Logout successful.'}), 200
 
         else:
-            return jsonify({'success': True, 'message': 'Logout successful'}), 202
+            return jsonify({'success': True, 'message': 'Session expired.'}), 202
     
 
 
@@ -564,6 +583,7 @@ def register_new_user():
         app.logger.info('Invoking registering a new user.')
 
         user = {'username': username, 'password': password}
+        favorite_info = {'username': username, 'favorites': {}}
         if username is None or not username: 
             return jsonify({'success': False, 'message': 'Username is required.'}), 400
         elif password is None or not password: 
@@ -579,6 +599,7 @@ def register_new_user():
                 return jsonify({'success': False, 'message': 'Username already exists.'}), 400
             try: 
                 users.insert_one(user)
+                user_favorites.insert_one(favorite_info)
                 return jsonify({'success': True, 'message': 'Registration successful, please log in.'}), 200
             except errors.DuplicateKeyError:
                 print('User already in DB')
