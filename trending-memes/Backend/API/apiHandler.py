@@ -301,7 +301,39 @@ def callback():
 
 @app.route('/saved_favorites', methods=['POST'])
 def saved_favorites():
-    return jsonify({})
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    token = ''
+    if data:
+        token = data.get('token')
+    else:
+        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+    print('POST Request called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+    if validated_token:
+        session = sessions.find_one({'token': token})
+        username = ''
+        if (session):
+            username = session['username']
+        
+        print('username: ', username)
+
+        # search for the favorite with the specified user and id
+        user_data = user_favorites.find_one({'username': username})
+        print('favorite list: ', user_data['favorites'])
+        if (user_data):
+            print('Returning user favorites')
+            return jsonify(user_data['favorites']), 200
+        else: 
+            print('Returning nothing')
+            return jsonify({}), 200
+    else:
+        print('Non-authoritative information')
+        return jsonify({'success': True, 'message': 'Non-Authoritative Information'}), 203
 
 @app.route('/is_a_favorite', methods=['POST'])
 def is_a_favorite():
@@ -330,24 +362,41 @@ def update_favorites():
 
     if validated_token:
         session = sessions.find_one({'token': token})
-        username = session['username']
+        username = ''
+        favorites_list = ''
+        favorite = ''
+        if (session):
+            username = session['username']
+        
         print('username: ', username)
-        # if token is validated, then add  the session from sessions document
-        favorites = user_favorites.find_one({'username': username})['favorites']
-        print('user favorite:', favorites)
-        if (len(favorites) < 1):
+        print('id: ', id)
+
+        # search for the favorite with the specified user and id
+        favorite = user_favorites.find_one({'username': username, 'favorites.' + id: {'$exists': True}})
+        print('favorite before: ', favorite)
+        
+        if (favorite is None):
             favorite_info = {id: {'media_info': media_info, 'album_info': album_info}}
             user_favorites.update_one(
-                {"usernme": username},
+                {"username": username},
                 {"$push": {"favorites": favorite_info}}
             )
+            user_data = user_favorites.find_one({'username': username})
+            if (user_data):
+                favorites_list = user_data['favorites']
+                print('favorites list after 1: ', favorites_list)
             return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
         else: 
             # remove from db 
+            # delete the favorite
             user_favorites.update_one(
-                {'userId': username},
-                {'$pull': {"favorites": {id}}}
+                {'username': username}, 
+                {'$pull': {'favorites': {id: {'$exists': True}}}}
             )
+            user_data = user_favorites.find_one({'username': username})
+            if (user_data):
+                favorites_list = user_data['favorites']
+                print('favorites list after 2: ', favorites_list)
             return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
     else:
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
@@ -583,7 +632,7 @@ def register_new_user():
         app.logger.info('Invoking registering a new user.')
 
         user = {'username': username, 'password': password}
-        favorite_info = {'username': username, 'favorites': {}}
+        favorite_info = {'username': username, 'favorites': []}
         if username is None or not username: 
             return jsonify({'success': False, 'message': 'Username is required.'}), 400
         elif password is None or not password: 

@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import StarButton from '../Images/starButton.png'
+import StarButtonHightlight from '../Images/starButtonHighlight.png'
 
-export default function SearchResults({query, mediaInfo, setMediaInfo, albumInfo, setAlbumInfo, setLoadingScreen}) {
+export default function SearchResults({query, setMediaInfo, setAlbumInfo, setShowLoginModal, setLoadingScreen}) {
 
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
- const [favorites, setFavorites] = useState({});
+ const [isFavorite, setIsFavorite] = useState({});
+ const tokenData = {'token': sessionStorage.getItem('token')};
 
  const memorizedData = useMemo(() => data, [data]);
+
  // show media state variable to display media previews
  //const [showMedia, setShowMedia] = useState([]);
 
@@ -27,35 +30,45 @@ export default function SearchResults({query, mediaInfo, setMediaInfo, albumInfo
         setLoadingScreen(false);
       }
     ) 
-  }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
+  }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   useEffect(() => {
-      fetch('/api/is_a_favorite').then(  
-        // Promise
-        res => res.json()
-      ).then(
-        data => {
-          setFavorites(JSON.parse(JSON.stringify(data)).data);
-          //console.log(JSON.parse(JSON.stringify(data)).data.items);
-          console.log(JSON.parse(JSON.stringify(data)));
+    const fetchData = async () => {
+      const favoriteList = await fetchFavorites();
+      const initialFavorites = {};
+      const favoriteObj = {};
+      if (Object.keys(favoriteList).length !== 0) {
+        favoriteList.forEach(item => {
+          const key = Object.keys(item);
+          favoriteObj[key] = item;
+        });
+      } 
+      data.forEach(media => {
+        if (favoriteObj.hasOwnProperty(media.id)) {
+          //console.log(media.id);
+          initialFavorites[media.id] = true;
+        } else {
+          initialFavorites[media.id] = false;
         }
-      ) 
-    }); // by putting query as a dependency here, we render more than once, every time the query changes.
-
-
-  useEffect(() => {
-    fetch('/api/add_to_favorites').then(
-      // Promise
-      res => res.json()
-    ).then(
-      data => {
-        setData(JSON.parse(JSON.stringify(data)).data);
-        //console.log(JSON.parse(JSON.stringify(data)).data.items);
-        console.log(JSON.parse(JSON.stringify(data)));
-        setLoadingScreen(false);
-      }
-    )
-  }, [query, setLoadingScreen])  // by putting query as a dependency here, we render more than once, every time the query changes.
+      });
+      setIsFavorite(initialFavorites);
+      console.log(isFavorite);
+    };
+    fetchData();
+  }, [data]);
+  
+  const fetchFavorites = async () => {
+    const response = await fetch("/api/saved_favorites", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+      },
+      body: JSON.stringify(tokenData),
+    });
+    const favoriteList = await response.json();
+    return favoriteList;
+  };
 
   const divStyle = {
     color: 'black',
@@ -100,8 +113,8 @@ const mediaBoxStyle = {
   position: 'relative'
 }
 
-const favoriteIcon = {
-  backgroundImage: "url(" + StarButton  + ")",
+const favoriteIcon = (id) => ({
+  backgroundImage: isFavorite[id] ? "url(" + StarButtonHightlight  + ")" : "url(" + StarButton  + ")",
   backgroundPosition: "center",
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
@@ -110,10 +123,10 @@ const favoriteIcon = {
   width: '25px',
   top: '2%',
   right: '1%',
-  backgroundColor: favorites ? 'yellow' : 'transparent',
+  backgroundColor: 'transparent',
   border: 'none',
   zIndex: '1'
-}
+})
 
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
@@ -219,13 +232,11 @@ function writeMetadataToMediaInfo(data) {
 }
 
 // Update state when a favorite is clicked
-const toggleFavorite = (id) => {
+const toggleFavorite = (data, id) => {
     // setFavorites(id);
-
-    const mediaMetaData = {'id': data.id, 'mediaInfo': mediaInfo, 'albumInfo': albumInfo, 'token': sessionStorage.getItem('token')};
-    const newFavorites = { ...favorites};
-    newFavorites[id] = !newFavorites[id];
-    setFavorites(newFavorites);
+    const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
+    const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
+    const mediaMetaData = {'id': id, 'mediaInfo': mediaInfoTemp, 'albumInfo': albumInfoTemp, 'token': sessionStorage.getItem('token')};
     fetch("/api/update_favorites", {
       method: "POST",
       headers: {
@@ -233,23 +244,24 @@ const toggleFavorite = (id) => {
           'Connection': 'keep-alive',
       },
       body: JSON.stringify(mediaMetaData),
-  })
-      .then((response) => response.json())
-      .then((data) => {
-          // Handle server response
-          // console.log(data);
-          // console.log(data.success);
-          // console.log('status code: ' + data.statusCode);
-          // setStatusMessage(data.message);
-          // setStatusSuccess(data.success);
-          // if (data.token !== undefined && data.token !== null) {
-          //     sessionStorage.setItem('token', data.token);
-          // }
-          // if (statusMessage) {
-          //     console.log('status message: ' + statusMessage);
-          // }
-
-
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          sessionStorage.clear();
+          setShowLoginModal(true);
+          setIsFavorite({});
+          throw new Error('401 Unauthorized'); // Stops the promise 
+        }
+        return response.json();
+      })
+      .then(() => {
+        console.log('id: ', id);
+        const newFavorite = {...isFavorite};
+        console.log(newFavorite);
+        newFavorite[id] = !newFavorite[id];
+        console.log('executed here: ' + newFavorite[id]);
+        setIsFavorite(newFavorite);
+        console.log(newFavorite);
       })
       .catch((error) => {
           console.error("Error:", error);
@@ -259,7 +271,7 @@ const toggleFavorite = (id) => {
 
   return (
     <>
-      { <div className='mediaBox' style={divStyle}>
+      { <div className='mediaPreview' style={divStyle}>
         {
           (data ? data.filter(data => {
               if (query === "") {
@@ -271,15 +283,15 @@ const toggleFavorite = (id) => {
               } else {
                 return {};
               }
-          }).map((data, index) => (
+          }).map((resultData, index) => (
               // data can be an empty list {}
-              Object.keys(data).length !== 0 ? (
-                <div className={"mediaBox" + index} style={mediaBoxStyle}>
-                  <div key={data.id} className={"mediaInfo" + index} style={searchResults} onClick={() => writeMetadataToMediaInfo(data)}>
-                    <p>{data.title}</p>
-                    {renderMediaPreview(data)}
+              Object.keys(resultData).length !== 0 ? (
+                <div key={resultData.id + "mediaBox" + index} className={"mediaBox" + index} style={mediaBoxStyle}>
+                  <div key={resultData.id + "info" + index} className={"mediaInfo" + index} style={searchResults} onClick={() => writeMetadataToMediaInfo(resultData)}>
+                    <p>{resultData.title}</p>
+                    {renderMediaPreview(resultData)}
                   </div>
-                  <button className={favorites[data.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon} onClick={() => toggleFavorite(data.id)}></button>
+                  <button key={resultData.id + "btn" + index} className={isFavorite[resultData.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon(resultData.id)} onClick={() => toggleFavorite(resultData, resultData.id)}></button>
                 </div>): null
 
           )) : null)
