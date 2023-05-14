@@ -6,7 +6,8 @@ const API_ENDPOINT = 'http://127.0.0.1:5000/logout_user';
 
 exports.handler = async (event, context) => {
   try {
-    const formData = JSON.parse(event.body);
+    const token = event.headers.Authorization;
+
     if (event.httpMethod == 'OPTIONS') {
       console.log('OPTIONS Request');
       return {
@@ -24,10 +25,10 @@ exports.handler = async (event, context) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': 'https://tmback.xyz',
-            },
-        body: JSON.stringify(formData),
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "https://tmback.xyz",
+            "Authorization": `Bearer ${token}`
+            }
     });
     const data = await response.json();
     return {

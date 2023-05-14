@@ -2,24 +2,23 @@ import React, {useState} from 'react'
 
 export default function Logout({setShowLogoutModal}) {
 
-    const [formData, setFormData] = useState({
-        token: ""
-    });
-
     const [statusMessage, setStatusMessage] = useState("");
     const [statusSuccess, setStatusSuccess] = useState(false);
 
     const handleSubmit = (event) => {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
+
+        const token = sessionStorage.getItem('token');
+        console.log('token: ' + token);
         // Send data to the server
         fetch("/api/logout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                'Connection': 'keep-alive',
-            },
-            body: JSON.stringify(formData),
+                "Connection": "keep-alive",
+                "Authorization": `Bearer ${token}`
+            }
         })
             .then((response) => response.json())
             .then((data) => {
@@ -129,7 +128,7 @@ export default function Logout({setShowLogoutModal}) {
                 <div className='authForm' style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowLogoutModal(false)}>x</button>
                     <p className='logoutTitle' style={logoutTitleStyle}>Are you sure you want to Log out?</p>
-                    <button className='yesButton' style={yesButtonStyle} type='submit' onClick={() => setFormData({token: sessionStorage.getItem('token')})}>Yes</button>
+                    <button className='yesButton' style={yesButtonStyle} type='submit'>Yes</button>
                     <button className='noButton' style={noButtonStyle} onClick={() => setShowLogoutModal(false)}>No</button>
                     {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
                     {statusSuccess ? closeModal() : null}

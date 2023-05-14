@@ -298,9 +298,50 @@ def callback():
 
     return redirect(url_for('.search'))
 
-
 @app.route('/saved_favorites', methods=['POST'])
 def saved_favorites():
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    token = ''
+    if data:
+        token = data.get('token')
+    else:
+        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+    print('POST Request called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+    if validated_token:
+        session = sessions.find_one({'token': token})
+        username = ''
+        if (session):
+            username = session['username']
+        
+        print('username: ', username)
+
+        # search for the favorite with the specified user and id
+        user_data = user_favorites.find_one({'username': username})
+        print('favorite list: ', user_data['favorites'])
+        if (user_data):
+            query = request.args.get('q')
+            if (query is None or query == ""):
+                print('Returning user favorites')
+                return jsonify(user_data['favorites']), 200
+            else : 
+                print(query)
+                return ""
+        else: 
+            print('Returning nothing')
+            return jsonify({}), 200
+    else:
+        print('Non-authoritative information')
+        return jsonify({'success': True, 'message': 'Non-Authoritative Information'}), 203
+
+
+@app.route('/saved_favorites_as_data', methods=['POST'])
+def saved_favorites_as_data():
     # Get the form data from the POST Request as application/json (use get_json)
     data = request.get_json()
     token = ''
@@ -390,7 +431,7 @@ def update_favorites():
             user_data = user_favorites.find_one({'username': username})
             if (user_data):
                 favorites_list = user_data['favorites']
-                print('favorites list after 1: ', favorites_list)
+                print('favorites list after 1: ', jsonify(favorites_list).get_data(as_text=True))
             return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
         else: 
             # remove from db 
@@ -402,7 +443,7 @@ def update_favorites():
             user_data = user_favorites.find_one({'username': username})
             if (user_data):
                 favorites_list = user_data['favorites']
-                print('favorites list after 2: ', favorites_list)
+                print('favorites list after 2: ', jsonify(favorites_list).get_data(as_text=True))
             return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
     else:
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
@@ -586,14 +627,14 @@ def logout_user():
         return ('', 204, response_headers) 
     else:
         # Get the form data from the POST Request as application/json (use get_json)
-        data = request.get_json()
-        token = ''
-        if data:
-            token = data.get('token')
+        token = None
+        print(request.headers)
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split('Bearer ')[1]
         else:
-            return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 401
         
-        print('POST Request called')
+        print('POST Request called ', token)
 
         # find the token in the database by token
         validated_token = is_token_valid(token)
