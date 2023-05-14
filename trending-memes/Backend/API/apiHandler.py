@@ -45,6 +45,7 @@ db = mongo_client['trending_memes']
 # users is a collection 
 users = db['users']
 sessions = db['sessions']
+user_favorites = db['user_favorites']
 
 headers = {'Connnection' : 'keep-alive'}
 
@@ -62,41 +63,43 @@ refresh_url = token_url
 get_request_url = 'https://api.imgur.com/3/gallery/search/'
 
 
-def generate_session_token(user_id):
+def generate_session_token(acc_id):
     payload = {
-        'sub': str(user_id),
+        'sub': str(acc_id),
         'iat': time(),
         'exp': time() + DEFAULT_SESSION_TIME
     }
     # generates a token based on payload then stores in session for reference 
     token = jwt.encode(payload, SESSION_SECRET_KEY, algorithm='HS256')
-    sessions.insert_one({'user': user_id, 'token': token})
+    sessions.insert_one({'username': acc_id['username'], 'token': token})
     return token
 
 def is_token_valid(token):
-    # see if the session with the token is originally stored in db before validating the payload 
-    validated_session = sessions.find_one({'token': token}) 
-    print(validated_session)
-    if validated_session:
-        print('decoding payload')
-        payload = jwt.decode(validated_session['token'], SESSION_SECRET_KEY, algorithms=['HS256'])
-        print('After decoding payload')
-        if (payload['exp'] < time()): 
-            # token has expired. need to delete from sessions collection then return false 
-            sessions.delete_one({'token': token}) 
-            return False
+    try:
+        # see if the session with the token is originally stored in db before validating the payload 
+        validated_session = sessions.find_one({'token': token}) 
+        print(validated_session)
+        if validated_session:
+            print('decoding payload')
+            payload = jwt.decode(validated_session['token'], SESSION_SECRET_KEY, algorithms=['HS256'])
+            print('After decoding payload')
+            if (payload['exp'] < time()): 
+                # token has expired. need to delete from sessions collection then return false 
+                sessions.delete_one({'token': token}) 
+                return False
+            else:
+                # token is valid
+                return True
         else:
-            # token is valid
-            return True
-    else:
+            return False
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        # for some reason, token is invalid
+        if (jwt.ExpiredSignatureError):
+            sessions.delete_one({'token': token})
+            print(jwt.ExpiredSignatureError)
+        elif (jwt.InvalidTokenError):
+            print(jwt.InvalidTokenError)
         return False
-    # except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-    #     # for some reason, token is invalid
-    #     if (jwt.ExpiredSignatureError):
-    #         print(jwt.ExpiredSignatureError)
-    #     elif (jwt.InvalidTokenError):
-    #         print(jwt.InvalidTokenError)
-    #     return False
 
 
 
@@ -296,9 +299,114 @@ def callback():
     return redirect(url_for('.search'))
 
 
-@app.route('/saved_favorites', methods=['GET'])
+@app.route('/saved_favorites', methods=['POST'])
 def saved_favorites():
-    return ""
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    token = ''
+    if data:
+        token = data.get('token')
+    else:
+        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+    print('POST Request called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+    if validated_token:
+        session = sessions.find_one({'token': token})
+        username = ''
+        if (session):
+            username = session['username']
+        
+        print('username: ', username)
+
+        # search for the favorite with the specified user and id
+        user_data = user_favorites.find_one({'username': username})
+        print('favorite list: ', user_data['favorites'])
+        if (user_data):
+            query = request.args.get('q')
+            if (query is None or query == ""):
+                print('Returning user favorites')
+                return jsonify(user_data['favorites']), 200
+            else : 
+                print(query)
+                return ""
+        else: 
+            print('Returning nothing')
+            return jsonify({}), 200
+    else:
+        print('Non-authoritative information')
+        return jsonify({'success': True, 'message': 'Non-Authoritative Information'}), 203
+
+
+@app.route('/is_a_favorite', methods=['POST'])
+def is_a_favorite():
+    return jsonify({})
+
+@app.route('/update_favorites', methods=['POST'])
+def update_favorites():
+    # Get the form data from the POST Request as application/json (use get_json)
+    data = request.get_json()
+    token = ''
+    id = ''
+    media_info = ''
+    album_info = ''
+    if data:
+        id = data.get('id')
+        token = data.get('token')
+        media_info = data.get('mediaInfo')
+        album_info = data.get('albumInfo')
+    else:
+        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        
+    print('POST Request called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+    if validated_token:
+        session = sessions.find_one({'token': token})
+        username = ''
+        favorites_list = ''
+        favorite = ''
+        if (session):
+            username = session['username']
+        
+        print('username: ', username)
+        print('id: ', id)
+
+        # search for the favorite with the specified user and id
+        favorite = user_favorites.find_one({'username': username, 'favorites.' + id: {'$exists': True}})
+        print('favorite before: ', favorite)
+        
+        if (favorite is None):
+            favorite_info = {id: {'media_info': media_info, 'album_info': album_info}}
+            user_favorites.update_one(
+                {"username": username},
+                {"$push": {"favorites": favorite_info}}
+            )
+            user_data = user_favorites.find_one({'username': username})
+            if (user_data):
+                favorites_list = user_data['favorites']
+                print('favorites list after 1: ', favorites_list)
+            return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
+        else: 
+            # remove from db 
+            # delete the favorite
+            user_favorites.update_one(
+                {'username': username}, 
+                {'$pull': {'favorites': {id: {'$exists': True}}}}
+            )
+            user_data = user_favorites.find_one({'username': username})
+            if (user_data):
+                favorites_list = user_data['favorites']
+                print('favorites list after 2: ', favorites_list)
+            return jsonify({'success': True, 'message': 'Favorite update successful'}), 200
+    else:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
 
 
 @app.route('/search', methods=['GET'])
@@ -449,13 +557,13 @@ def login_user():
         print('POST Request called')
 
         # find the user in the database by their username
-        user = users.find_one({'username': username})
+        account = users.find_one({'username': username})
 
-        if user:
+        if account:
             # check if the password matches 
-            if password == user['password'].decode('utf-8'):
+            if password == account['password'].decode('utf-8'):
                 # return a success message and any other data you want to include
-                user_session_token = generate_session_token(user)
+                user_session_token = generate_session_token(account)
                 
                 return jsonify({'success': True, 'message': 'Login successful', 'token': user_session_token}), 200
             else:
@@ -494,10 +602,10 @@ def logout_user():
             # if token is validated, then delete the session from sessions document
             print('deleting session token for user')
             sessions.delete_one({'token': token})
-            return jsonify({'success': True, 'message': 'Logout successful'}), 200
+            return jsonify({'success': True, 'message': 'Logout successful.'}), 200
 
         else:
-            return jsonify({'success': True, 'message': 'Logout successful'}), 202
+            return jsonify({'success': True, 'message': 'Session expired.'}), 202
     
 
 
@@ -530,6 +638,7 @@ def register_new_user():
         app.logger.info('Invoking registering a new user.')
 
         user = {'username': username, 'password': password}
+        favorite_info = {'username': username, 'favorites': []}
         if username is None or not username: 
             return jsonify({'success': False, 'message': 'Username is required.'}), 400
         elif password is None or not password: 
@@ -545,6 +654,7 @@ def register_new_user():
                 return jsonify({'success': False, 'message': 'Username already exists.'}), 400
             try: 
                 users.insert_one(user)
+                user_favorites.insert_one(favorite_info)
                 return jsonify({'success': True, 'message': 'Registration successful, please log in.'}), 200
             except errors.DuplicateKeyError:
                 print('User already in DB')

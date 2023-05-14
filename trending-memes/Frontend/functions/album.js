@@ -1,8 +1,8 @@
 
 const fetch = require('isomorphic-fetch');
 
-const API_ENDPOINT = 'https://trending-memes-production.up.railway.app/all_album_image_links/';
-//const API_ENDPOINT = `${RAILWAY_API_ENDPOINT}/search`;
+// const API_ENDPOINT = 'https://trending-memes-production.up.railway.app/all_album_image_links/';
+const API_ENDPOINT = "http://127.0.0.1:5000/all_album_image_links/"
 
 exports.handler = async (event, context) => {
   try {
@@ -12,7 +12,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://tmback.xyz',
+        'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
         'Content-Type': 'application/json',
         'Connection': 'keep-alive'
       },
