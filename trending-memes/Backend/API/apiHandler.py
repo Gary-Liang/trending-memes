@@ -326,14 +326,20 @@ def saved_favorites():
         user_data = user_favorites.find_one({'username': username})
         print('favorite list: ', user_data['favorites'])
         if (user_data):
-            print('Returning user favorites')
-            return jsonify(user_data['favorites']), 200
+            query = request.args.get('q')
+            if (query is None or query == ""):
+                print('Returning user favorites')
+                return jsonify(user_data['favorites']), 200
+            else : 
+                print(query)
+                return ""
         else: 
             print('Returning nothing')
             return jsonify({}), 200
     else:
         print('Non-authoritative information')
         return jsonify({'success': True, 'message': 'Non-Authoritative Information'}), 203
+
 
 @app.route('/is_a_favorite', methods=['POST'])
 def is_a_favorite():

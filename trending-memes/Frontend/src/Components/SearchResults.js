@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo} from 'react'
 import StarButton from '../Images/starButton.png'
 import StarButtonHightlight from '../Images/starButtonHighlight.png'
 
@@ -7,7 +7,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
   // create state variable to get backend API 
  const [data, setData] = useState([{}]);
  const [isFavorite, setIsFavorite] = useState({});
- const tokenData = {'token': sessionStorage.getItem('token')};
+ const token = sessionStorage.getItem('token') || '';
 
  const memorizedData = useMemo(() => data, [data]);
 
@@ -16,23 +16,64 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
 
 
  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
- useEffect(() => {
-  setLoadingScreen(true);
-    // fetch(`/search?q=${query}`).then(
-    fetch(`/api/search?q=${query}`).then(  
-      // Promise
-      res => res.json()
-    ).then(
-      data => {
+  useEffect(() => {
+    const abortController = new AbortController();
+    const fetchData = async () => {
+      try {
+        setLoadingScreen(true);
+        // fetch(`/search?q=${query}`).then(
+
+        const response = await fetch(`/api/search?q=${query}`, {
+          signal: abortController.signal,
+        });
+
+
+        const data = await response.json();
         setData(JSON.parse(JSON.stringify(data)).data);
-        //console.log(JSON.parse(JSON.stringify(data)).data.items);
         console.log(JSON.parse(JSON.stringify(data)));
         setLoadingScreen(false);
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error(error);
+          setLoadingScreen(false);
+        }
       }
-    ) 
-  }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
+    };
+
+      fetchData();
+
+      return () => {
+        abortController.abort();
+      };
+    }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
+
+  // useEffect(() => {
+  //   // Update the sessionStorage whenever the token changes
+  //   setToken({'token': sessionStorage.getItem('token')});
+  // });
+
+  const fetchFavorites = useCallback(async () => {
+    const tokenJson = {'token': token || ''};
+    const response = await fetch("/api/saved_favorites", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+      },
+      body: JSON.stringify(tokenJson),
+    });
+
+    if (response.status !== 200) {
+      return [];
+    }
+
+    const favoriteList = await response.json();
+    return favoriteList;
+  }, [token]);
+
 
   useEffect(() => {
+    const abortController = new AbortController();
     const fetchData = async () => {
       const favoriteList = await fetchFavorites();
       const initialFavorites = {};
@@ -52,23 +93,13 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
         }
       });
       setIsFavorite(initialFavorites);
-      console.log(isFavorite);
     };
     fetchData();
-  }, [data]);
-  
-  const fetchFavorites = async () => {
-    const response = await fetch("/api/saved_favorites", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Connection": "keep-alive",
-      },
-      body: JSON.stringify(tokenData),
-    });
-    const favoriteList = await response.json();
-    return favoriteList;
-  };
+
+    return () => {
+      abortController.abort();
+    };
+  }, [data, fetchFavorites]);
 
   const divStyle = {
     color: 'black',

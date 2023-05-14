@@ -1,6 +1,5 @@
 import React, {useEffect, useCallback, useLayoutEffect, useState} from 'react'
 import ClipboardImage from '../Images/copyToClipboard.png'
-import StarButton from '../Images/starButton.png'
 
 // Global fields 
 let currentMediaLink = "";
@@ -351,24 +350,6 @@ const copyMessageStyle = {
   animation: `${fadeOut} 2s forwards`
 };
 
-const favoriteIcon = {
-  backgroundImage: "url(" + StarButton  + ")",
-  backgroundPosition: "center",
-  backgroundSize: "cover",
-  backgroundRepeat: "no-repeat",
-  position: 'absolute',
-  height: '25px',
-  width: '25px',
-  top: '2%',
-  right: '1%',
-  backgroundColor: 'transparent',
-  border: 'none',
-  filter: 'brightness(0) invert(1)'
-}
-
-function writeFavoriteAsMetadata() {
-  // console.log(meediainfo);
-}
 
 function mediaResizing() {
   let windowWidth = window.innerWidth;
@@ -419,7 +400,6 @@ function mediaResizing() {
                 <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
                 <div className="copyToClipBoardContainer"> 
                   <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
-                  <button className="favorite" style={favoriteIcon} onClick={() => writeFavoriteAsMetadata}></button>
                   {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
                 </div>
                 { (albumInfo && albumInfo.albumLength > 1) ? 

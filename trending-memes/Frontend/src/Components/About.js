@@ -15,8 +15,8 @@ export default function About({setShowAboutModal}) {
 
     const authFormStyle = {
         backgroundColor: 'white',
-        width: '40%',
-        height: '50%',
+        width: '45%',
+        height: '65%',
         border: 'black ridge 1px',
         borderRadius: '10px',
         position: 'fixed',
@@ -61,9 +61,9 @@ export default function About({setShowAboutModal}) {
                     <header className='aboutHeader'>
                         <h2 className='aboutTitle' style={aboutTitleStyle}>About</h2>
                         <div className='aboutBodyText' style={aboutBodyTextStyle}>
-                            <p>This web application pulls from Imgur API to pull trending 'memes'. This is a personal project started by Gary Liang</p>
-                            <p>to demonstrate a fullstack project using the following technologies: Node.js, React frontend, Flask backend, redis and mongoDB databases.</p>
-                            <p>The frontend is hosted by Netlify and the backend is hosted by railway app. https://github.com/Gary-Liang/trending-memes </p>
+                            <p>This web application pulls trending 'memes' from the Imgur API. It is a personal project started by Gary Liang</p>
+                            <p>to demonstrate the use of Node.js, React frontend, Flask backend, Redis, and MongoDB databases in a full-stack project.</p>
+                            <p>The frontend is hosted on Netlify, and the backend is hosted on Railway app. For more information, check out the project repository at https://github.com/Gary-Liang/trending-memes. </p>
                             <p> © GARY LIANG 2023</p>
                         </div>
                     </header>    
