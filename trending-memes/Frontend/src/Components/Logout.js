@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 
-export default function Logout({setShowLogoutModal}) {
+export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
 
     const [statusMessage, setStatusMessage] = useState("");
     const [statusSuccess, setStatusSuccess] = useState(false);
@@ -17,7 +17,7 @@ export default function Logout({setShowLogoutModal}) {
             headers: {
                 "Content-Type": "application/json",
                 "Connection": "keep-alive",
-                "Authorization": `Bearer ${token}`
+                "Authorization": token
             }
         })
             .then((response) => response.json())
@@ -29,6 +29,7 @@ export default function Logout({setShowLogoutModal}) {
                 if (data.success) {
                     console.log('deleting session storage');
                     sessionStorage.clear();
+                    setShowSavedMemes(false);
                 }
 
 

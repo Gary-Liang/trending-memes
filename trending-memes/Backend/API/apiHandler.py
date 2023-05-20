@@ -298,17 +298,40 @@ def callback():
 
     return redirect(url_for('.search'))
 
+@app.route('/check_session', methods=['POST'])
+def check_session():
+    # Get the form data from the POST Request as application/json (use get_json)
+    # data = request.get_data
+    token = None
+    if 'Authorization' in request.headers:
+        token = request.headers['Authorization'].split('Bearer ')[1]
+    else:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+        
+    print('Check session called')
+
+    # find the token in the database by token
+    validated_token = is_token_valid(token)
+
+    if validated_token:
+        return jsonify({}), 200
+    else:
+        print('Non-authoritative information')
+        return jsonify({'success': True, 'message': 'Unauthorized'}), 401
+
+
 @app.route('/saved_favorites', methods=['POST'])
 def saved_favorites():
     # Get the form data from the POST Request as application/json (use get_json)
-    data = request.get_json()
-    token = ''
-    if data:
-        token = data.get('token')
+    # data = request.get_data
+    token = None
+    if 'Authorization' in request.headers:
+        token = request.headers['Authorization'].split('Bearer ')[1]
     else:
-        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
         
-    print('POST Request called')
+    print('POST Request called from saved favorites')
+    
 
     # find the token in the database by token
     validated_token = is_token_valid(token)
@@ -343,17 +366,17 @@ def saved_favorites():
 @app.route('/saved_favorites_as_data', methods=['POST'])
 def saved_favorites_as_data():
     # Get the form data from the POST Request as application/json (use get_json)
-    data = request.get_json()
-    token = ''
-    if data:
-        token = data.get('token')
+    # data = request.get_json()
+    token = request.headers['Authorization'].split
+    if 'Authorization' in request.headers:
+        token = request.headers['Authorization'].split('Bearer ')[1]
     else:
-        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
-        
-    print('POST Request called')
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     # find the token in the database by token
     validated_token = is_token_valid(token)
+
+    print('POST Request called from sav fav as data')
 
     if validated_token:
         session = sessions.find_one({'token': token})
@@ -365,21 +388,29 @@ def saved_favorites_as_data():
 
         # search for the favorite with the specified user and id
         user_data = user_favorites.find_one({'username': username})
-        print('favorite list: ', user_data['favorites'])
+        # print('favorite list: ', fav_data['favorites'])
         if (user_data):
-            query = request.args.get('q')
-            if (query is None or query == ""):
-                print('Returning user favorites')
-                return jsonify(user_data['favorites']), 200
-            else : 
-                print(query)
-                return ""
+            # query = request.args.get('q')
+            # if (query is None or query == ""):
+            print('Returning user favorites')
+            # convert favorites stored in favorites document to return back to frontend to interpret properly as a data dict
+            fav_as_data = {"data": []}
+            favorites = user_data['favorites']
+            for i in range(len(favorites) - 1, -1, -1):
+                favorite = favorites[i]
+                for fav_value in favorite.values():
+                    fav_as_data["data"].append(fav_value)
+            print(fav_as_data)
+            return jsonify(fav_as_data), 200
+            # else : 
+            #     print(query)
+            #     return ""
         else: 
             print('Returning nothing')
-            return jsonify({}), 200
+            return jsonify({"data": []}), 200
     else:
         print('Non-authoritative information')
-        return jsonify({'success': True, 'message': 'Non-Authoritative Information'}), 203
+        return jsonify({'success': True, 'message': 'Unauthorized'}), 401
 
 
 @app.route('/is_a_favorite', methods=['POST'])
@@ -390,17 +421,11 @@ def is_a_favorite():
 def update_favorites():
     # Get the form data from the POST Request as application/json (use get_json)
     data = request.get_json()
-    token = ''
-    id = ''
-    media_info = ''
-    album_info = ''
-    if data:
-        id = data.get('id')
-        token = data.get('token')
-        media_info = data.get('mediaInfo')
-        album_info = data.get('albumInfo')
+    token = None
+    if 'Authorization' in request.headers:
+        token = request.headers['Authorization'].split('Bearer ')[1]
     else:
-        return jsonify({'success': False, 'message': 'Internal Error Occurred'}), 500
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
         
     print('POST Request called')
 
@@ -416,14 +441,15 @@ def update_favorites():
             username = session['username']
         
         print('username: ', username)
-        print('id: ', id)
+        print('data: ', data)
+        print('id: ', data['id'])
 
         # search for the favorite with the specified user and id
-        favorite = user_favorites.find_one({'username': username, 'favorites.' + id: {'$exists': True}})
+        favorite = user_favorites.find_one({'username': username, 'favorites.' + data['id']: {'$exists': True}})
         print('favorite before: ', favorite)
         
         if (favorite is None):
-            favorite_info = {id: {'media_info': media_info, 'album_info': album_info}}
+            favorite_info = {data['id']: data}
             user_favorites.update_one(
                 {"username": username},
                 {"$push": {"favorites": favorite_info}}
@@ -438,7 +464,7 @@ def update_favorites():
             # delete the favorite
             user_favorites.update_one(
                 {'username': username}, 
-                {'$pull': {'favorites': {id: {'$exists': True}}}}
+                {'$pull': {'favorites': {data['id']: {'$exists': True}}}}
             )
             user_data = user_favorites.find_one({'username': username})
             if (user_data):
@@ -621,7 +647,7 @@ def logout_user():
         response_headers = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Connection'
+            'Access-Control-Allow-Headers': 'Content-Type, Connection, Authorization'
         }
         print('OPTIONS request called.')
         return ('', 204, response_headers) 

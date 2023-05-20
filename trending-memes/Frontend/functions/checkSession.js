@@ -1,7 +1,7 @@
 
 const fetch = require('isomorphic-fetch');
 
-// const API_ENDPOINT = 'http://127.0.0.1:5000/saved_favorites';
+// const API_ENDPOINT = 'http://127.0.0.1:5000/check_session';
 const API_ENDPOINT = 'https://tmback.xyz/saved_favorites';
 
 exports.handler = async (event, context) => {
@@ -28,10 +28,9 @@ exports.handler = async (event, context) => {
             'Access-Control-Allow-Origin': 'https://tmback.xyz',
             'Authorization': `Bearer ${token}`
             },
-        body: '',
     });
     const data = await response.json();
-    // console.log("saved favs: " + JSON.stringify(data));
+    console.log("saved favs: " + JSON.stringify(data));
     return {
       statusCode: response.status,
       headers: {

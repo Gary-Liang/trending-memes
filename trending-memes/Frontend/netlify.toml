@@ -17,13 +17,23 @@
   status = 200
 
 [[redirects]]
+  from ="/api/saved_favorites"
+  to = "/.netlify/functions/savedFavorites"
+  status = 200
+
+[[redirects]]
   from ="/api/update_favorites"
   to = "/.netlify/functions/updateFavorites"
   status = 200
 
 [[redirects]]
-  from ="/api/saved_favorites"
-  to = "/.netlify/functions/savedFavorites"
+  from ="/api/saved_favorites_as_data"
+  to = "/.netlify/functions/userFavorites"
+  status = 200
+
+[[redirects]]
+  from ="/api/check_session"
+  to = "/.netlify/functions/checkSession"
   status = 200
 
 [[redirects]]

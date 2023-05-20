@@ -3,7 +3,7 @@ import StarButton from '../Images/starButton.png'
 import StarButtonHightlight from '../Images/starButtonHighlight.png'
 
 
-export default function SavedMemes({query, setMediaInfo, setAlbumInfo, setShowLoginModal, setLoadingScreen}) {
+export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModal, setLoadingScreen}) {
 
    // create state variable to get backend API 
  const [data, setData] = useState([{}]);
@@ -22,16 +22,25 @@ export default function SavedMemes({query, setMediaInfo, setAlbumInfo, setShowLo
     const fetchData = async () => {
       try {
         setLoadingScreen(true);
-        // fetch(`/search?q=${query}`).then(
-
-        const response = await fetch(`/api/saved_favorites?q=${query}`, {
+        console.log('called from saved memes.')
+        const response = await fetch('/api/saved_favorites_as_data', {
           signal: abortController.signal,
-        });
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "Connection": "keep-alive",
+              "Authorization": token
+        }});
 
-
-        const data = await response.json();
-        setData(JSON.parse(JSON.stringify(data)).data);
-        console.log(JSON.parse(JSON.stringify(data)));
+        const responseData = await response.json();
+        const parseResponseData = JSON.parse(JSON.stringify(responseData)); 
+        if (parseResponseData && parseResponseData.data.length === 0) {
+          console.log("set data to empty");
+          setData([{}]);
+        } else {
+          setData(parseResponseData.data);
+        }
+        console.log(JSON.parse(JSON.stringify(responseData)));
         setLoadingScreen(false);
       } catch (error) {
         if (!abortController.signal.aborted) {
@@ -46,7 +55,7 @@ export default function SavedMemes({query, setMediaInfo, setAlbumInfo, setShowLo
       return () => {
         abortController.abort();
       };
-    }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
+    }, [setLoadingScreen, token]);  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   // useEffect(() => {
   //   // Update the sessionStorage whenever the token changes
@@ -54,14 +63,14 @@ export default function SavedMemes({query, setMediaInfo, setAlbumInfo, setShowLo
   // });
 
   const fetchFavorites = useCallback(async () => {
-    const tokenJson = {'token': token || ''};
     const response = await fetch("/api/saved_favorites", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Connection": "keep-alive",
+        "Authorization": token
       },
-      body: JSON.stringify(tokenJson),
+      body: ''
     });
 
     if (response.status !== 200) {
@@ -159,6 +168,10 @@ const favoriteIcon = (id) => ({
   border: 'none',
   zIndex: '1'
 })
+
+const noFavResults = {
+  position: 'relative',
+}
 
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
@@ -265,66 +278,59 @@ function writeMetadataToMediaInfo(data) {
 
 // Update state when a favorite is clicked
 const toggleFavorite = (data, id) => {
-    // setFavorites(id);
-    const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
-    const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
-    const mediaMetaData = {'id': id, 'mediaInfo': mediaInfoTemp, 'albumInfo': albumInfoTemp, 'token': sessionStorage.getItem('token')};
-    fetch("/api/update_favorites", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-          'Connection': 'keep-alive',
-      },
-      body: JSON.stringify(mediaMetaData),
+  // setFavorites(id);
+  // const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
+  // const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
+  console.log('sample favorite data: ', data);
+  fetch("/api/update_favorites", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Authorization": sessionStorage.getItem('token')
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => {
+      if (response.status === 401) {
+        sessionStorage.clear();
+        setShowLoginModal(true);
+        setIsFavorite({});
+        throw new Error('401 Unauthorized'); // Stops the promise 
+      }
+      return response.json();
     })
-      .then((response) => {
-        if (response.status === 401) {
-          sessionStorage.clear();
-          setShowLoginModal(true);
-          setIsFavorite({});
-          throw new Error('401 Unauthorized'); // Stops the promise 
-        }
-        return response.json();
-      })
-      .then(() => {
-        console.log('id: ', id);
-        const newFavorite = {...isFavorite};
-        console.log(newFavorite);
-        newFavorite[id] = !newFavorite[id];
-        console.log('executed here: ' + newFavorite[id]);
-        setIsFavorite(newFavorite);
-        console.log(newFavorite);
-      })
-      .catch((error) => {
-          console.error("Error:", error);
-      });
+    .then(() => {
+      console.log('id: ', id);
+      const newFavorite = {...isFavorite};
+      console.log(newFavorite);
+      newFavorite[id] = !newFavorite[id];
+      console.log('executed here: ' + newFavorite[id]);
+      setIsFavorite(newFavorite);
+      console.log(newFavorite);
+    })
+    .catch((error) => {
+        console.error("Error:", error);
+    });
 };
 
 
   return (
     <>
-      { <div className='mediaPreview' style={divStyle}>
+      { <div className='favMediaPreview' style={divStyle}>
         {
           (data ? data.filter(data => {
-              if (query === "") {
-                  // if query is empty
-                  return data;
-              } else if (data.title.toLowerCase().includes(query.toLowerCase())) { 
-                  // if condition is true, then return data that matches query to be mapped
-                  return data;
-              } else {
-                return {};
-              }
+            return data;
           }).map((resultData, index) => (
               // data can be an empty list {}
               Object.keys(resultData).length !== 0 ? (
-                <div key={resultData.id + "mediaBox" + index} className={"mediaBox" + index} style={mediaBoxStyle}>
-                  <div key={resultData.id + "info" + index} className={"mediaInfo" + index} style={searchResults} onClick={() => writeMetadataToMediaInfo(resultData)}>
+                <div key={resultData.id + "favMediaBox" + index} className={"favMediaBox" + index} style={mediaBoxStyle}>
+                  <div key={resultData.id + "favInfo" + index} className={"favMediaInfo" + index} style={searchResults} onClick={() => writeMetadataToMediaInfo(resultData)}>
                     <p>{resultData.title}</p>
                     {renderMediaPreview(resultData)}
                   </div>
                   <button key={resultData.id + "btn" + index} className={isFavorite[resultData.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon(resultData.id)} onClick={() => toggleFavorite(resultData, resultData.id)}></button>
-                </div>): null
+                </div>): <div className="noFavResults" style={noFavResults}>No favorites added. Try adding some!</div>
 
           )) : null)
         }

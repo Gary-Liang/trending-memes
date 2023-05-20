@@ -38,15 +38,15 @@ export default function App() {
   return (
       <div className="App">
         <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} setShowAboutModal={setShowAboutModal} setShowLogoutModal={setShowLogoutModal} showSavedMemes={showSavedMemes} setShowSavedMemes={setShowSavedMemes}/>
-        <Title /*name='The Trending Memes'*//>
+        {!showSavedMemes ? <Title/> : <Title name='Your Memes'/>}
         {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
-        {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal}/>}
+        {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal} setShowSavedMemes={setShowSavedMemes}/>}
         {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
         {showAboutModal && <About setShowAboutModal={setShowAboutModal}/>}
-        <SearchBar setQuery={setQuery} />
+        {!showSavedMemes ? <SearchBar setQuery={setQuery} /> : <></>}
         {loadingScreen && <LoadingScreen/>}
         {!showSavedMemes ? <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen}  />
-                         : <SavedMemes query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen} />}
+                         : <SavedMemes setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen} />}
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
       </div>
   );

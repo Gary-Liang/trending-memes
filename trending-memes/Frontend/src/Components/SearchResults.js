@@ -15,22 +15,28 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
  //const [showMedia, setShowMedia] = useState([]);
 
 
- // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
+  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
   useEffect(() => {
     const abortController = new AbortController();
     const fetchData = async () => {
       try {
         setLoadingScreen(true);
         // fetch(`/search?q=${query}`).then(
-
+        console.log('called from search results.')
         const response = await fetch(`/api/search?q=${query}`, {
           signal: abortController.signal,
         });
 
 
-        const data = await response.json();
-        setData(JSON.parse(JSON.stringify(data)).data);
-        console.log(JSON.parse(JSON.stringify(data)));
+        const responseData = await response.json();
+        const parseResponseData = JSON.parse(JSON.stringify(responseData)); 
+        if (parseResponseData && parseResponseData.data.length === 0) {
+          console.log("set data to empty");
+          setData([{}]);
+        } else {
+          setData(parseResponseData.data);
+        }
+        console.log(parseResponseData);
         setLoadingScreen(false);
       } catch (error) {
         if (!abortController.signal.aborted) {
@@ -40,12 +46,12 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
       }
     };
 
-      fetchData();
+    fetchData();
 
-      return () => {
-        abortController.abort();
-      };
-    }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
+    return () => {
+      abortController.abort();
+    };
+  }, [query, setLoadingScreen]);  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   // useEffect(() => {
   //   // Update the sessionStorage whenever the token changes
@@ -53,14 +59,14 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
   // });
 
   const fetchFavorites = useCallback(async () => {
-    const tokenJson = {'token': token || ''};
     const response = await fetch("/api/saved_favorites", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Connection": "keep-alive",
+        "Authorization": token
       },
-      body: JSON.stringify(tokenJson),
+      body: '',
     });
 
     if (response.status !== 200) {
@@ -255,6 +261,10 @@ function getAlbumData(data) {
   }
 }
 
+const noResults = {
+  position: 'relative',
+}
+
 // data.id is album hash link
 function writeMetadataToMediaInfo(data) {
     setMediaInfo({dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)});
@@ -265,16 +275,17 @@ function writeMetadataToMediaInfo(data) {
 // Update state when a favorite is clicked
 const toggleFavorite = (data, id) => {
     // setFavorites(id);
-    const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
-    const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
-    const mediaMetaData = {'id': id, 'mediaInfo': mediaInfoTemp, 'albumInfo': albumInfoTemp, 'token': sessionStorage.getItem('token')};
+    // const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
+    // const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
+    console.log('sample favorite data: ', data);
     fetch("/api/update_favorites", {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
-          'Connection': 'keep-alive',
+          "Connection": "keep-alive",
+          "Authorization": sessionStorage.getItem('token')
       },
-      body: JSON.stringify(mediaMetaData),
+      body: JSON.stringify(data),
     })
       .then((response) => {
         if (response.status === 401) {
@@ -300,6 +311,7 @@ const toggleFavorite = (data, id) => {
 };
 
 
+{console.log(data)}
   return (
     <>
       { <div className='mediaPreview' style={divStyle}>
@@ -308,7 +320,7 @@ const toggleFavorite = (data, id) => {
               if (query === "") {
                   // if query is empty
                   return data;
-              } else if (data.title.toLowerCase().includes(query.toLowerCase())) { 
+              } else if (data.title && data.title.toLowerCase().includes(query.toLowerCase())) { 
                   // if condition is true, then return data that matches query to be mapped
                   return data;
               } else {
@@ -323,7 +335,7 @@ const toggleFavorite = (data, id) => {
                     {renderMediaPreview(resultData)}
                   </div>
                   <button key={resultData.id + "btn" + index} className={isFavorite[resultData.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon(resultData.id)} onClick={() => toggleFavorite(resultData, resultData.id)}></button>
-                </div>): null
+                </div>): <div className="noResults" style={noResults}>No results found. Please try again.</div>
 
           )) : null)
         }
