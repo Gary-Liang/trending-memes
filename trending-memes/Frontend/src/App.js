@@ -46,7 +46,7 @@ export default function App() {
         {!showSavedMemes ? <SearchBar setQuery={setQuery} /> : <></>}
         {loadingScreen && <LoadingScreen/>}
         {!showSavedMemes ? <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen}  />
-                         : <SavedMemes setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen} />}
+                         : <SavedMemes setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen}  loadingScreen={loadingScreen}/>}
         <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
       </div>
   );

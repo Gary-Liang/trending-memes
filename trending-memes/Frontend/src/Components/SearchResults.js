@@ -79,7 +79,7 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
 
 
   useEffect(() => {
-    const abortController = new AbortController();
+    // const abortController = new AbortController();
     const fetchData = async () => {
       const favoriteList = await fetchFavorites();
       const initialFavorites = {};
@@ -102,9 +102,9 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
     };
     fetchData();
 
-    return () => {
-      abortController.abort();
-    };
+    // return () => {
+    //   abortController.abort();
+    // };
   }, [data, fetchFavorites]);
 
   const divStyle = {
@@ -311,7 +311,6 @@ const toggleFavorite = (data, id) => {
 };
 
 
-{console.log(data)}
   return (
     <>
       { <div className='mediaPreview' style={divStyle}>
@@ -335,7 +334,7 @@ const toggleFavorite = (data, id) => {
                     {renderMediaPreview(resultData)}
                   </div>
                   <button key={resultData.id + "btn" + index} className={isFavorite[resultData.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon(resultData.id)} onClick={() => toggleFavorite(resultData, resultData.id)}></button>
-                </div>): <div className="noResults" style={noResults}>No results found. Please try again.</div>
+                </div>): (query !== "") ? <div className="noResults" style={noResults}>No results found. Please try again.</div> : null
 
           )) : null)
         }

@@ -231,6 +231,8 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     top: "50%",
     left: "50%",
     color: "white",
+    width: "100%",
+    height: "100%"
 
   }
 
@@ -240,7 +242,7 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     height: "100%",
     position: "fixed",
     top: "0",
-    zIndex: "5",
+    zIndex: "3",
     overflow: "hidden"
 }
 
@@ -371,7 +373,8 @@ function mediaResizing() {
               right: "0",
               bottom: "0",
               margin: "0 auto",
-              position: "absolute"
+              position: "fixed",
+              zIndex: "5"
     };
   } else {
     styles = {  
@@ -382,7 +385,8 @@ function mediaResizing() {
                 right: "0",
                 bottom: "0",
                 margin: "0 auto",
-                position: "absolute"
+                position: "fixed",
+                zIndex: "5"
               };
 
   }
@@ -392,28 +396,31 @@ function mediaResizing() {
     return (
         <>
             {(mediaInfo.isClicked) ? 
-              <div className="popup" style={overlayDiv}>
-                <div className="popupMedia" style={mediaPopupDisplay}>
-                    {(mediaLoading) ? renderLoadIcon() : renderFullMedia(mediaInfo.dataInfo)}
-                    {/* {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null} */}
-                </div>
-                <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
-                <div className="copyToClipBoardContainer"> 
-                  <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
-                  {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
-                </div>
-                { (albumInfo && albumInfo.albumLength > 1) ? 
-                  <div>
-                    <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1 + "/" + albumInfo.albumLength}</div>
-                    <button className="viewNextInAlbum" style={arrowRightButton} onClick={loadNextMediaInAlbum}>
-                      {(imageAlbumCount + 1 < albumInfo.albumLength) ? "▶" : null}
-                    </button>
-                    <button className="viewPrevInAlbum" style={arrowLeftButton} onClick={loadPrevMediaInAlbum}>
-                    {(imageAlbumCount > 0) ? "◀" : null}
-                    </button>
-                  </div> : null
-                }
-              </div>: null}
+          <>
+            <div className="popup" style={overlayDiv} onClick={closeViewMediaAndReset}>
+            </div>
+            <div className="popupMedia" style={mediaPopupDisplay}>
+              {(mediaLoading) ? renderLoadIcon() : renderFullMedia(mediaInfo.dataInfo)}
+              {/* {(mediaInfo.dataInfo) ? renderFullMedia(mediaInfo.dataInfo): null} */}
+            </div>
+            <button className="closeButton" style={closeButton} onClick={closeViewMediaAndReset}>x</button>
+            <div className="copyToClipBoardContainer">
+              <button className="copyToClipBoardButton" style={copyToClipboardButton} onClick={copyMediaToClipboard}></button>
+              {showCopyMessage && (<div className="copyMessage" style={copyMessageStyle}>Copied to clipboard!</div>)}
+            </div>
+            {(albumInfo && albumInfo.albumLength > 1) ?
+              <div>
+                <div className="imageNumInAlbum" style={imageNumber}>{imageAlbumCount + 1 + "/" + albumInfo.albumLength}</div>
+                <button className="viewNextInAlbum" style={arrowRightButton} onClick={loadNextMediaInAlbum}>
+                  {(imageAlbumCount + 1 < albumInfo.albumLength) ? "▶" : null}
+                </button>
+                <button className="viewPrevInAlbum" style={arrowLeftButton} onClick={loadPrevMediaInAlbum}>
+                  {(imageAlbumCount > 0) ? "◀" : null}
+                </button>
+              </div> : null
+            }
+
+          </> : null}
         </>
     )
 }
