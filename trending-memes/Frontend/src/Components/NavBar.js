@@ -33,15 +33,6 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
         }
         return response.json();
       })
-      .then(() => {
-        // console.log('id: ', id);
-        // const newFavorite = {...isFavorite};
-        // console.log(newFavorite);
-        // newFavorite[id] = !newFavorite[id];
-        // console.log('executed here: ' + newFavorite[id]);
-        // setIsFavorite(newFavorite);
-        // console.log(newFavorite);
-      })
       .catch((error) => {
           console.error("Error:", error);
       });

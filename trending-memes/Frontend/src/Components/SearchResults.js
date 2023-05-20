@@ -11,17 +11,12 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
 
  const memorizedData = useMemo(() => data, [data]);
 
- // show media state variable to display media previews
- //const [showMedia, setShowMedia] = useState([]);
 
-
-  // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
   useEffect(() => {
     const abortController = new AbortController();
     const fetchData = async () => {
       try {
         setLoadingScreen(true);
-        // fetch(`/search?q=${query}`).then(
         console.log('called from search results.')
         const response = await fetch(`/api/search?q=${query}`, {
           signal: abortController.signal,
@@ -274,10 +269,6 @@ function writeMetadataToMediaInfo(data) {
 
 // Update state when a favorite is clicked
 const toggleFavorite = (data, id) => {
-    // setFavorites(id);
-    // const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
-    // const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
-    console.log('sample favorite data: ', data);
     fetch("/api/update_favorites", {
       method: "POST",
       headers: {
@@ -297,13 +288,9 @@ const toggleFavorite = (data, id) => {
         return response.json();
       })
       .then(() => {
-        console.log('id: ', id);
         const newFavorite = {...isFavorite};
-        console.log(newFavorite);
         newFavorite[id] = !newFavorite[id];
-        console.log('executed here: ' + newFavorite[id]);
         setIsFavorite(newFavorite);
-        console.log(newFavorite);
       })
       .catch((error) => {
           console.error("Error:", error);
