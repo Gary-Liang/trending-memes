@@ -12,17 +12,11 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
 
  const memorizedData = useMemo(() => data, [data]);
 
- // show media state variable to display media previews
- //const [showMedia, setShowMedia] = useState([]);
 
-
- // Purpose of useEffect is to define some anonymous lambda function inside the parameters to use it after 
   useEffect(() => {
-    const abortController = new AbortController();
     const fetchData = async () => {
       try {
         setLoadingScreen(true);
-        console.log('called from saved memes.')
         const response = await fetch('/api/saved_favorites_as_data', {
           signal: abortController.signal,
           method: "POST",
@@ -35,18 +29,15 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
         const responseData = await response.json();
         const parseResponseData = JSON.parse(JSON.stringify(responseData)); 
         if (parseResponseData && parseResponseData.data.length === 0) {
-          console.log("set data to empty");
           setData([{}]);
         } else {
           setData(parseResponseData.data);
         }
-        console.log(JSON.parse(JSON.stringify(responseData)));
         setLoadingScreen(false);
       } catch (error) {
-        if (!abortController.signal.aborted) {
           console.error(error);
           setLoadingScreen(false);
-        }
+
       }
     };
 
@@ -83,7 +74,7 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
 
 
   useEffect(() => {
-    const abortController = new AbortController();
+    // const abortController = new AbortController();
     const fetchData = async () => {
       const favoriteList = await fetchFavorites();
       const initialFavorites = {};
@@ -96,7 +87,6 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
       } 
       data.forEach(media => {
         if (favoriteObj.hasOwnProperty(media.id)) {
-          //console.log(media.id);
           initialFavorites[media.id] = true;
         } else {
           initialFavorites[media.id] = false;
@@ -106,9 +96,9 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
     };
     fetchData();
 
-    return () => {
-      abortController.abort();
-    };
+    // return () => {
+    //   abortController.abort();
+    // };
   }, [data, fetchFavorites]);
 
   const divStyle = {
@@ -281,7 +271,6 @@ const toggleFavorite = (data, id) => {
   // setFavorites(id);
   // const mediaInfoTemp = {dataInfo: data, isClicked: true, mediaLink: getMediaLink(data), height: getHeightLink(data), width: getWidthLink(data)};
   // const albumInfoTemp = {album: getAlbumData(data), albumLength: getAlbumLink(data)};
-  console.log('sample favorite data: ', data);
   fetch("/api/update_favorites", {
     method: "POST",
     headers: {
@@ -301,13 +290,9 @@ const toggleFavorite = (data, id) => {
       return response.json();
     })
     .then(() => {
-      console.log('id: ', id);
       const newFavorite = {...isFavorite};
-      console.log(newFavorite);
       newFavorite[id] = !newFavorite[id];
-      console.log('executed here: ' + newFavorite[id]);
       setIsFavorite(newFavorite);
-      console.log(newFavorite);
     })
     .catch((error) => {
         console.error("Error:", error);
