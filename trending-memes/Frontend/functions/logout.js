@@ -1,33 +1,34 @@
 
 const fetch = require('isomorphic-fetch');
 
-const API_ENDPOINT = 'http://127.0.0.1:5000/logout_user';
-// const API_ENDPOINT = 'https://tmback.xyz/logout_user';
+// const API_ENDPOINT = 'http://127.0.0.1:5000/logout_user';
+const API_ENDPOINT = 'https://tmback.xyz/logout_user';
 
 exports.handler = async (event, context) => {
   try {
-    const formData = JSON.parse(event.body);
+    const token = event.headers["authorization"];
+
     if (event.httpMethod == 'OPTIONS') {
       console.log('OPTIONS Request');
       return {
         statusCode: 204,
         headers: {
-          'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
-          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Origin': 'https://tmback.xyz',
+          'Access-Control-Allow-Headers': 'Content-Type, Connection, Authorization',
           'Access-Control-Allow-Methods': 'OPTIONS, POST'
         },
         body: ''
       }
     }
-
+    
     const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': 'https://tmback.xyz',
-            },
-        body: JSON.stringify(formData),
+            "Connection": "keep-alive",
+            'Authorization': `Bearer ${token}`,
+            "Access-Control-Allow-Origin": "https://tmback.xyz",
+            }
     });
     const data = await response.json();
     return {

@@ -1,18 +1,19 @@
 
 const fetch = require('isomorphic-fetch');
 
-const API_ENDPOINT = 'http://127.0.0.1:5000/update_favorites';
-// const API_ENDPOINT = 'https://tmback.xyz/update_favorites';
+// const API_ENDPOINT = 'http://127.0.0.1:5000/update_favorites';
+const API_ENDPOINT = 'https://tmback.xyz/update_favorites';
 
 exports.handler = async (event, context) => {
   try {
     const formData = JSON.parse(event.body);
+    const token = event.headers["authorization"];
     if (event.httpMethod == 'OPTIONS') {
       console.log('OPTIONS Request');
       return {
         statusCode: 204,
         headers: {
-          'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
+          'Access-Control-Allow-Origin': 'https://tmback.xyz',
           'Access-Control-Allow-Headers': 'Content-Type',
           'Access-Control-Allow-Methods': 'OPTIONS, POST'
         },
@@ -26,6 +27,7 @@ exports.handler = async (event, context) => {
             "Content-Type": "application/json",
             'Connection': 'keep-alive',
             'Access-Control-Allow-Origin': 'https://tmback.xyz',
+            'Authorization': `Bearer ${token}`
             },
         body: JSON.stringify(formData),
     });

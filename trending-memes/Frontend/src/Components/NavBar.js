@@ -2,6 +2,7 @@ import React from 'react'
 
 export default function NavBar({setShowRegistrationModal, setShowLoginModal, setShowAboutModal, setShowLogoutModal, showSavedMemes, setShowSavedMemes}) {
 
+  const token = sessionStorage.getItem('token') || '';
 
   const menuBarStyle = {
     listStyle: 'none',
@@ -11,7 +12,41 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
     padding: '15px'
   }
 
-  const token = sessionStorage.getItem('token');
+  const checkSession = () => {
+    fetch("/api/check_session", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Connection": "keep-alive",
+          "Authorization": sessionStorage.getItem('token')
+      },
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          sessionStorage.clear();
+          setShowLoginModal(true);
+          setShowSavedMemes(false);
+          throw new Error('401 Unauthorized'); // Stops the promise 
+        }
+        else if (response.status === 200) {
+          setShowSavedMemes(true);
+        }
+        return response.json();
+      })
+      .then(() => {
+        // console.log('id: ', id);
+        // const newFavorite = {...isFavorite};
+        // console.log(newFavorite);
+        // newFavorite[id] = !newFavorite[id];
+        // console.log('executed here: ' + newFavorite[id]);
+        // setIsFavorite(newFavorite);
+        // console.log(newFavorite);
+      })
+      .catch((error) => {
+          console.error("Error:", error);
+      });
+
+  }
 
   return (
     <>
@@ -22,7 +57,7 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
           <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
         </nav> :
         <nav className='menuBar' style={menuBarStyle}>
-          {!showSavedMemes ? <li className='savedMemesLink' onClick={() => setShowSavedMemes(true)}>Saved Memes</li>
+          {!showSavedMemes ? <li className='savedMemesLink' onClick={checkSession}>Saved Memes</li>
                            : <li className='homeLink' onClick={() => setShowSavedMemes(false)}>Home</li>}
           <li className='logOutLink' onClick={() => setShowLogoutModal(true)}>Log Out</li>
           <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
