@@ -3,7 +3,7 @@ import StarButton from '../Images/starButton.png'
 import StarButtonHightlight from '../Images/starButtonHighlight.png'
 
 
-export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModal, setLoadingScreen}) {
+export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModal, setLoadingScreen, loadingScreen}) {
 
    // create state variable to get backend API 
  const [data, setData] = useState([{}]);
@@ -330,8 +330,7 @@ const toggleFavorite = (data, id) => {
                     {renderMediaPreview(resultData)}
                   </div>
                   <button key={resultData.id + "btn" + index} className={isFavorite[resultData.id] ? "fave_highlighted_" + index : "favorite_" + index} style={favoriteIcon(resultData.id)} onClick={() => toggleFavorite(resultData, resultData.id)}></button>
-                </div>): <div className="noFavResults" style={noFavResults}>No favorites added. Try adding some!</div>
-
+                </div>): (loadingScreen === false) ? <div className="noFavResults" style={noFavResults}>No favorites added. Try adding some!</div> : null
           )) : null)
         }
       </div>}
