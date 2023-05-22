@@ -156,14 +156,14 @@ const favoriteIcon = (id) => ({
   right: '1%',
   backgroundColor: 'transparent',
   border: 'none',
-  zIndex: '1'
+  zIndex: '1',
+  cursor: 'pointer'
 })
 
 
 // functions should be declared outside of the functional components or else we re-render the function every time 
 // it is called for imgur
 function renderMediaPreview(data) {
-  console.log('Rendering.');
   if (data && data.link) {
     if (data.link.includes(".mp4")) {
       let mediaURL = data.link.replace("http://", "https://");
@@ -174,12 +174,10 @@ function renderMediaPreview(data) {
       )
     } else if (data.link.includes("/a/")) {
       let mediaURL = getMediaLink(data).replace("http://", "https://");
-      //let mediaURL = "http://i.imgur.com/" + data.cover + ".";
       let previewHeaderText = "";
       if (data.images_count > 1)
         previewHeaderText = "(Album Count: " + data.images_count +")";
       if (data.images[0].type.includes("mp4")) {
-        //mediaURL += "mp4";
         return (
           <div key={data.id}>
             <p>{previewHeaderText}</p>
@@ -189,7 +187,6 @@ function renderMediaPreview(data) {
             </div>
         )
       } else {
-        //mediaURL += data.images[0].type.split("/")[1];
         return (
           <div key={data.id}>
             <p>{previewHeaderText}</p>
@@ -198,7 +195,6 @@ function renderMediaPreview(data) {
         )
       }
     } else {
-      // if link is just a normal image or a gifv, render it normally. 
       let mediaURL = data.link.replace("http://", "https://");
       return (
         <img key={mediaURL} src={mediaURL} style={mediaMaxSize} alt=""/>

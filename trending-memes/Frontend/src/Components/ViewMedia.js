@@ -106,8 +106,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') {
-        console.log("Pressed escape key");
-        console.log('image count' + imageAlbumCount);
         closeViewMediaAndReset(); 
       }// }else 
       
@@ -115,8 +113,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         // Left arrow key
         if (imageAlbumCount > 0) {
           if (e.key === 'ArrowLeft') {
-            console.log("pressed left arrowkey");
-            console.log('image count' + imageAlbumCount);
             loadPrevMediaInAlbum();
           } 
         }
@@ -124,7 +120,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         // Right arrow key
         if (imageAlbumCount + 1 < albumInfo.albumLength) {
           if (e.key === 'ArrowRight') {
-            console.log("pressed right arrowkey");
             loadNextMediaInAlbum();
           }  
         }
@@ -160,7 +155,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
         let mediaURL = data.link.replace("http://", "https://");
         return (
           <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
-            {console.log(mediaURL)}
             <source src={mediaURL} type="video/mp4"/>
           </video>
         )
@@ -173,16 +167,12 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
           currentMediaHeight = mediaInfo.height;
           return (
             <video key={mediaURL} style={mediaResizing()} preload="auto" controls autoPlay loop>
-              {console.log(data.link)}
               <source src={mediaURL} type="video/mp4"/>
             </video>
           )
         } else {
           mediaURL += data.images[0].type.split("/")[1].replace("http://", "https://");
           currentMediaLink = mediaURL
-          console.log(data.link)
-          console.log("data info" + data);
-          console.log("width at first function: " + mediaInfo.width);
           currentMediaWidth = mediaInfo.width;
           currentMediaHeight = mediaInfo.height;
           return (
@@ -194,12 +184,10 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
       } else {
         // if link is just a normal image or a gifv, render it normally. 
         currentMediaLink = data.link.replace("http://", "https://");
-        console.log("width at first function: " + mediaInfo.width);
         currentMediaWidth = mediaInfo.width;
         currentMediaHeight = mediaInfo.height;
         return (
           <>
-            {console.log(data.link)}
             <img key={data.link} style={mediaResizing()} src={data.link} alt=""/>
           </>
         )
