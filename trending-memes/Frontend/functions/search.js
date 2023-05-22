@@ -1,8 +1,8 @@
 
 const fetch = require('isomorphic-fetch');
 
-//const API_ENDPOINT = 'https://tmback.xyz/search?q=';
-const API_ENDPOINT = 'http://127.0.0.1:5000/search?q=';
+const API_ENDPOINT = 'https://tmback.xyz/search?q=';
+//const API_ENDPOINT = 'http://127.0.0.1:5000/search?q=';
 
 
 exports.handler = async (event, context) => {

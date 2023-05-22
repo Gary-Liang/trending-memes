@@ -1,8 +1,8 @@
 
 const fetch = require('isomorphic-fetch');
 
-const API_ENDPOINT = 'http://127.0.0.1:5000/saved_favorites_as_data';
-// const API_ENDPOINT = 'https://tmback.xyz/saved_favorites_as_data';
+// const API_ENDPOINT = 'http://127.0.0.1:5000/saved_favorites_as_data';
+const API_ENDPOINT = 'https://tmback.xyz/saved_favorites_as_data';
 
 exports.handler = async (event, context) => {
   try {

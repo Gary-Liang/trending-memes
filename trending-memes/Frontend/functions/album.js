@@ -1,8 +1,8 @@
 
 const fetch = require('isomorphic-fetch');
 
-// const API_ENDPOINT = 'https://tmback.xyz/all_album_image_links/';
-const API_ENDPOINT = "http://127.0.0.1:5000/all_album_image_links/"
+const API_ENDPOINT = 'https://tmback.xyz/all_album_image_links/';
+// const API_ENDPOINT = "http://127.0.0.1:5000/all_album_image_links/"
 
 exports.handler = async (event, context) => {
   try {
