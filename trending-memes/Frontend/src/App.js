@@ -11,7 +11,7 @@ import LoadingScreen from './Components/LoadingScreen';
 import About from './Components/About';
 
 
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 
 export default function App() {
   // use State
@@ -33,22 +33,22 @@ export default function App() {
     album: null,
     albumLength: null
   }]);
-  //const [showMedia] = useState(false); 
+
 
   return (
-      <div className="App">
-        <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} setShowAboutModal={setShowAboutModal} setShowLogoutModal={setShowLogoutModal} showSavedMemes={showSavedMemes} setShowSavedMemes={setShowSavedMemes}/>
-        {!showSavedMemes ? <Title/> : <Title name='Your Memes'/>}
-        {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
-        {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal} setShowSavedMemes={setShowSavedMemes}/>}
-        {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal}/>}
-        {showAboutModal && <About setShowAboutModal={setShowAboutModal}/>}
-        {!showSavedMemes ? <SearchBar setQuery={setQuery} /> : <></>}
-        {loadingScreen && <LoadingScreen/>}
-        {!showSavedMemes ? <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen}  />
-                         : <SavedMemes setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen}  loadingScreen={loadingScreen}/>}
-        <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
-      </div>
+    <div className="App">
+      <NavBar setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} setShowAboutModal={setShowAboutModal} setShowLogoutModal={setShowLogoutModal} showSavedMemes={showSavedMemes} setShowSavedMemes={setShowSavedMemes} />
+      {!showSavedMemes ? <Title /> : <Title name='Your Memes' />}
+      {showLoginModal && <Login setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} />}
+      {showLogoutModal && <Logout setShowLogoutModal={setShowLogoutModal} setShowSavedMemes={setShowSavedMemes} />}
+      {showRegistrationModal && <Registration setShowRegistrationModal={setShowRegistrationModal} setShowLoginModal={setShowLoginModal} />}
+      {showAboutModal && <About setShowAboutModal={setShowAboutModal} />}
+      {!showSavedMemes ? <SearchBar setQuery={setQuery} /> : <></>}
+      {loadingScreen && <LoadingScreen loadingScreen={loadingScreen} />}
+      {!showSavedMemes ? <SearchResults query={query} setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen} loadingScreen={loadingScreen} />
+        : <SavedMemes setMediaInfo={setMediaInfo} setAlbumInfo={setAlbumInfo} setShowLoginModal={setShowLoginModal} setLoadingScreen={setLoadingScreen} loadingScreen={loadingScreen} />}
+      <ViewMedia mediaInfo={mediaInfo} setMediaInfo={setMediaInfo} albumInfo={albumInfo} />
+    </div>
   );
 }
 

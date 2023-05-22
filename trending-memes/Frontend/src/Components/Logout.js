@@ -1,6 +1,6 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
 
-export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
+export default function Logout({ setShowLogoutModal, setShowSavedMemes }) {
 
     const [statusMessage, setStatusMessage] = useState("");
     const [statusSuccess, setStatusSuccess] = useState(false);
@@ -10,7 +10,6 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         event.preventDefault();
 
         const token = sessionStorage.getItem('token');
-        console.log('token: ' + token);
         // Send data to the server
         fetch("/api/logout", {
             method: "POST",
@@ -27,7 +26,6 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
                 // does not update until after due to the setstate being async
                 setStatusSuccess(data.success);
                 if (data.success) {
-                    console.log('deleting session storage');
                     sessionStorage.clear();
                     setShowSavedMemes(false);
                 }
@@ -38,6 +36,22 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
                 console.error("Error:", error);
             });
     }
+
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                setShowLogoutModal(false);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Don't forget to clean up
+        return function cleanup() {
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [setShowLogoutModal]);
 
     const closeModal = () => {
         setTimeout(() => setShowLogoutModal(false), 100);
@@ -81,7 +95,7 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         transform: 'translate(-50%, -50%)',
         zIndex: '5'
     }
-    
+
     const logoutTitleStyle = {
         position: 'fixed',
         top: '15%',
@@ -132,12 +146,12 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
             <div className='logoutFormModal' style={logoutFormModalStyle} onClick={() => setShowLogoutModal(false)}>
             </div>
             <form className='authForm' onSubmit={handleSubmit} style={authFormStyle}>
-                    <button className="closeButton" style={closeButton} onClick={() => setShowLogoutModal(false)}>x</button>
-                    <p className='logoutTitle' style={logoutTitleStyle}>Are you sure you want to Log out?</p>
-                    <button className='yesButton' style={yesButtonStyle} type='submit'>Yes</button>
-                    <button className='noButton' style={noButtonStyle} onClick={() => setShowLogoutModal(false)}>No</button>
-                    {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
-                    {statusSuccess ? closeModal() : null}
+                <button className="closeButton" style={closeButton} type='button' onClick={() => setShowLogoutModal(false)}>x</button>
+                <p className='logoutTitle' style={logoutTitleStyle}>Are you sure you want to Log out?</p>
+                <button className='yesButton' style={yesButtonStyle} type='submit'>Yes</button>
+                <button className='noButton' style={noButtonStyle} type='button' onClick={() => setShowLogoutModal(false)}>No</button>
+                {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
+                {statusSuccess ? closeModal() : null}
             </form>
 
         </>

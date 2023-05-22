@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function NavBar({setShowRegistrationModal, setShowLoginModal, setShowAboutModal, setShowLogoutModal, showSavedMemes, setShowSavedMemes}) {
+export default function NavBar({ setShowRegistrationModal, setShowLoginModal, setShowAboutModal, setShowLogoutModal, showSavedMemes, setShowSavedMemes }) {
 
   const token = sessionStorage.getItem('token') || '';
 
@@ -10,16 +10,22 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
     justifyContent: 'center', // We can use justify content after display property
     gap: '3%',
     padding: '15px',
-    cursor: 'pointer'
+    backgroundColor: 'silver'
+  }
+
+  const buttonStyle = {
+    cursor: 'pointer',
+    color: '#3F3D56',
+    transform: 'scale(1.25)',
   }
 
   const checkSession = () => {
     fetch("/api/check_session", {
       method: "POST",
       headers: {
-          "Content-Type": "application/json",
-          "Connection": "keep-alive",
-          "Authorization": sessionStorage.getItem('token')
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Authorization": sessionStorage.getItem('token')
       },
     })
       .then((response) => {
@@ -35,27 +41,27 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
         return response.json();
       })
       .catch((error) => {
-          console.error("Error:", error);
+        console.error("Error:", error);
       });
 
   }
 
   return (
     <>
-      {!token ? 
+      {!token ?
         <nav className='menuBar' style={menuBarStyle}>
-          <li className='signUpLink' onClick={() => setShowRegistrationModal(true)}>Sign Up</li>
-          <li className='logInLink' onClick={() => setShowLoginModal(true)}>Log In</li>
-          <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
+          <li className='signUpLink' style={buttonStyle} onClick={() => setShowRegistrationModal(true)}>Sign Up</li>
+          <li className='logInLink' style={buttonStyle} onClick={() => setShowLoginModal(true)}>Log In</li>
+          <li className='aboutLink' style={buttonStyle} onClick={() => setShowAboutModal(true)}>About</li>
         </nav> :
         <nav className='menuBar' style={menuBarStyle}>
-          {!showSavedMemes ? <li className='savedMemesLink' onClick={checkSession}>Saved Memes</li>
-                           : <li className='homeLink' onClick={() => setShowSavedMemes(false)}>Home</li>}
-          <li className='logOutLink' onClick={() => setShowLogoutModal(true)}>Log Out</li>
-          <li className='aboutLink' onClick={() => setShowAboutModal(true)}>About</li>
+          {!showSavedMemes ? <li className='savedMemesLink' style={buttonStyle} onClick={checkSession}>Saved Memes</li>
+            : <li className='homeLink' style={buttonStyle} onClick={() => setShowSavedMemes(false)}>Home</li>}
+          <li className='logOutLink' style={buttonStyle} onClick={() => setShowLogoutModal(true)}>Log Out</li>
+          <li className='aboutLink' style={buttonStyle} onClick={() => setShowAboutModal(true)}>About</li>
         </nav>
       }
     </>
-    
+
   )
 }
