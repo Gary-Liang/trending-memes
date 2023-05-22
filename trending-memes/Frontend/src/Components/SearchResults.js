@@ -31,7 +31,6 @@ export default function SearchResults({query, setMediaInfo, setAlbumInfo, setSho
         } else {
           setData(parseResponseData.data);
         }
-        console.log(parseResponseData);
         setLoadingScreen(false);
       } catch (error) {
         if (!abortController.signal.aborted) {

@@ -9,7 +9,8 @@ export default function NavBar({setShowRegistrationModal, setShowLoginModal, set
     display: 'flex',
     justifyContent: 'center', // We can use justify content after display property
     gap: '3%',
-    padding: '15px'
+    padding: '15px',
+    cursor: 'pointer'
   }
 
   const checkSession = () => {

@@ -72,6 +72,7 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         border: "none",
         fontWeight: "bold",
         WebkitTextStroke: "0.10px white",
+        cursor: 'pointer'
     }
 
     const authFormStyle = {
@@ -83,7 +84,8 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         position: 'fixed',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        zIndex: '5'
     }
     
     const welcomeBackTitleStyle = {
@@ -114,7 +116,8 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         left: '55%',
         border: 'none',
         transform: 'scale(1.5)',
-        color: 'white'
+        color: 'white',
+        cursor: 'pointer'
 
     }
 
@@ -125,7 +128,8 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
         left: '55%',
         border: 'none',
         transform: 'scale(1.5)',
-        color: 'white'
+        color: 'white',
+        cursor: 'pointer'
 
     }
 
@@ -145,8 +149,9 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
 
     return (
         <>
-            <form className='registrationFormModal' style={registrationFormModalStyle} onSubmit={handleSubmit}>
-                <div className='authForm' style={authFormStyle}>
+            <div className='registrationFormModal' style={registrationFormModalStyle} onClick={() => setShowRegistrationModal(false)}>
+            </div>
+            <form className='authForm' onSubmit={handleSubmit} style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowRegistrationModal(false)}>x</button>
                     <p className='registrationTitle' style={welcomeBackTitleStyle}>Registration</p>
                     <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange}></input>
@@ -154,7 +159,6 @@ export default function Registration({setShowRegistrationModal, setShowLoginModa
                     <button className='submitButton' style={submitButtonStyle} type='submit'>Sign Up</button>
                     <button className='loginButton' style={loginButtonStyle} onClick={switchModal}>Existing Users</button>
                     {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
-                </div>
             </form>
 
         </>

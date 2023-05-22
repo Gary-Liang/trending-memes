@@ -50,10 +50,7 @@ const styleDiv = {
 }
 
 const styleSearchButton = {
-  // alignItems: 'right',
   display: 'flex',
-  // justifyContent: 'right',
-  // marginBottom: '15px',
   marginLeft: '10px',
   padding: '15px',
   WebkitAppearance: 'none',
@@ -62,9 +59,9 @@ const styleSearchButton = {
   backgroundPosition: "center",
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
-  // opacity: "0.99",
   backgroundColor: "transparent",
   outline: "none",
+  cursor: 'pointer'
 }
 
 
