@@ -1,8 +1,8 @@
 
 const fetch = require('isomorphic-fetch');
 
-// const API_ENDPOINT = 'http://127.0.0.1:5000/logout_user';
-const API_ENDPOINT = 'https://tmback.xyz/logout_user';
+const API_ENDPOINT = 'http://127.0.0.1:5000/logout_user';
+// const API_ENDPOINT = 'https://tmback.xyz/logout_user';
 
 exports.handler = async (event, context) => {
   try {

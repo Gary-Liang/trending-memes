@@ -1,7 +1,22 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 
 export default function About({setShowAboutModal}) {
 
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                setShowAboutModal(false);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Don't forget to clean up
+        return function cleanup() {
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [setShowAboutModal]);
 
     const aboutModalStyle = {
         background: 'rgba(0,0,0, 0.75)',
@@ -63,6 +78,7 @@ export default function About({setShowAboutModal}) {
                     <button className="closeButton" style={closeButton} onClick={() => setShowAboutModal(false)}>x</button>
                     <header className='aboutHeader'>
                         <h2 className='aboutTitle' style={aboutTitleStyle}>About</h2>
+                        <h1 className='aboutTitle' style={aboutTitleStyle}>v. 1.5.0</h1>
                         <div className='aboutBodyText' style={aboutBodyTextStyle}>
                             <p>This web application pulls trending 'memes' from the Imgur API. It is a personal project started by Gary Liang</p>
                             <p>to demonstrate the use of Node.js, React frontend, Flask backend, Redis, and MongoDB databases in a full-stack project.</p>

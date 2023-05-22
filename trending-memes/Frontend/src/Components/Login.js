@@ -1,6 +1,6 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
 
-export default function Login({setShowRegistrationModal, setShowLoginModal}) {
+export default function Login({ setShowRegistrationModal, setShowLoginModal }) {
 
     const [formData, setFormData] = useState({
         username: "",
@@ -24,27 +24,35 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
             .then((response) => response.json())
             .then((data) => {
                 // Handle server response
-                console.log(data);
-                console.log(data.success);
-                console.log('status code: ' + data.statusCode);
                 setStatusMessage(data.message);
                 setStatusSuccess(data.success);
                 if (data.token !== undefined && data.token !== null) {
                     sessionStorage.setItem('token', data.token);
                 }
-                if (statusMessage) {
-                    console.log('status message: ' + statusMessage);
-                }
-
-
             })
             .catch((error) => {
                 console.error("Error:", error);
             });
     }
 
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                setShowLoginModal(false);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Don't forget to clean up
+        return function cleanup() {
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [setShowLoginModal]);
+
     const inputChange = (event) => {
-        const {className, value} = event.target;
+        const { className, value } = event.target;
         setFormData((prevFormData) => ({
             ...prevFormData,
             [className]: value,
@@ -59,8 +67,6 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
     const closeModal = () => {
         setTimeout(() => setShowLoginModal(false), 1500);
     }
-
-
 
     const loginFormModalStyle = {
         background: 'rgba(0,0,0, 0.75)',
@@ -98,7 +104,7 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
         transform: 'translate(-50%, -50%)',
         zIndex: '5'
     }
-    
+
     const welcomeBackTitleStyle = {
         position: 'fixed',
         top: '15%',
@@ -163,14 +169,14 @@ export default function Login({setShowRegistrationModal, setShowLoginModal}) {
             <div className='loginFormModal' style={loginFormModalStyle} onClick={() => setShowLoginModal(false)}>
             </div>
             <form className='authForm' style={authFormStyle} onSubmit={handleSubmit}>
-                    <button className="closeButton" style={closeButton} onClick={() => setShowLoginModal(false)}>x</button>
-                    <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
-                    <input className='username' placeholder='Enter Username' type='string' value={formData.username} style={usernameStyle} onChange={inputChange} disabled={statusSuccess}></input>
-                    <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange} disabled={statusSuccess}></input>
-                    <button className='submitButton' style={submitButtonStyle} type='submit'>Sign In</button>
-                    <button className='registrationButton' style={registrationButtonStyle} onClick={switchModal}>No Account?</button>
-                    {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
-                    {statusSuccess ? closeModal() : null}
+                <button className="closeButton" style={closeButton} type='button' onClick={() => setShowLoginModal(false)}>x</button>
+                <p className='welcomeBackTitle' style={welcomeBackTitleStyle}>Welcome back!</p>
+                <input className='username' placeholder='Enter Username' type='text' value={formData.username} style={usernameStyle} onChange={inputChange} disabled={statusSuccess}></input>
+                <input className='password' placeholder='Enter Password' type='password' value={formData.password} style={passwordStyle} onChange={inputChange} disabled={statusSuccess}></input>
+                <button className='submitButton' style={submitButtonStyle} type='submit' >Sign In</button>
+                <button className='registrationButton' style={registrationButtonStyle} type='button' onClick={switchModal}>No Account?</button>
+                {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
+                {statusSuccess ? closeModal() : null}
             </form>
 
         </>

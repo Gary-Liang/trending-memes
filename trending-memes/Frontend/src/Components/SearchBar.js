@@ -1,11 +1,7 @@
-import React, {useRef} from 'react'
+import React, { useRef } from 'react'
 import SearchButton from '../Images/searchButton.png'
 
-export default function SearchBar({setQuery}) {
-
-  // const searchValue = (e) => {
-  //   setQuery(e.target.value);
-  // }
+export default function SearchBar({ setQuery }) {
 
   const inputRef = useRef();
 
@@ -19,15 +15,15 @@ export default function SearchBar({setQuery}) {
     // Don't forget to clean up
     return function cleanup() {
       document.removeEventListener('keydown', handleKeyDown);
-    } 
+    }
   };
 
   return (
     <>
       <div style={styleDiv}>
-          {/*input type matters for e.target.value or else it will return an undefined object  */}
-          <input className='searchInput' type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown}/>
-          <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}></button>
+        {/*input type matters for e.target.value or else it will return an undefined object  */}
+        <input className='searchInput' type="string" placeholder="Search Here!" style={styleSearch} ref={inputRef} onKeyDown={handleKeyDown} />
+        <button className='searchButton' style={styleSearchButton} onClick={() => setQuery(inputRef.current.value)}></button>
       </div>
     </>
   );
@@ -55,7 +51,7 @@ const styleSearchButton = {
   padding: '15px',
   WebkitAppearance: 'none',
   border: '0',
-  backgroundImage: "url(" + SearchButton  + ")",
+  backgroundImage: "url(" + SearchButton + ")",
   backgroundPosition: "center",
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",

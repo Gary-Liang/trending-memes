@@ -1,8 +1,20 @@
-import React from 'react'
+import React, {useLayoutEffect} from 'react'
 
-export default function LoadingScreen() {
+export default function LoadingScreen(loadingScreen) {
 
-    const loadingstyle = {
+    // Use useLayoutEffect for modifying the DOM prior to page rendering
+    useLayoutEffect(() => {
+        if (loadingScreen) {
+            document.body.style.overflow = "hidden";
+            document.body.style.height = "100%";
+        } else {
+            document.body.style.overflow = "auto";
+            document.body.style.height = "auto";
+        }
+    }, [loadingScreen]);
+
+
+    const loadingStyle = {
         background: 'rgba(0,0,0, 0.75)',
         width: "100%",
         height: "100%",
@@ -18,7 +30,7 @@ export default function LoadingScreen() {
 
     return(
         <>
-            <div className='loadingScreen' style={loadingstyle}>
+            <div className='loadingScreen' style={loadingStyle}>
                 Loading . . . 
             </div>
         </>

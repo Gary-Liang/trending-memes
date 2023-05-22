@@ -346,7 +346,6 @@ def saved_favorites():
 
         # search for the favorite with the specified user and id
         user_data = user_favorites.find_one({'username': username})
-        print('favorite list: ', user_data['favorites'])
         if (user_data):
             query = request.args.get('q')
             if (query is None or query == ""):
