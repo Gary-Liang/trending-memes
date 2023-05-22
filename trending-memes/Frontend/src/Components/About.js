@@ -22,7 +22,8 @@ export default function About({setShowAboutModal}) {
         position: 'fixed',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        zIndex: '5'
     }
 
     const closeButton = {
@@ -36,6 +37,7 @@ export default function About({setShowAboutModal}) {
         border: "none",
         fontWeight: "bold",
         WebkitTextStroke: "0.10px white",
+        cursor: 'pointer'
     }
     
     const aboutTitleStyle = {
@@ -55,8 +57,9 @@ export default function About({setShowAboutModal}) {
 
     return(
         <>
-            <div className="aboutModal" style={aboutModalStyle}>
-                <div className="aboutText" style={authFormStyle}>
+            <div className="aboutModal" style={aboutModalStyle} onClick={() => setShowAboutModal(false)}>
+            </div>
+            <div className="aboutText" style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowAboutModal(false)}>x</button>
                     <header className='aboutHeader'>
                         <h2 className='aboutTitle' style={aboutTitleStyle}>About</h2>
@@ -67,7 +70,6 @@ export default function About({setShowAboutModal}) {
                             <p> © GARY LIANG 2023</p>
                         </div>
                     </header>    
-                </div>
             </div>
         </>
     )

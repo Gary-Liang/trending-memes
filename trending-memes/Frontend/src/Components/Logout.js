@@ -66,6 +66,7 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         border: "none",
         fontWeight: "bold",
         WebkitTextStroke: "0.10px white",
+        cursor: 'pointer'
     }
 
     const authFormStyle = {
@@ -77,7 +78,8 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         position: 'fixed',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        zIndex: '5'
     }
     
     const logoutTitleStyle = {
@@ -94,7 +96,8 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         left: '55%',
         border: 'none',
         transform: 'scale(1.5)',
-        color: 'white'
+        color: 'white',
+        cursor: 'pointer'
 
     }
 
@@ -105,7 +108,8 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
         left: '55%',
         border: 'none',
         transform: 'scale(1.5)',
-        color: 'white'
+        color: 'white',
+        cursor: 'pointer'
 
     }
 
@@ -125,15 +129,15 @@ export default function Logout({setShowLogoutModal, setShowSavedMemes}) {
 
     return (
         <>
-            <form className='logoutFormModal' style={logoutFormModalStyle} onSubmit={handleSubmit}>
-                <div className='authForm' style={authFormStyle}>
+            <div className='logoutFormModal' style={logoutFormModalStyle} onClick={() => setShowLogoutModal(false)}>
+            </div>
+            <form className='authForm' onSubmit={handleSubmit} style={authFormStyle}>
                     <button className="closeButton" style={closeButton} onClick={() => setShowLogoutModal(false)}>x</button>
                     <p className='logoutTitle' style={logoutTitleStyle}>Are you sure you want to Log out?</p>
                     <button className='yesButton' style={yesButtonStyle} type='submit'>Yes</button>
                     <button className='noButton' style={noButtonStyle} onClick={() => setShowLogoutModal(false)}>No</button>
                     {statusMessage !== "" ? <p className='errorMessage' style={statusSuccess ? successMessageStyle : errorMessageStyle}>{statusMessage}</p> : null}
                     {statusSuccess ? closeModal() : null}
-                </div>
             </form>
 
         </>

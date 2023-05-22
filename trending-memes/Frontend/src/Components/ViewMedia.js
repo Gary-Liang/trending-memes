@@ -6,7 +6,8 @@ let currentMediaLink = "";
 let currentMediaWidth = 0;
 let currentMediaHeight;
 
-let breakpoint = 400;
+let breakpointWidth = .55 * window.innerWidth;
+let breakpointHeight = 1 * window.innerHeight;
 
 export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
 
@@ -63,15 +64,6 @@ export default function ViewMedia({mediaInfo, setMediaInfo, albumInfo}) {
     setMediaLoading(false);
   
   }, [albumInfo.album, imageAlbumCount, imageAlbumData, setMediaInfo, setMediaLoading]);
-
-  // const saveAsFavorite = {
-  //   fetch('/api/save_as_favorite').then(
-  //       // Promise
-  //       res => res.json()
-  //   ).then(
-
-  //   )
-  // }
 
   const loadPrevMediaInAlbum = useCallback(() => {
     let updateImageIncrement = imageAlbumCount - 1;
@@ -355,40 +347,42 @@ const copyMessageStyle = {
 
 function mediaResizing() {
   let windowWidth = window.innerWidth;
-  console.log('window width: ' + windowWidth)
+  let windowHeight = window.innerHeight;
   let adjustedWidth = 0;
+  let adjustedHeight = 0;
   let styles = {};
-  if (currentMediaWidth > breakpoint) {
+  if (currentMediaWidth > breakpointWidth || currentMediaHeight > breakpointHeight) {
     if (currentMediaWidth > windowWidth) {
-      console.log('current media width > windowwidth condition triggered. ');
-      currentMediaWidth = windowWidth;
+      currentMediaWidth = breakpointWidth;
     }
-    adjustedWidth = (currentMediaWidth * .85).toString();
-    console.log('current width value: ' + adjustedWidth);
+    if (currentMediaHeight > windowHeight) {
+      currentMediaHeight = windowHeight;
+    }
+    adjustedWidth = (currentMediaWidth).toString();
+    adjustedHeight = (currentMediaHeight).toString();
     styles= {  
-              height: "100%",
+              height: adjustedHeight + "px",
               width:  adjustedWidth + "px",
               top: "0",
               left: "0",
               right: "0",
               bottom: "0",
-              margin: "0 auto",
+              margin: "auto",
               position: "fixed",
               zIndex: "5"
     };
   } else {
     styles = {  
-                height: "100%",
-                width: "auto",
+                height: currentMediaHeight + "px",
+                width: currentMediaWidth + "px",
                 top: "0",
                 left: "0",
                 right: "0",
                 bottom: "0",
-                margin: "0 auto",
+                margin: "auto",
                 position: "fixed",
                 zIndex: "5"
               };
-
   }
   return styles;
 }

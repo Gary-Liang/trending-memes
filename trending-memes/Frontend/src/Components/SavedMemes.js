@@ -18,7 +18,7 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
       try {
         setLoadingScreen(true);
         const response = await fetch('/api/saved_favorites_as_data', {
-          signal: abortController.signal,
+          // signal: abortController.signal,
           method: "POST",
           headers: {
               "Content-Type": "application/json",
@@ -43,9 +43,9 @@ export default function SavedMemes({setMediaInfo, setAlbumInfo, setShowLoginModa
 
       fetchData();
 
-      return () => {
-        abortController.abort();
-      };
+      // return () => {
+      //   abortController.abort();
+      // };
     }, [setLoadingScreen, token]);  // by putting query as a dependency here, we render more than once, every time the query changes.
 
   // useEffect(() => {
