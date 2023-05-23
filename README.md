@@ -5,9 +5,9 @@ https://www.trendingmemes.org/
 
 TrendingMemes is a full-stack web application that leverages the Imgur API to fetch viral videos or images that are currently trending based on user activity within the past 2 weeks on Imgur. Users can sign up and save their favorite memes for future reference in the "Saved Memes" section. <br>
 
-<p align="center">
-  <img src="https://github.com/Gary-Liang/trending-memes/assets/51287164/b3b487c8-0062-43ba-88b5-4dea811e9fd9" width="600" height="500" />
-</p>
+
+https://github.com/Gary-Liang/trending-memes/assets/51287164/c9d3b4e1-77cb-40a2-8e09-978c31875656
+
 
 
 
