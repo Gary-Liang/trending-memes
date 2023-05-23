@@ -19,7 +19,7 @@ export default function LoadingScreen(loadingScreen) {
         width: "100%",
         height: "100%",
         position: "fixed",
-        zIndex: "5",
+        zIndex: "4",
         overflow: "hidden",
         display: "flex",
         justifyContent: "center",
