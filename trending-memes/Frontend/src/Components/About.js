@@ -57,13 +57,20 @@ export default function About({setShowAboutModal}) {
     
     const aboutTitleStyle = {
         position: 'auto',
-        padding: '35px'
+        paddingLeft: '35px',
+        paddingTop: '25px'
+    }
 
+    const versionTitleStyle = {
+        position: 'auto',
+        paddingLeft: '35px',
+        paddingBottom:'0px'
     }
 
     const aboutBodyTextStyle = {
         position: 'auto',
         padding: '4%',
+        paddingTop: '5px'
 
     }
 
@@ -78,7 +85,7 @@ export default function About({setShowAboutModal}) {
                     <button className="closeButton" style={closeButton} onClick={() => setShowAboutModal(false)}>x</button>
                     <header className='aboutHeader'>
                         <h2 className='aboutTitle' style={aboutTitleStyle}>About</h2>
-                        <h1 className='aboutTitle' style={aboutTitleStyle}>v. 1.5.0</h1>
+                        <h4 className='versionTitle' style={versionTitleStyle}>Trending Memes v. 1.5.0</h4>
                         <div className='aboutBodyText' style={aboutBodyTextStyle}>
                             <p>This web application pulls trending 'memes' from the Imgur API. It is a personal project started by Gary Liang</p>
                             <p>to demonstrate the use of Node.js, React frontend, Flask backend, Redis, and MongoDB databases in a full-stack project.</p>
