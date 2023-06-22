@@ -492,12 +492,6 @@ def search():
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token.get('access_token')})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    # elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
-    #     if (redis_client.get('oauth_token') is not None):
-    #         session['oauth_token'] = redis_client.get('oauth_token')
-    #         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-    #     elif (redis_client.get('refresh_token') is not None):
-    #         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": redis_client.get('refresh_token')})
     else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
@@ -526,12 +520,6 @@ def all_album_image_links(album_hash_info):
         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
     elif (session.get('refresh_token') is not None):
         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
-    # elif (session.get('oauth_token') is None and session.get('refresh_token') is None):
-    #     if (redis_client.get('oauth_token') is not None):
-    #         session = get_session_cache()
-    #         imgur = OAuth2Session(CLIENT_ID, token={"access_token": oauth_token})
-    #     elif (redis_client.get('refresh_token') is not None):
-    #         imgur = OAuth2Session(CLIENT_ID, token={"refresh_token": session['refresh_token']})
     else:    
         return "Error: Both oauth_token and refresh_token are missing"
 
@@ -542,14 +530,9 @@ def all_album_image_links(album_hash_info):
 def automatic_refresh():
     app.logger.info('Called automatic refresh function.')
     session = get_session_cache()
-    # token = session['oauth_token']
     refresh_token = session['refresh_token']
-    # str_refresh_token = str(refresh_token, 'utf-8').replace('"', '')
 
     app.logger.info("refresh token: " + str(refresh_token))
-    # print("refresh_token " + str_refresh_token)
-
-    # token['expires_at'] = time() + 3600
     new_expiration_time = time() + 3600
 
     extra = {
@@ -586,7 +569,6 @@ def automatic_refresh():
     session['oauth_state'] = state
     session['oauth_token'] = response_json['oauth_token']
     session['refresh_token'] = response_json['refresh_token']
-    # session['expires_at'] = response_json['oauth_token']['expires_in']
     set_session_cache(session)
 
     return jsonify(session)
