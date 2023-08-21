@@ -9,7 +9,7 @@ export default function Logout({ setShowLogoutModal, setShowSavedMemes }) {
         // The preventDefault() method is called to prevent the default form submission behavior, which would cause the page to refresh.
         event.preventDefault();
 
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token');
         // Send data to the server
         fetch("/api/logout", {
             method: "POST",
@@ -26,7 +26,7 @@ export default function Logout({ setShowLogoutModal, setShowSavedMemes }) {
                 // does not update until after due to the setstate being async
                 setStatusSuccess(data.success);
                 if (data.success) {
-                    sessionStorage.clear();
+                    localStorage.clear();
                     setShowSavedMemes(false);
                 }
 

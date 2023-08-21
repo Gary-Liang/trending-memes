@@ -8,7 +8,7 @@ export default function SavedMemes({ setMediaInfo, setAlbumInfo, setShowLoginMod
   // create state variable to get backend API 
   const [data, setData] = useState([{}]);
   const [isFavorite, setIsFavorite] = useState({});
-  const token = sessionStorage.getItem('token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useLayoutEffect(() => {
     if (!loadingScreen) {
@@ -274,13 +274,13 @@ export default function SavedMemes({ setMediaInfo, setAlbumInfo, setShowLoginMod
       headers: {
         "Content-Type": "application/json",
         "Connection": "keep-alive",
-        "Authorization": sessionStorage.getItem('token')
+        "Authorization": localStorage.getItem('token')
       },
       body: JSON.stringify(data),
     })
       .then((response) => {
         if (response.status === 401) {
-          sessionStorage.clear();
+          localStorage.clear();
           setShowLoginModal(true);
           setIsFavorite({});
           throw new Error('401 Unauthorized'); // Stops the promise 

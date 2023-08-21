@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function NavBar({ setShowRegistrationModal, setShowLoginModal, setShowAboutModal, setShowLogoutModal, showSavedMemes, setShowSavedMemes }) {
 
-  const token = sessionStorage.getItem('token') || '';
+  const token = localStorage.getItem('token') || '';
 
   const menuBarStyle = {
     listStyle: 'none',
@@ -25,12 +25,12 @@ export default function NavBar({ setShowRegistrationModal, setShowLoginModal, se
       headers: {
         "Content-Type": "application/json",
         "Connection": "keep-alive",
-        "Authorization": sessionStorage.getItem('token')
+        "Authorization": localStorage.getItem('token')
       },
     })
       .then((response) => {
         if (response.status === 401) {
-          sessionStorage.clear();
+          localStorage.clear();
           setShowLoginModal(true);
           setShowSavedMemes(false);
           throw new Error('401 Unauthorized'); // Stops the promise 
