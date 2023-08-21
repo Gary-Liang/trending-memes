@@ -27,7 +27,7 @@ export default function Login({ setShowRegistrationModal, setShowLoginModal }) {
                 setStatusMessage(data.message);
                 setStatusSuccess(data.success);
                 if (data.token !== undefined && data.token !== null) {
-                    sessionStorage.setItem('token', data.token);
+                    localStorage.setItem('token', data.token);
                 }
             })
             .catch((error) => {
