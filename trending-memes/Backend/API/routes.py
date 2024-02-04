@@ -34,7 +34,7 @@ APPLICATION_STATE = 'TEST'
 # FIRST_TIME_LAUNCHED = ast.literal_eval(str(os.environ.get('FIRST_TIME_LAUNCH')))
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 REDIS_PASSWORD = str(os.environ.get('REDIS_PASSWORD'))
-REDIS_PORT = 5591
+REDIS_PORT = 22235
 MONGO_CLIENT =str(os.environ.get('MONGO_CLIENT'))
 
 # 5591 is the default port for redis railway db, redis is a quick non-sql database to save for cache 
